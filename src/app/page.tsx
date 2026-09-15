@@ -7,10 +7,10 @@ export default function HomePage() {
   const { user, loading } = useAuth();
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#e8a04a33,transparent_28%),radial-gradient(circle_at_80%_10%,#1c181414,transparent_24%),#fbf7f0]">
-      <header className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6 sm:px-6">
+    <div className="min-h-dvh bg-[radial-gradient(circle_at_top_left,#e8a04a33,transparent_28%),radial-gradient(circle_at_80%_10%,#1c181414,transparent_24%),#fbf7f0]">
+      <header className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-5 sm:px-6 sm:py-6">
         <p className="font-display text-2xl">Universal POS</p>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           <Link href="/login" className="btn-ghost">
             Sign in
           </Link>
@@ -19,12 +19,12 @@ export default function HomePage() {
           </Link>
         </div>
       </header>
-      <main className="mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+      <main className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:gap-12 sm:px-6 sm:py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-copper-600">
             One core. Many businesses.
           </p>
-          <h1 className="mt-3 font-display text-4xl leading-[1.05] text-ink-950 sm:text-5xl lg:text-6xl">
+          <h1 className="mt-3 font-display text-3xl leading-[1.08] text-ink-950 sm:text-5xl lg:text-6xl">
             A POS that starts with the shop, not the register.
           </h1>
           <p className="mt-5 max-w-xl text-lg text-ink-700/75">

@@ -92,6 +92,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const [cashierStats, setCashierStats] = useState<CashierOverview | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [deskHelp, setDeskHelp] = useState("");
+  const [ticketOpen, setTicketOpen] = useState(false);
   const helpOnce = useRef(false);
   const skuOnce = useRef(false);
   const hardware = useHardware();
@@ -405,6 +406,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       setMessage(`Sale ${sale.number} saved.`);
       setOnline(true);
       setCart([]);
+      setTicketOpen(false);
       setCouponCode("");
       setManualKind("");
       setManualValue("");
@@ -423,6 +425,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         setOnline(false);
         setMessage("Sale saved on this counter. It will sync when the line is back.");
         setCart([]);
+        setTicketOpen(false);
         setCouponCode("");
         setManualKind("");
         setManualValue("");
@@ -460,8 +463,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const priced = quote?.priced || [];
 
   const register = (
-    <div className={`grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,28rem)] ${mode === "owner" ? "h-full" : ""}`}>
-      <section className="flex min-h-0 flex-col">
+    <div className={`relative grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)] ${mode === "owner" ? "h-full" : ""}`}>
+      <section className="flex min-h-0 flex-col overflow-hidden">
         {mode === "standalone" ? <HardwareSetup hardware={hardware} compact /> : null}
 
         {deskHelp && HELP_COPY[deskHelp] ? (
@@ -471,20 +474,27 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           </div>
         ) : null}
 
-        <div className="mb-3 grid grid-cols-2 gap-2 lg:grid-cols-3 2xl:grid-cols-6">
-          <Kpi
-            icon={Banknote}
-            label="Sales today"
-            value={rs(todaySales)}
-            hint={`${todayOrders} order${todayOrders === 1 ? "" : "s"}`}
-          />
-          <Kpi icon={Receipt} label="Orders" value={String(todayOrders)} hint={`Avg ${rs(avgTicket)}`} />
+        <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-3 2xl:grid-cols-6 [&>:nth-child(n+5)]:max-lg:hidden">
           <Kpi
             icon={ShoppingCart}
             label="This ticket"
             value={String(cartQty)}
             hint={quote ? rs(quote.total) : "Empty"}
           />
+          <Kpi
+            icon={Banknote}
+            label="Sales today"
+            value={rs(todaySales)}
+            hint={`${todayOrders} order${todayOrders === 1 ? "" : "s"}`}
+          />
+          <Kpi
+            icon={Banknote}
+            label="Cash drawer"
+            value={shift ? "Open" : "Closed"}
+            hint={shift ? `${shift.number} · ${rs(shift.expected_cash)}` : "Open before cash"}
+            warn={!shift}
+          />
+          <Kpi icon={Receipt} label="Orders" value={String(todayOrders)} hint={`Avg ${rs(avgTicket)}`} />
           <Kpi
             icon={Package}
             label="Catalog"
@@ -497,13 +507,6 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             value={String(lowStock + outStock)}
             hint={`${lowStock} low · ${outStock} out`}
             warn={lowStock + outStock > 0}
-          />
-          <Kpi
-            icon={Banknote}
-            label="Cash drawer"
-            value={shift ? "Open" : "Closed"}
-            hint={shift ? `${shift.number} · ${rs(shift.expected_cash)}` : "Open before cash"}
-            warn={!shift}
           />
         </div>
 
@@ -520,23 +523,23 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                 e.preventDefault();
                 applyCode(query);
               }}
-              placeholder="Scan barcode or type SKU, name, coupon"
+              placeholder="Scan or type SKU, name, coupon"
               className="field h-12 !pl-12 text-base"
               autoFocus
             />
           </div>
-          <Button type="button" className="h-12 shrink-0" variant="ghost" onClick={() => setCameraOpen(true)}>
+          <Button type="button" className="h-12 shrink-0 px-3 sm:px-4" variant="ghost" onClick={() => setCameraOpen(true)}>
             <QrCode size={16} />
-            Camera
+            <span className="hidden sm:inline">Camera</span>
           </Button>
           <Button
             type="button"
-            className="h-12 shrink-0"
+            className="h-12 shrink-0 px-3 sm:px-4"
             variant="copper"
             onClick={() => openConnect().catch(() => setError("Could not start scanner link."))}
           >
             <Smartphone size={16} />
-            Phone scan
+            <span className="hidden sm:inline">Phone scan</span>
           </Button>
         </div>
         <div className="mb-3 flex flex-wrap gap-2">
@@ -648,7 +651,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           </p>
         )}
 
-        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+        <div className="min-h-0 flex-1 overflow-y-auto pb-20 pr-1 lg:pb-1">
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {items.slice(0, 80).map((item) => {
               const active = selectedId === item.id;
@@ -659,7 +662,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                   key={item.id}
                   type="button"
                   onClick={() => addItem(item)}
-                  className={`card p-4 text-left transition hover:border-copper-400 ${
+                  className={`card overflow-hidden p-3 text-left transition hover:border-copper-400 sm:p-4 ${
                     active ? "border-copper-500 ring-2 ring-copper-500/30" : ""
                   } ${stock.kind === "out" ? "opacity-80" : ""}`}
                 >
@@ -698,16 +701,30 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         </div>
       </section>
 
-      <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-paper-200 bg-white shadow-card">
+      <aside
+        className={`flex min-h-0 min-w-0 flex-col overflow-hidden bg-white shadow-card max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-40 max-lg:max-h-[90dvh] max-lg:rounded-t-2xl max-lg:border max-lg:border-paper-200 max-lg:transition-transform max-lg:duration-200 lg:relative lg:rounded-2xl lg:border lg:border-paper-200 ${
+          ticketOpen ? "max-lg:translate-y-0" : "max-lg:translate-y-full"
+        }`}
+      >
         <div className="border-b border-paper-200 bg-ink-950 px-4 py-3 text-paper-50">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper-400">Current ticket</p>
               <p className="font-display text-xl">{branch?.name || "Branch"}</p>
             </div>
-            <div className="text-right text-xs text-paper-50/70">
-              <p>{cartQty} item{cartQty === 1 ? "" : "s"}</p>
-              <p>{cart.length} line{cart.length === 1 ? "" : "s"}</p>
+            <div className="flex items-start gap-3">
+              <div className="text-right text-xs text-paper-50/70">
+                <p>{cartQty} item{cartQty === 1 ? "" : "s"}</p>
+                <p>{cart.length} line{cart.length === 1 ? "" : "s"}</p>
+              </div>
+              <button
+                type="button"
+                className="grid h-9 w-9 place-items-center rounded-lg bg-white/10 text-sm lg:hidden"
+                onClick={() => setTicketOpen(false)}
+                aria-label="Close ticket"
+              >
+                ×
+              </button>
             </div>
           </div>
         </div>
@@ -908,7 +925,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           ) : null}
         </div>
 
-        <div className="shrink-0 border-t border-paper-200 bg-white p-4">
+        <div className="safe-bottom shrink-0 border-t border-paper-200 bg-white p-4">
           {quote ? (
             <dl className="space-y-1.5 text-sm">
               <div className="flex items-baseline justify-between gap-3 text-ink-700/70">
@@ -1005,6 +1022,25 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         </div>
       </aside>
 
+      {ticketOpen ? (
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-ink-950/40 lg:hidden"
+          aria-label="Close ticket"
+          onClick={() => setTicketOpen(false)}
+        />
+      ) : (
+        <button
+          type="button"
+          className="fixed z-30 inline-flex min-h-12 items-center gap-2 rounded-full bg-ink-950 px-4 py-3 text-sm font-medium text-paper-50 shadow-lg lg:hidden"
+          style={{ bottom: "max(1rem, env(safe-area-inset-bottom))", right: "1rem" }}
+          onClick={() => setTicketOpen(true)}
+        >
+          <ShoppingCart size={16} />
+          {cartQty} · {quote ? rs(quote.total) : rs(0)}
+        </button>
+      )}
+
       <Modal open={cameraOpen} title="Scan product" onClose={() => setCameraOpen(false)}>
         <CameraScan
           onCode={(code) => {
@@ -1038,14 +1074,14 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-paper-50">
+    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-paper-50">
       <HardwareToasts hardware={hardware} />
-      <header className="border-b border-paper-200 bg-ink-950 px-4 py-3 text-paper-50">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <header className="safe-top shrink-0 border-b border-paper-200 bg-ink-950 px-3 py-2.5 text-paper-50 sm:px-4 sm:py-3">
+        <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-400">Register</p>
-            <p className="truncate font-display text-2xl leading-tight">{user?.business_name || "POS"}</p>
-            <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-paper-50/65">
+            <p className="truncate font-display text-xl leading-tight sm:text-2xl">{user?.business_name || "POS"}</p>
+            <p className="mt-0.5 hidden flex-wrap items-center gap-x-3 gap-y-1 text-xs text-paper-50/65 sm:flex">
               <span className="inline-flex items-center gap-1">
                 <UserRound size={12} />
                 {user?.full_name || user?.first_name || "Cashier"}
@@ -1058,9 +1094,9 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               </span>
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
             <select
-              className="max-w-full min-w-0 rounded-xl border border-white/15 bg-ink-900 px-3 py-2 text-sm"
+              className="max-w-[8.5rem] min-w-0 rounded-xl border border-white/15 bg-ink-900 px-2 py-2 text-sm sm:max-w-xs sm:px-3"
               value={activeBranch}
               onChange={(e) => setBranch(e.target.value)}
             >
@@ -1075,7 +1111,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                 shift ? "bg-emerald-500/20 text-emerald-200" : "bg-amber-500/20 text-amber-100"
               }`}
             >
-              {shift ? `Shift ${shift.number}` : "No cash shift"}
+              {shift ? `Shift ${shift.number}` : "No shift"}
             </span>
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs ${
@@ -1083,21 +1119,24 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               }`}
             >
               {online ? <Wifi size={12} /> : <WifiOff size={12} />}
-              {online ? "Live" : "Offline · saved locally"}
+              <span className="hidden sm:inline">{online ? "Live" : "Offline · saved locally"}</span>
+              <span className="sm:hidden">{online ? "Live" : "Off"}</span>
             </span>
-            <HardwareStatus hardware={hardware} />
-            {queued > 0 ? <span className="text-xs text-copper-300">{queued} waiting to sync</span> : null}
-            <Link href={officeHref} className="btn-ghost border-white/15 bg-transparent text-paper-50">
+            <div className="hidden md:block">
+              <HardwareStatus hardware={hardware} />
+            </div>
+            {queued > 0 ? <span className="text-xs text-copper-300">{queued} sync</span> : null}
+            <Link href={officeHref} className="btn-ghost min-h-11 border-white/15 bg-transparent px-3 text-paper-50">
               <LayoutDashboard size={16} />
-              Back office
+              <span className="hidden sm:inline">Back office</span>
             </Link>
-            <button type="button" onClick={logout} className="text-sm text-paper-50/60 hover:text-white">
+            <button type="button" onClick={logout} className="min-h-11 px-1 text-sm text-paper-50/60 hover:text-white">
               Sign out
             </button>
           </div>
         </div>
       </header>
-      <div className="flex min-h-0 flex-1 flex-col p-4">{register}</div>
+      <div className="flex min-h-0 flex-1 flex-col p-2 sm:p-4">{register}</div>
     </div>
   );
 }

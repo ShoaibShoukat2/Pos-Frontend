@@ -9,6 +9,7 @@
 html,
 body {
   min-height: 100%;
+  min-height: 100dvh;
   max-width: 100%;
   overflow-x: hidden;
 }
@@ -27,18 +28,60 @@ video {
   min-width: 0;
 }
 
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
 input,
 select,
 textarea {
   @apply outline-none;
+  font-size: 16px;
+}
+
+@media (min-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 0.875rem;
+  }
+}
+
+.safe-top {
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.page-pad {
+  padding-top: 1.25rem;
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .page-pad {
+    padding-top: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-pad {
+    padding-bottom: 2rem;
+  }
 }
 
 .field {
-  @apply min-w-0 w-full rounded-xl border border-paper-200 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-ink-700/40 focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20;
+  @apply min-w-0 w-full rounded-xl border border-paper-200 bg-white px-3.5 py-2.5 text-ink-900 placeholder:text-ink-700/40 focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20;
 }
 
 .btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 .btn-primary {
@@ -62,10 +105,16 @@ textarea {
 }
 
 .table-scroll {
-  @apply max-w-full overflow-x-auto;
+  @apply max-w-full overflow-x-auto overscroll-x-contain;
 }
 
 th,
 td {
   overflow-wrap: break-word;
+}
+
+@media (max-width: 639px) {
+  .card {
+    @apply rounded-xl;
+  }
 }

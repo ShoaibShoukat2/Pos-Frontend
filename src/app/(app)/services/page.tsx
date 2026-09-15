@@ -165,7 +165,7 @@ export default function ServicesPage() {
         description="Repair, installation and other jobs with a selling price. They appear on POS with products, without stock tracking."
         action={
           can("product.manage") ? (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
               <Button type="button" variant="ghost" onClick={seedTemplates} disabled={seeding}>
                 {seeding ? "Loading…" : "Load electronics starters"}
               </Button>
@@ -180,10 +180,10 @@ export default function ServicesPage() {
           <SearchField value={services.search} onChange={services.setSearch} placeholder="Search service name or SKU" />
         </div>
         {can("category.manage") || can("product.manage") ? (
-          <div className="flex gap-2">
-            <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="New service category" />
-            <Button type="button" variant="ghost" onClick={addCategory}>
-              Add category
+          <div className="flex min-w-0 flex-1 gap-2">
+            <Input className="min-w-0 flex-1" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} placeholder="New service category" />
+            <Button type="button" variant="ghost" className="shrink-0" onClick={addCategory}>
+              Add
             </Button>
           </div>
         ) : null}

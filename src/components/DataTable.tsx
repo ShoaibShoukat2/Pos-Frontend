@@ -35,7 +35,7 @@ export function SearchField({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="max-w-sm"
+      className="w-full max-w-none sm:max-w-sm"
     />
   );
 }

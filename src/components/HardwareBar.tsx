@@ -10,7 +10,7 @@ type Hardware = ReturnType<typeof useHardware>;
 export function HardwareToasts({ hardware }: { hardware: Hardware }) {
   if (!hardware.toasts.length) return null;
   return (
-    <div className="pointer-events-none fixed right-4 top-4 z-[70] flex w-[min(22rem,calc(100vw-2rem))] flex-col gap-2">
+    <div className="pointer-events-none fixed right-3 z-[70] flex w-[min(22rem,calc(100vw-1.5rem))] flex-col gap-2" style={{ top: "max(0.75rem, env(safe-area-inset-top))" }}>
       {hardware.toasts.map((toast) => (
         <div
           key={toast.id}

@@ -14,7 +14,7 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="mb-8 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mb-6 flex min-w-0 flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         {eyebrow ? (
           <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-copper-600">
@@ -24,7 +24,7 @@ export function PageHeader({
         <h1 className="font-display text-2xl tracking-tight text-ink-950 sm:text-3xl">{title}</h1>
         {description ? <p className="mt-1 max-w-2xl text-sm text-ink-700/70">{description}</p> : null}
       </div>
-      {action ? <div className="w-full min-w-0 sm:w-auto sm:max-w-md">{action}</div> : null}
+      {action ? <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:max-w-md sm:items-end">{action}</div> : null}
     </div>
   );
 }
@@ -109,11 +109,11 @@ export function Modal({
 }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink-950/45 p-4 backdrop-blur-sm">
-      <div className="card mt-10 w-full max-w-[min(32rem,calc(100vw-2rem))] p-4 sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-ink-950/45 p-0 backdrop-blur-sm sm:items-start sm:p-4">
+      <div className="card max-h-[92dvh] w-full overflow-y-auto rounded-b-none p-4 sm:mt-10 sm:max-w-[min(32rem,calc(100vw-2rem))] sm:rounded-2xl sm:p-6">
         <div className="mb-5 flex items-start justify-between gap-4">
           <h2 className="min-w-0 break-words font-display text-xl text-ink-950 sm:text-2xl">{title}</h2>
-          <button type="button" onClick={onClose} className="text-sm text-ink-700/70 hover:text-ink-950">
+          <button type="button" onClick={onClose} className="min-h-11 shrink-0 px-1 text-sm text-ink-700/70 hover:text-ink-950">
             Close
           </button>
         </div>

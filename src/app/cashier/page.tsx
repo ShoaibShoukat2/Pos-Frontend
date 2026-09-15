@@ -182,7 +182,7 @@ export default function CashierDashboardPage() {
       {loading && !data ? <TableSkeleton rows={2} cols={3} /> : null}
 
       {data ? (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
           <div className="card p-4">
             <p className="text-[11px] uppercase tracking-[0.16em] text-ink-700/55">My sales today</p>
             <p className="stat-value mt-1.5">{rs(data.today_sales)}</p>

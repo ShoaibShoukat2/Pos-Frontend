@@ -211,7 +211,7 @@ export default function DashboardPage() {
       ) : null}
 
       {kpis.length ? (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
           {kpis.map((card) => (
             <Link key={card.label} href={card.href} className="card p-4 hover:border-copper-400">
               <p className="text-[11px] uppercase tracking-[0.16em] text-ink-700/55">{card.label}</p>
@@ -226,7 +226,7 @@ export default function DashboardPage() {
       <section className="mt-8">
         <h2 className="font-display text-xl">Owner controls</h2>
         <p className="mt-1 text-sm text-ink-700/60">Jump into any part of the system.</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-4">
           {ACTIONS.map((item) => {
             const Icon = item.icon;
             return (
