@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  min-height: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  @apply bg-paper-50 text-ink-900 antialiased;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+.grid > * {
+  min-width: 0;
+}
+
+input,
+select,
+textarea {
+  @apply outline-none;
+}
+
+.field {
+  @apply min-w-0 w-full rounded-xl border border-paper-200 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-ink-700/40 focus:border-copper-500 focus:ring-2 focus:ring-copper-500/20;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-primary {
+  @apply btn bg-ink-950 text-paper-50 hover:bg-ink-800;
+}
+
+.btn-copper {
+  @apply btn bg-copper-500 text-ink-950 hover:bg-copper-400;
+}
+
+.btn-ghost {
+  @apply btn border border-paper-200 bg-white text-ink-800 hover:bg-paper-100;
+}
+
+.card {
+  @apply min-w-0 max-w-full overflow-x-auto rounded-2xl border border-paper-200 bg-white shadow-card;
+}
+
+.stat-value {
+  @apply break-words font-display text-xl leading-tight sm:text-2xl xl:text-3xl;
+}
+
+.table-scroll {
+  @apply max-w-full overflow-x-auto;
+}
+
+th,
+td {
+  overflow-wrap: break-word;
+}

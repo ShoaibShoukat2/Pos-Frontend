@@ -1,0 +1,9 @@
+{
+  "name": "Universal POS",
+  "short_name": "UPOS",
+  "start_url": "/pos",
+  "display": "standalone",
+  "background_color": "#fbf7f0",
+  "theme_color": "#14110e",
+  "icons": []
+}
