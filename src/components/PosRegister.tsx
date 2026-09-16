@@ -53,6 +53,7 @@ const PAY_LABEL: Record<string, string> = {
 };
 
 const TENDER = [500, 1000, 5000];
+const QTY_PRESETS = [1, 2, 5, 10];
 
 const HELP_COPY: Record<string, string> = {
   type: "Scanner not needed. Type barcode, SKU or product name, then press Enter.",
@@ -72,6 +73,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const [remoteItems, setRemoteItems] = useState<PosCatalogItem[] | null>(null);
   const [cart, setCart] = useState<CartLine[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [draftQty, setDraftQty] = useState(1);
   const [category, setCategory] = useState("");
   const [kindFilter, setKindFilter] = useState<"all" | "product" | "service">("all");
   const [customerId, setCustomerId] = useState("");
@@ -237,6 +239,11 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
     cart.find((row) => row.item.id === selectedId)?.item ||
     snapshot?.catalog.find((row) => row.id === selectedId) ||
     null;
+  const selectedLine = selected ? cart.find((row) => row.item.id === selected.id) : null;
+
+  useEffect(() => {
+    setDraftQty(cart.find((row) => row.item.id === selectedId)?.qty || 1);
+  }, [selectedId]);
 
   const todaySales = overview?.today_sales || cashierStats?.today_sales || "0";
   const todayOrders = overview?.orders ?? cashierStats?.orders ?? 0;
@@ -252,10 +259,42 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
 
   function addItem(item: PosCatalogItem) {
     setSelectedId(item.id);
+    const max = maxSellable(item);
+    const current = cart.find((row) => row.item.id === item.id)?.qty || 0;
+    if (max === 0) {
+      setError(`${item.product} is out of stock`);
+      return;
+    }
+    if (max !== null && current >= max) {
+      setError(`Only ${fmtQty(max)} in stock for ${item.product}`);
+      setDraftQty(Math.max(1, current));
+      return;
+    }
+    const qty = clampQty(item, current + 1);
+    setDraftQty(Math.max(1, qty));
     setCart((prev) => {
       const found = prev.find((row) => row.item.id === item.id);
-      if (found) return prev.map((row) => (row.item.id === item.id ? { ...row, qty: row.qty + 1 } : row));
-      return [...prev, { item, qty: 1 }];
+      if (found) return prev.map((row) => (row.item.id === item.id ? { ...row, qty } : row));
+      return [...prev, { item, qty }];
+    });
+    setMessage("");
+    setError("");
+  }
+
+  function setItemQty(item: PosCatalogItem, qty: number) {
+    setSelectedId(item.id);
+    const max = maxSellable(item);
+    if (max === 0 && qty > 0) {
+      setError(`${item.product} is out of stock`);
+      return;
+    }
+    const next = clampQty(item, qty);
+    setDraftQty(Math.max(1, next));
+    setCart((prev) => {
+      if (next <= 0) return prev.filter((row) => row.item.id !== item.id);
+      const found = prev.find((row) => row.item.id === item.id);
+      if (found) return prev.map((row) => (row.item.id === item.id ? { ...row, qty: next } : row));
+      return [...prev, { item, qty: next }];
     });
     setMessage("");
     setError("");
@@ -316,11 +355,15 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   }
 
   function setQty(id: string, qty: number) {
-    if (qty <= 0) {
+    const line = cart.find((row) => row.item.id === id);
+    if (!line) return;
+    const next = clampQty(line.item, qty);
+    if (id === selectedId) setDraftQty(Math.max(1, next));
+    if (next <= 0) {
       setCart((prev) => prev.filter((row) => row.item.id !== id));
       return;
     }
-    setCart((prev) => prev.map((row) => (row.item.id === id ? { ...row, qty } : row)));
+    setCart((prev) => prev.map((row) => (row.item.id === id ? { ...row, qty: next } : row)));
   }
 
   function removeLine(id: string) {
@@ -642,12 +685,13 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         {snapshot?.catalog_truncated && !query.trim() ? (
           <p className="mb-3 text-xs text-ink-700/60">
             Showing first {snapshot.catalog.length} of {snapshot.catalog_total?.toLocaleString()} items. Search to find the rest.
+            Use Add 1, then + / − to change quantity.
           </p>
         ) : (
           <p className="mb-3 text-xs text-ink-700/55">
             {items.length} item{items.length === 1 ? "" : "s"}
             {query.trim() ? ` matching “${query.trim()}”` : ""}
-            {category ? ` in ${category}` : ""}
+            {category ? ` in ${category}` : ""}. Add 1, or use + / − to update quantity.
           </p>
         )}
 
@@ -657,41 +701,89 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               const active = selectedId === item.id;
               const inCart = cart.find((row) => row.item.id === item.id);
               const stock = stockTone(item);
+              const max = maxSellable(item);
+              const out = max === 0;
               return (
-                <button
+                <article
                   key={item.id}
-                  type="button"
-                  onClick={() => addItem(item)}
-                  className={`card overflow-hidden p-3 text-left transition hover:border-copper-400 sm:p-4 ${
-                    active ? "border-copper-500 ring-2 ring-copper-500/30" : ""
-                  } ${stock.kind === "out" ? "opacity-80" : ""}`}
+                  className={`card flex flex-col overflow-hidden p-0 transition hover:border-copper-400 ${
+                    inCart ? "border-copper-400 bg-copper-500/[0.04]" : ""
+                  } ${active ? "border-copper-500 ring-2 ring-copper-500/30" : ""} ${
+                    out ? "opacity-80" : ""
+                  }`}
                 >
-                  <div className="mb-2 flex items-start justify-between gap-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-copper-600">
-                      {isService(item) ? "Service" : item.category || "Uncategorized"}
-                      {isService(item) && item.category ? ` · ${item.category}` : ""}
-                    </p>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${stock.className}`}>{stock.label}</span>
-                  </div>
-                  <p className="break-words font-medium leading-snug">{item.product}</p>
-                  <p className="mt-0.5 text-xs text-ink-700/55">
-                    {item.variant && item.variant !== item.product ? `${item.variant} · ` : ""}
-                    {item.sku || "No SKU"}
-                  </p>
-                  {item.barcode ? <p className="mt-0.5 font-mono text-[11px] text-ink-700/45">{item.barcode}</p> : null}
-                  <div className="mt-3 flex items-end justify-between gap-2">
-                    <div>
-                      <p className="font-display text-xl">{rs(item.selling_price)}</p>
-                      {can("report.sales") ? <p className="text-[11px] text-ink-700/45">Cost {rs(item.cost_price)}</p> : null}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedId(item.id)}
+                    className="flex flex-1 flex-col p-3 text-left sm:p-4"
+                  >
+                    <div className="mb-3 flex items-start gap-3">
+                      <span
+                        className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl font-display text-lg ${
+                          inCart ? "bg-copper-500 text-ink-950" : "bg-paper-100 text-ink-800"
+                        }`}
+                      >
+                        {inCart ? inCart.qty : (item.product || "?").slice(0, 1).toUpperCase()}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-copper-600">
+                            {isService(item) ? "Service" : item.category || "Uncategorized"}
+                            {isService(item) && item.category ? ` · ${item.category}` : ""}
+                          </p>
+                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${stock.className}`}>
+                            {stock.label}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 break-words font-medium leading-snug text-ink-950">{item.product}</p>
+                        <p className="mt-0.5 text-xs text-ink-700/55">
+                          {item.variant && item.variant !== item.product ? `${item.variant} · ` : ""}
+                          {item.sku || "No SKU"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-ink-700/55">
+                    <div className="mt-auto flex items-end justify-between gap-2">
+                      <div>
+                        <p className="font-display text-xl leading-none">{rs(item.selling_price)}</p>
+                        {can("report.sales") ? <p className="mt-0.5 text-[11px] text-ink-700/45">Cost {rs(item.cost_price)}</p> : null}
+                      </div>
+                      <p className="text-right text-xs text-ink-700/55">
                         {isService(item) ? serviceMeta(item) : `${fmtQty(item.qty)} on hand`}
                       </p>
-                      {inCart ? <p className="text-[11px] font-medium text-copper-700">{inCart.qty} in ticket</p> : null}
                     </div>
+                  </button>
+                  <div className="border-t border-paper-100 bg-paper-50/90 px-3 py-2.5">
+                    {out ? (
+                      <p className="py-1.5 text-center text-xs font-medium text-red-700">Out of stock</p>
+                    ) : inCart ? (
+                      <div className="flex items-center justify-between gap-2">
+                        <QtyControl
+                          value={inCart.qty}
+                          min={0}
+                          max={max ?? undefined}
+                          onChange={(qty) => setQty(item.id, qty)}
+                        />
+                        <button
+                          type="button"
+                          className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-red-700 hover:bg-red-50"
+                          onClick={() => removeLine(item.id)}
+                          aria-label="Remove from ticket"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-ink-950 text-sm font-medium text-paper-50 hover:bg-ink-800"
+                        onClick={() => addItem(item)}
+                      >
+                        <Plus size={15} />
+                        Add 1
+                      </button>
+                    )}
                   </div>
-                </button>
+                </article>
               );
             })}
           </div>
@@ -774,9 +866,50 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                   <DetailRow label="Stock" value={`${fmtQty(selected.qty)} on hand`} />
                 )}
               </dl>
+              <div className="mt-3 border-t border-paper-200 pt-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-700/55">Quantity</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <QtyControl
+                    value={draftQty}
+                    min={1}
+                    max={maxSellable(selected) ?? undefined}
+                    onChange={(qty) => setDraftQty(Math.max(1, qty))}
+                  />
+                  <button
+                    type="button"
+                    className="btn-copper h-10 flex-1 px-3 text-sm"
+                    disabled={maxSellable(selected) === 0}
+                    onClick={() => setItemQty(selected, draftQty)}
+                  >
+                    {selectedLine ? `Update · ${draftQty}` : `Add ${draftQty}`}
+                  </button>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {QTY_PRESETS.map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      disabled={maxSellable(selected) !== null && n > (maxSellable(selected) || 0)}
+                      className={`rounded-lg border px-2.5 py-1 text-xs disabled:opacity-40 ${
+                        draftQty === n ? "border-ink-950 bg-ink-950 text-paper-50" : "border-paper-200 bg-white text-ink-700"
+                      }`}
+                      onClick={() => setItemQty(selected, n)}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-ink-700/55">
+                  {selectedLine
+                    ? `${selectedLine.qty} on this ticket. Change the number and tap Update.`
+                    : "Add 1, or pick a quantity then tap Add."}
+                </p>
+              </div>
             </div>
           ) : (
-            <p className="rounded-xl bg-paper-50 px-3 py-3 text-sm text-ink-700/60">Tap a product or service to see details and add it.</p>
+            <p className="rounded-xl bg-paper-50 px-3 py-3 text-sm text-ink-700/60">
+              Tap a product to see details. Use Add 1, or + / − to change quantity.
+            </p>
           )}
 
           <div>
@@ -789,9 +922,13 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               ) : null}
             </div>
             <ul className="mt-2 space-y-2">
-              {cart.length === 0 ? <li className="text-sm text-ink-700/60">No items yet.</li> : null}
+              {cart.length === 0 ? (
+                <li className="rounded-xl border border-dashed border-paper-200 px-3 py-6 text-center text-sm text-ink-700/60">
+                  No items yet. Tap Add 1, then use + / − if the customer wants more.
+                </li>
+              ) : null}
               {priced.map((row) => (
-                <li key={row.item.id} className="rounded-xl border border-paper-200 p-3">
+                <li key={row.item.id} className="rounded-xl border border-paper-200 bg-paper-50/60 p-3">
                   <div className="flex items-start justify-between gap-2">
                     <button type="button" className="min-w-0 text-left" onClick={() => setSelectedId(row.item.id)}>
                       <p className="truncate font-medium">
@@ -816,32 +953,16 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                       {" "}each
                     </p>
                     <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        className="grid h-8 w-8 place-items-center rounded-lg border border-paper-200 bg-white"
-                        onClick={() => setQty(row.item.id, row.qty - 1)}
-                        aria-label="Decrease quantity"
-                      >
-                        <Minus size={14} />
-                      </button>
-                      <input
-                        type="number"
-                        min={1}
+                      <QtyControl
+                        size="sm"
                         value={row.qty}
-                        onChange={(e) => setQty(row.item.id, Number(e.target.value))}
-                        className="field h-8 w-14 py-1 text-center"
+                        min={0}
+                        max={maxSellable(row.item) ?? undefined}
+                        onChange={(qty) => setQty(row.item.id, qty)}
                       />
                       <button
                         type="button"
-                        className="grid h-8 w-8 place-items-center rounded-lg border border-paper-200 bg-white"
-                        onClick={() => setQty(row.item.id, row.qty + 1)}
-                        aria-label="Increase quantity"
-                      >
-                        <Plus size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        className="grid h-8 w-8 place-items-center rounded-lg text-red-700"
+                        className="grid h-8 w-8 place-items-center rounded-lg text-red-700 hover:bg-red-50"
                         onClick={() => removeLine(row.item.id)}
                         aria-label="Remove line"
                       >
@@ -1143,6 +1264,72 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
 
 function isService(item: PosCatalogItem) {
   return (item.item_kind || "product") === "service";
+}
+
+function maxSellable(item: PosCatalogItem) {
+  if (isService(item) || !item.track_stock) return null;
+  return Math.max(0, num(item.qty));
+}
+
+function clampQty(item: PosCatalogItem, qty: number) {
+  if (!Number.isFinite(qty)) return 0;
+  const max = maxSellable(item);
+  const next = Math.max(0, qty);
+  return max === null ? next : Math.min(next, max);
+}
+
+function QtyControl({
+  value,
+  onChange,
+  min = 0,
+  max,
+  size = "md",
+}: {
+  value: number;
+  onChange: (qty: number) => void;
+  min?: number;
+  max?: number;
+  size?: "sm" | "md";
+}) {
+  const btn = size === "sm" ? "h-8 w-8" : "h-10 w-10";
+  return (
+    <div
+      className={`inline-flex items-center overflow-hidden rounded-xl border border-paper-200 bg-white ${
+        size === "sm" ? "w-[7.25rem] shrink-0" : "min-w-0 flex-1"
+      }`}
+    >
+      <button
+        type="button"
+        className={`grid ${btn} shrink-0 place-items-center text-ink-800 hover:bg-paper-100 disabled:opacity-35`}
+        disabled={value <= min}
+        onClick={() => onChange(value - 1)}
+        aria-label="Decrease quantity"
+      >
+        <Minus size={14} />
+      </button>
+      <input
+        type="number"
+        min={min}
+        max={max}
+        value={value}
+        onChange={(e) => {
+          const n = Number(e.target.value);
+          if (!Number.isFinite(n)) return;
+          onChange(n);
+        }}
+        className="min-w-0 flex-1 border-x border-paper-200 bg-transparent py-1 text-center text-sm tabular-nums outline-none"
+      />
+      <button
+        type="button"
+        className={`grid ${btn} shrink-0 place-items-center text-ink-800 hover:bg-paper-100 disabled:opacity-35`}
+        disabled={max !== undefined && value >= max}
+        onClick={() => onChange(value + 1)}
+        aria-label="Increase quantity"
+      >
+        <Plus size={14} />
+      </button>
+    </div>
+  );
 }
 
 function serviceMeta(item: PosCatalogItem) {
