@@ -11,6 +11,7 @@ import {
   QrCode,
   RefreshCw,
   Receipt,
+  RotateCcw,
   Search,
   Smartphone,
   UserCircle,
@@ -28,6 +29,7 @@ import type { CashierOverview } from "@/lib/types";
 const ACTIONS = [
   { href: "/pos", label: "Open POS", hint: "Sell on this counter", icon: Monitor },
   { href: "/cashier/sales", label: "My sales", hint: "Tickets and items you sold", icon: Receipt },
+  { href: "/cashier/returns", label: "Returns", hint: "Customer brought an item back", icon: RotateCcw },
   { href: "/cashier/lookup", label: "Find to sell", hint: "Price and SKU for the ticket", icon: Search },
   { href: "/cash", label: "Cash drawer", hint: "Open or close shift", icon: Banknote },
 ];
@@ -74,6 +76,12 @@ const MANUAL = [
     title: "Take card or bank instead of cash",
     hint: "If the drawer will not open, complete the sale with Card or Bank.",
     icon: CreditCard,
+  },
+  {
+    href: "/cashier/returns",
+    title: "Customer brought an item back",
+    hint: "Find the ticket, remove the item, refund the customer. Stock comes back to the shelf.",
+    icon: RotateCcw,
   },
 ];
 

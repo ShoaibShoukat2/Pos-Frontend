@@ -14,6 +14,7 @@ import {
   Plus,
   QrCode,
   Receipt,
+  RotateCcw,
   Search,
   ShoppingCart,
   Smartphone,
@@ -27,6 +28,7 @@ import {
 import { CameraScan } from "@/components/CameraScan";
 import { HardwareSetup, HardwareStatus, HardwareToasts } from "@/components/HardwareBar";
 import { QrImage } from "@/components/QrImage";
+import { SaleReturnPanel } from "@/components/SaleReturnPanel";
 import { Badge, Button, Field, Input, Modal, Select } from "@/components/ui";
 import { ApiError, NetworkError, api, asList } from "@/lib/api";
 import { homeFor, isCashier, useAuth } from "@/lib/auth";
@@ -42,6 +44,7 @@ import type {
   PosCatalogItem,
   PosCustomer,
   PosSalePayload,
+  PosSaleReturn,
   PosSnapshot,
   ProductVariant,
 } from "@/lib/types";
@@ -95,6 +98,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const [now, setNow] = useState(() => new Date());
   const [deskHelp, setDeskHelp] = useState("");
   const [ticketOpen, setTicketOpen] = useState(false);
+  const [returnOpen, setReturnOpen] = useState(false);
+  const [returnQuery, setReturnQuery] = useState("");
   const helpOnce = useRef(false);
   const skuOnce = useRef(false);
   const hardware = useHardware();
@@ -486,6 +491,31 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
     }
   }
 
+  function openReturn(ticket = "") {
+    setReturnQuery(ticket);
+    setReturnOpen(true);
+    setTicketOpen(false);
+    setError("");
+  }
+
+  async function onReturned(result: PosSaleReturn) {
+    setMessage(`Return ${result.number} saved. Refund ${rs(result.refund_amount)}.`);
+    if (snapshot) {
+      const nextCatalog = snapshot.catalog.map((item) => {
+        const add = result.lines
+          .filter((line) => line.variant === item.id)
+          .reduce((sum, line) => sum + num(line.quantity), 0);
+        if (!add) return item;
+        return { ...item, qty: String(num(item.qty) + add) };
+      });
+      const nextSnap = { ...snapshot, catalog: nextCatalog };
+      setSnapshot(nextSnap);
+      if (activeBranch) await saveSnapshot(activeBranch, nextSnap);
+    }
+    refreshDash();
+    load();
+  }
+
   if (loading || !user) {
     return (
       <div className="grid min-h-[40vh] place-items-center">
@@ -619,6 +649,14 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           >
             <Smartphone size={12} />
             Phone
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 rounded-full border border-copper-300 bg-white px-3 py-1.5 text-xs text-copper-800 hover:border-copper-500"
+            onClick={() => openReturn()}
+          >
+            <RotateCcw size={12} />
+            Customer return
           </button>
           <button
             type="button"
@@ -1014,17 +1052,25 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               </div>
               <ul className="mt-2 space-y-2 text-sm">
                 {recentSales.slice(0, 4).map((row) => (
-                  <li key={row.id} className="flex justify-between gap-2 border-b border-paper-100 pb-2">
-                    <span className="min-w-0">
-                      <span className="block truncate font-medium">{row.number}</span>
-                      <span className="block truncate text-xs text-ink-700/55">{row.customer_name}</span>
-                    </span>
-                    <span className="shrink-0 text-right">
-                      <span className="block font-medium">{rs(row.total)}</span>
-                      {"cashier_name" in row && row.cashier_name ? (
-                        <span className="block text-[11px] text-ink-700/45">{row.cashier_name}</span>
-                      ) : null}
-                    </span>
+                  <li key={row.id}>
+                    <button
+                      type="button"
+                      className="flex w-full justify-between gap-2 border-b border-paper-100 pb-2 text-left hover:text-copper-800"
+                      onClick={() => openReturn(row.number)}
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium">{row.number}</span>
+                        <span className="block truncate text-xs text-ink-700/55">
+                          {row.customer_name} · tap to return
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-right">
+                        <span className="block font-medium">{rs(row.total)}</span>
+                        {"cashier_name" in row && row.cashier_name ? (
+                          <span className="block text-[11px] text-ink-700/45">{row.cashier_name}</span>
+                        ) : null}
+                      </span>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -1140,6 +1186,10 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           <Button className="mt-3 h-12 w-full text-base" disabled={pending || cart.length === 0} onClick={checkout}>
             {pending ? "Saving…" : `Complete sale · ${quote ? rs(quote.total) : rs(0)}`}
           </Button>
+          <Button type="button" variant="ghost" className="mt-2 h-11 w-full" onClick={() => openReturn()}>
+            <RotateCcw size={16} />
+            Customer return
+          </Button>
         </div>
       </aside>
 
@@ -1181,6 +1231,9 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             {phoneLinked ? "Phone connected — start scanning." : "Waiting for phone…"}
           </p>
         </div>
+      </Modal>
+      <Modal open={returnOpen} title="Customer return" onClose={() => setReturnOpen(false)}>
+        {returnOpen ? <SaleReturnPanel initialQuery={returnQuery} onDone={onReturned} /> : null}
       </Modal>
     </div>
   );
@@ -1247,6 +1300,14 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               <HardwareStatus hardware={hardware} />
             </div>
             {queued > 0 ? <span className="text-xs text-copper-300">{queued} sync</span> : null}
+            <button
+              type="button"
+              onClick={() => openReturn()}
+              className="btn-ghost min-h-11 border-white/15 bg-transparent px-3 text-paper-50"
+            >
+              <RotateCcw size={16} />
+              <span className="hidden sm:inline">Return</span>
+            </button>
             <Link href={officeHref} className="btn-ghost min-h-11 border-white/15 bg-transparent px-3 text-paper-50">
               <LayoutDashboard size={16} />
               <span className="hidden sm:inline">Back office</span>

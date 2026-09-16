@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Banknote, LayoutDashboard, LogOut, Monitor, Receipt, Search, UserCircle } from "lucide-react";
+import { Banknote, LayoutDashboard, LogOut, Monitor, Receipt, RotateCcw, Search, UserCircle } from "lucide-react";
 
 import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
 import { useAuth } from "@/lib/auth";
@@ -12,6 +12,7 @@ const NAV = [
   { href: "/cashier", label: "My dashboard", icon: LayoutDashboard },
   { href: "/pos", label: "POS", icon: Monitor },
   { href: "/cashier/sales", label: "My sales", icon: Receipt },
+  { href: "/cashier/returns", label: "Returns", icon: RotateCcw },
   { href: "/cashier/lookup", label: "Find to sell", icon: Search },
   { href: "/customers", label: "Customers", icon: UserCircle },
   { href: "/cash", label: "Cash drawer", icon: Banknote },

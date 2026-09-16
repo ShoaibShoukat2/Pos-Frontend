@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { RotateCcw } from "lucide-react";
 
+import { SaleReturnPanel } from "@/components/SaleReturnPanel";
 import { TableSkeleton } from "@/components/DataTable";
-import { PageHeader } from "@/components/ui";
+import { Badge, Button, Modal, PageHeader } from "@/components/ui";
 import { api, asList } from "@/lib/api";
 import { rs } from "@/lib/money";
 import type { PosSale } from "@/lib/types";
@@ -12,12 +14,18 @@ import type { PosSale } from "@/lib/types";
 export default function CashierSalesPage() {
   const [rows, setRows] = useState<PosSale[]>([]);
   const [loading, setLoading] = useState(true);
+  const [returnTicket, setReturnTicket] = useState<string | null>(null);
 
-  useEffect(() => {
+  function load() {
+    setLoading(true);
     api<PosSale[] | { results: PosSale[] }>("/api/pos/sales/?page_size=40")
       .then((data) => setRows(asList(data)))
       .catch(() => setRows([]))
       .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    load();
   }, []);
 
   return (
@@ -25,11 +33,17 @@ export default function CashierSalesPage() {
       <PageHeader
         eyebrow="Counter"
         title="My sales"
-        description="Tickets you took on this counter, with the products on each ticket. You cannot add catalog items here."
+        description="Tickets you took on this counter. If a customer brings an item back, open the ticket and return it — stock and cash update automatically."
         action={
-          <Link href="/pos" className="btn-copper text-center">
-            Open POS
-          </Link>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <Button type="button" variant="ghost" onClick={() => setReturnTicket("")}>
+              <RotateCcw size={16} />
+              Return item
+            </Button>
+            <Link href="/pos" className="btn-copper text-center">
+              Open POS
+            </Link>
+          </div>
         }
       />
       {loading ? <TableSkeleton rows={4} cols={3} /> : null}
@@ -45,8 +59,26 @@ export default function CashierSalesPage() {
                 <p className="text-xs text-ink-700/55">
                   {sale.customer_name || "Walk-in"} · {sale.payment_method} · {sale.branch_name}
                 </p>
+                {sale.status && sale.status !== "completed" ? (
+                  <p className="mt-1">
+                    <Badge tone={sale.status === "returned" ? "warn" : "copper"}>
+                      {sale.status === "returned" ? "Returned" : "Partial return"}
+                    </Badge>
+                  </p>
+                ) : null}
               </div>
-              <p className="font-display text-xl">{rs(sale.total)}</p>
+              <div className="text-right">
+                <p className="font-display text-xl">{rs(sale.net_total || sale.total)}</p>
+                {sale.status !== "returned" ? (
+                  <button
+                    type="button"
+                    className="mt-1 text-xs text-copper-700 underline"
+                    onClick={() => setReturnTicket(sale.number)}
+                  >
+                    Return items
+                  </button>
+                ) : null}
+              </div>
             </div>
             {sale.lines?.length ? (
               <ul className="mt-3 space-y-1.5 border-t border-paper-100 pt-3 text-sm">
@@ -57,6 +89,7 @@ export default function CashierSalesPage() {
                       <span className="block text-xs text-ink-700/55">
                         {fmtQty(line.quantity)}
                         {line.sku ? ` · ${line.sku}` : ""}
+                        {numReturned(line) > 0 ? ` · returned ${fmtQty(numReturned(line))}` : ""}
                         {line.promo_name ? ` · ${line.promo_name}` : ""}
                       </span>
                     </span>
@@ -70,12 +103,27 @@ export default function CashierSalesPage() {
           </li>
         ))}
       </ul>
+      <Modal open={returnTicket !== null} title="Customer return" onClose={() => setReturnTicket(null)}>
+        {returnTicket !== null ? (
+          <SaleReturnPanel
+            initialQuery={returnTicket}
+            onDone={() => {
+              load();
+            }}
+          />
+        ) : null}
+      </Modal>
     </div>
   );
 }
 
-function fmtQty(value: string) {
+function numReturned(line: { returned_qty?: string }) {
+  const n = Number(line.returned_qty || 0);
+  return Number.isNaN(n) ? 0 : n;
+}
+
+function fmtQty(value: string | number) {
   const n = Number(value);
-  if (Number.isNaN(n)) return value;
+  if (Number.isNaN(n)) return String(value);
   return n.toLocaleString("en-PK", { maximumFractionDigits: n % 1 === 0 ? 0 : 3 });
 }

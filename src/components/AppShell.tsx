@@ -14,6 +14,7 @@ import {
   Package,
   Percent,
   Receipt,
+  RotateCcw,
   BarChart3,
   Shield,
   ShoppingBag,
@@ -31,12 +32,13 @@ import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
 import { isCashier, useAuth } from "@/lib/auth";
 import { useBranch } from "@/lib/branch";
 
-const CASHIER_LINKS = new Set(["/cashier", "/pos", "/customers", "/cash"]);
+const CASHIER_LINKS = new Set(["/cashier", "/pos", "/customers", "/cash", "/returns"]);
 
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, perm: null },
   { href: "/settings/cashiers", label: "Add cashier", icon: UserPlus, perm: "user.create" },
   { href: "/pos", label: "POS", icon: Monitor, perm: "pos.access" },
+  { href: "/returns", label: "Returns", icon: RotateCcw, perm: "pos.access" },
   { href: "/reports", label: "Reports", icon: BarChart3, perm: "report.sales" },
   { href: "/products", label: "Products", icon: Package, perm: "product.view" },
   { href: "/services", label: "Services", icon: Wrench, perm: "product.view" },
