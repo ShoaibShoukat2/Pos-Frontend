@@ -28,9 +28,8 @@ export default function HomePage() {
             A POS that starts with the shop, not the register.
           </h1>
           <p className="mt-5 max-w-xl text-lg text-ink-700/75">
-            Phase 1 is live: business setup, branches, tax, currency, invoice rules, users and
-            custom roles. Grocery, clothing, restaurant, pharmacy and electronics stay configurable — not
-            hard-coded.
+            Business setup, branches, products, POS sales, stock, purchases and reports — priced in
+            Pakistani rupees, with simple ticket totals.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href={user ? homeFor(user) : "/register"} className="btn-copper">
@@ -44,9 +43,9 @@ export default function HomePage() {
         <div className="card p-6">
           <p className="text-xs uppercase tracking-[0.18em] text-copper-600">Now shipping</p>
           <ul className="mt-4 space-y-3 text-sm text-ink-800">
-            <li className="rounded-xl bg-paper-50 px-4 py-3">1 · Business profile, branches, tax, currency, invoices</li>
+            <li className="rounded-xl bg-paper-50 px-4 py-3">1 · Business profile, branches and invoices</li>
             <li className="rounded-xl bg-paper-50 px-4 py-3">2 · Owner, Admin, Manager, Cashier, Accountant + custom roles</li>
-            <li className="rounded-xl bg-paper-100 px-4 py-3 text-ink-700/70">Next · Products & inventory</li>
+            <li className="rounded-xl bg-paper-50 px-4 py-3">3 · Products, POS, stock, purchases and reports</li>
           </ul>
         </div>
       </main>

@@ -5,7 +5,7 @@ import { Minus, Plus, RotateCcw, Search, Trash2 } from "lucide-react";
 
 import { Alert, Button, Field, Input } from "@/components/ui";
 import { ApiError, api, asList } from "@/lib/api";
-import { num, rs } from "@/lib/money";
+import { money, num, rs } from "@/lib/money";
 import type { PosSale, PosSaleReturn } from "@/lib/types";
 
 const PAY_LABEL: Record<string, string> = {
@@ -104,10 +104,10 @@ export function SaleReturnPanel({
 
   const refundPreview = useMemo(() => {
     if (!sale) return 0;
-    const subtotal = num(sale.lines?.reduce((sum, line) => sum + num(line.line_total), 0) ?? sale.total);
-    const original = num(sale.total);
+    const subtotal = money(sale.lines?.reduce((sum, line) => sum + num(line.line_total), 0) ?? sale.total);
+    const original = money(sale.total);
     if (subtotal <= 0) return 0;
-    const remainingNet = Math.max(0, original - num(sale.returned_total));
+    const remainingNet = money(Math.max(0, original - num(sale.returned_total)));
     const returningAll = lines.every((line) => (qty[line.id] || 0) >= returnable(line)) && selected.length > 0;
     if (returningAll) return remainingNet;
     const share = selected.reduce((sum, row) => {
@@ -115,7 +115,7 @@ export function SaleReturnPanel({
       if (sold <= 0) return sum;
       return sum + (num(row.line.line_total) * row.qty * original) / sold / subtotal;
     }, 0);
-    return Math.min(remainingNet, Math.round(share * 100) / 100);
+    return money(Math.min(remainingNet, share));
   }, [sale, lines, qty, selected]);
 
   const fullyReturned = sale?.status === "returned" || sale?.status === "void";

@@ -76,11 +76,6 @@ export default function InvoicePage() {
           </div>
           <Toggle label="Show logo" checked={!!form.show_logo} onChange={(show_logo) => setForm({ ...form, show_logo })} />
           <Toggle
-            label="Show tax breakdown"
-            checked={!!form.show_tax_breakdown}
-            onChange={(show_tax_breakdown) => setForm({ ...form, show_tax_breakdown })}
-          />
-          <Toggle
             label="Show cashier name"
             checked={!!form.show_cashier_name}
             onChange={(show_cashier_name) => setForm({ ...form, show_cashier_name })}

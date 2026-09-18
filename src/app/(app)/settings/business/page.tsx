@@ -62,7 +62,7 @@ export default function BusinessPage() {
       <PageHeader
         eyebrow="Module 1"
         title="Business profile"
-        description="Legal identity, tax number, timezone and the business type used later for feature flags."
+        description="Shop name, contact details, timezone and the business type used for catalog defaults."
       />
       <form onSubmit={onSubmit} className="card grid gap-4 p-6 md:grid-cols-2">
         {errors.detail ? (
@@ -85,7 +85,7 @@ export default function BusinessPage() {
         <Field label="Website">
           <Input value={form.website || ""} onChange={(e) => set("website", e.target.value)} />
         </Field>
-        <Field label="Tax / NTN number">
+        <Field label="NTN number">
           <Input value={form.tax_number || ""} onChange={(e) => set("tax_number", e.target.value)} />
         </Field>
         <Field label="Address" error={errors.address}>

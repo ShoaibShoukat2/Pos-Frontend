@@ -48,7 +48,7 @@ const ACTIONS = [
   { href: "/settings/users", label: "Users", hint: "Staff access", icon: Users },
   { href: "/settings/roles", label: "Roles", hint: "Permissions", icon: Shield },
   { href: "/settings/branches", label: "Branches", hint: "Stores", icon: Store },
-  { href: "/settings/business", label: "Business", hint: "Profile and tax", icon: Building2 },
+  { href: "/settings/business", label: "Business", hint: "Shop profile", icon: Building2 },
   { href: "/promotions", label: "Loyalty", hint: "Coupons and points", icon: Tag },
 ];
 

@@ -34,7 +34,7 @@ import { ApiError, NetworkError, api, asList } from "@/lib/api";
 import { homeFor, isCashier, useAuth } from "@/lib/auth";
 import { useBranch } from "@/lib/branch";
 import { useHardware } from "@/lib/hardware";
-import { num, rs } from "@/lib/money";
+import { money, num, rs } from "@/lib/money";
 import { loadSnapshot, markSynced, pendingCount, queueSale, removePending, saveSnapshot, syncPending } from "@/lib/offline";
 import { useDebounced } from "@/lib/query";
 import { quoteCart, type CartLine } from "@/lib/quote";
@@ -193,7 +193,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
     : null;
 
   useEffect(() => {
-    if (quote) setPayAmount(quote.total.toFixed(2));
+    if (quote) setPayAmount(money(quote.total).toFixed(2));
   }, [quote?.total, couponCode, manualKind, manualValue, redeem, customerId, cart.length]);
 
   useEffect(() => {
@@ -258,8 +258,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const lowStock = (snapshot?.catalog || []).filter((row) => row.track_stock && num(row.qty) > 0 && num(row.qty) <= 5).length;
   const outStock = (snapshot?.catalog || []).filter((row) => row.track_stock && num(row.qty) <= 0).length;
   const shift = snapshot?.open_shift;
-  const paid = num(payAmount);
-  const change = quote ? paid - quote.total : 0;
+  const paid = money(payAmount);
+  const change = quote ? money(paid - quote.total) : 0;
   const officeHref = user ? homeFor(user) : "/dashboard";
 
   function addItem(item: PosCatalogItem) {
@@ -423,7 +423,9 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
     setPending(true);
     setError("");
     setMessage("");
-    const paidNow = Number(payAmount || 0);
+    const tendered = money(payAmount);
+    const dueTotal = money(quote.total);
+    const applied = money(Math.min(Math.max(0, tendered), dueTotal));
     const payload: PosSalePayload = {
       client_uuid: crypto.randomUUID(),
       branch: activeBranch,
@@ -434,7 +436,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       redeem_points: redeem || "0",
       sold_at: new Date().toISOString(),
       lines: cart.map((row) => ({ variant: row.item.id, quantity: String(row.qty) })),
-      payments: paidNow > 0 ? [{ method: payMethod, amount: paidNow.toFixed(2) }] : [],
+      payments: applied > 0 ? [{ method: payMethod, amount: applied.toFixed(2) }] : [],
     };
     await queueSale(payload);
     try {
@@ -1162,7 +1164,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             <button
               type="button"
               className="rounded-lg border border-paper-200 bg-white px-2.5 py-1 text-xs"
-              onClick={() => quote && setPayAmount(quote.total.toFixed(2))}
+              onClick={() => quote && setPayAmount(money(quote.total).toFixed(2))}
             >
               Exact
             </button>
