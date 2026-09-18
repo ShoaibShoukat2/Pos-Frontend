@@ -140,6 +140,7 @@ export default function DashboardPage() {
         { label: "Payables", value: rs(data.payables), href: "/purchases" },
         { label: "Expenses", value: rs(data.expenses), href: "/expenses" },
         { label: "Products", value: String(data.products), href: "/products" },
+        { label: "Services", value: String(data.services ?? 0), href: "/services" },
         { label: "Staff", value: `${data.users_active}/${data.users_total}`, href: "/settings/users" },
         { label: "Branches", value: String(data.branches), href: "/settings/branches" },
       ]
@@ -360,7 +361,7 @@ export default function DashboardPage() {
           <div>
             <h2 className="font-display text-xl">Live catalog</h2>
             <p className="mt-1 text-sm text-ink-700/60">
-              Products being sold, purchased, added or updated. {counts?.total || 0} moving now.
+              Goods being sold, purchased, added or updated. Services stay on the Services page. {counts?.total || 0} moving now.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

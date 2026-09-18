@@ -13,7 +13,6 @@ import {
   Package,
   Plus,
   QrCode,
-  Receipt,
   RotateCcw,
   Search,
   ShoppingCart,
@@ -78,7 +77,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draftQty, setDraftQty] = useState(1);
   const [category, setCategory] = useState("");
-  const [kindFilter, setKindFilter] = useState<"all" | "product" | "service">("all");
+  const [kindFilter, setKindFilter] = useState<"all" | "product" | "service">("product");
   const [customerId, setCustomerId] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [manualKind, setManualKind] = useState("");
@@ -252,9 +251,11 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
 
   const todaySales = overview?.today_sales || cashierStats?.today_sales || "0";
   const todayOrders = overview?.orders ?? cashierStats?.orders ?? 0;
-  const avgTicket = todayOrders ? num(todaySales) / todayOrders : 0;
   const cartQty = cart.reduce((sum, row) => sum + row.qty, 0);
-  const catalogTotal = snapshot?.catalog_total || snapshot?.catalog.length || 0;
+  const productCount = snapshot?.catalog_products ?? (snapshot?.catalog || []).filter((row) => !isService(row)).length;
+  const serviceCount = snapshot?.catalog_services ?? (snapshot?.catalog || []).filter((row) => isService(row)).length;
+  const catalogTotal =
+    kindFilter === "service" ? serviceCount : kindFilter === "product" ? productCount : snapshot?.catalog_total || productCount + serviceCount;
   const lowStock = (snapshot?.catalog || []).filter((row) => row.track_stock && num(row.qty) > 0 && num(row.qty) <= 5).length;
   const outStock = (snapshot?.catalog || []).filter((row) => row.track_stock && num(row.qty) <= 0).length;
   const shift = snapshot?.open_shift;
@@ -569,12 +570,17 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             hint={shift ? `${shift.number} · ${rs(shift.expected_cash)}` : "Open before cash"}
             warn={!shift}
           />
-          <Kpi icon={Receipt} label="Orders" value={String(todayOrders)} hint={`Avg ${rs(avgTicket)}`} />
+          <Kpi
+            icon={Wrench}
+            label="Services"
+            value={serviceCount.toLocaleString()}
+            hint="Priced when sold"
+          />
           <Kpi
             icon={Package}
-            label="Catalog"
-            value={catalogTotal.toLocaleString()}
-            hint={category ? category : "All items"}
+            label="Products"
+            value={productCount.toLocaleString()}
+            hint={kindFilter === "product" && category ? category : "Goods in catalog"}
           />
           <Kpi
             icon={AlertTriangle}
@@ -729,7 +735,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           </p>
         ) : (
           <p className="mb-3 text-xs text-ink-700/55">
-            {items.length} item{items.length === 1 ? "" : "s"}
+            {items.length} {kindFilter === "service" ? "service" : kindFilter === "product" ? "product" : "item"}
+            {items.length === 1 ? "" : "s"}
             {query.trim() ? ` matching “${query.trim()}”` : ""}
             {category ? ` in ${category}` : ""}. Add 1, or use + / − to update quantity.
           </p>
@@ -828,7 +835,9 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             })}
           </div>
           {snapshot && items.length === 0 ? (
-            <p className="py-10 text-center text-sm text-ink-700/60">No products or services match this search.</p>
+            <p className="py-10 text-center text-sm text-ink-700/60">
+              {kindFilter === "service" ? "No services match this search." : "No products match this search."}
+            </p>
           ) : null}
         </div>
       </section>

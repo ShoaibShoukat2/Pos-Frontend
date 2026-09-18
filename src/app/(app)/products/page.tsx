@@ -256,7 +256,7 @@ export default function ProductsPage() {
 
       {tab === "categories" ? (
         <NamedList
-          rows={categories}
+          rows={categories.filter((c) => !c.kind || c.kind === "product")}
           onAdd={(name) => addNamed("categories", name)}
           value={simpleName}
           setValue={setSimpleName}

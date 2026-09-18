@@ -157,12 +157,19 @@ export default function ServicesPage() {
     await services.reload();
   }
 
+  async function remove(row: Product) {
+    if (!confirm(`Delete ${row.name}? If it was already sold it will be hidden instead.`)) return;
+    await api(`/api/products/${row.id}/`, { method: "DELETE" });
+    invalidateApiCache("/api/products");
+    await services.reload();
+  }
+
   return (
     <div>
       <PageHeader
         eyebrow="Catalog"
         title="Services"
-        description="Repair, installation and other jobs with a selling price. They appear on POS with products, without stock tracking."
+        description="Repair and installation jobs. They are not products and have no stock — the selling price is added when you sell the job on POS."
         action={
           can("product.manage") ? (
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
@@ -174,6 +181,14 @@ export default function ServicesPage() {
           ) : undefined
         }
       />
+
+      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="card p-4">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-ink-700/55">Services</p>
+          <p className="stat-value mt-1">{services.count}</p>
+          <p className="mt-1 text-xs text-ink-700/60">Jobs you offer. Price is calculated on the ticket when sold.</p>
+        </div>
+      </div>
 
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end">
         <div className="flex-1">
@@ -204,7 +219,7 @@ export default function ServicesPage() {
         loading={services.loading}
         count={services.count}
         emptyTitle="No services yet"
-        emptyHint="Add a repair or installation with cost and selling price, or load electronics starter jobs."
+        emptyHint="Add a repair or installation. It will not show in Products or stock — only on POS when you sell it."
         cols={8}
       >
         <div className="card overflow-x-auto">
@@ -244,8 +259,15 @@ export default function ServicesPage() {
                         <button type="button" className="text-xs text-copper-700" onClick={() => startEdit(row)}>
                           Edit
                         </button>
-                        <button type="button" className="text-xs text-ink-700/60" onClick={() => toggleActive(row)}>
+                        <button
+                          type="button"
+                          className="text-xs text-ink-700/60"
+                          onClick={() => toggleActive(row)}
+                        >
                           {row.is_active ? "Hide" : "Show"}
+                        </button>
+                        <button type="button" className="text-xs text-red-700" onClick={() => remove(row)}>
+                          Delete
                         </button>
                       </div>
                     </td>
@@ -296,6 +318,7 @@ export default function ServicesPage() {
                 onChange={(e) => setForm({ ...form, selling_price: e.target.value })}
                 required
               />
+              <p className="mt-1 text-xs text-ink-700/55">Added to the sale total when this job is sold on POS. Not stock.</p>
             </Field>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">

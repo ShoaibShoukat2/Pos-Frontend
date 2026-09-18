@@ -528,6 +528,7 @@ export type OwnerOverview = DashboardReport & {
   stock_value: string;
   sku_locations: number;
   products: number;
+  services: number;
   variants: number;
   suppliers: number;
   branches: number;
@@ -724,6 +725,8 @@ export type PosSnapshot = {
   catalog: PosCatalogItem[];
   catalog_truncated?: boolean;
   catalog_total?: number;
+  catalog_products?: number;
+  catalog_services?: number;
   customers: PosCustomer[];
   customer_truncated?: boolean;
   coupons: Coupon[];
