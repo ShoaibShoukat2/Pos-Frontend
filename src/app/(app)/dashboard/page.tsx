@@ -8,7 +8,6 @@ import { TableSkeleton } from "@/components/DataTable";
 import { Badge, PageHeader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { useBranch } from "@/lib/branch";
 import { num, rs } from "@/lib/money";
 import type { LiveProduct, OwnerOverview } from "@/lib/types";
 
@@ -55,7 +54,6 @@ function timeAgo(value: string) {
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { branch, branchId } = useBranch();
   const [period, setPeriod] = useState<(typeof PERIODS)[number]["id"]>("today");
   const [data, setData] = useState<OwnerOverview | null>(null);
   const [loading, setLoading] = useState(true);
@@ -83,7 +81,7 @@ export default function DashboardPage() {
       active = false;
       window.clearInterval(tick);
     };
-  }, [period, branchId]);
+  }, [period]);
 
   const products = data?.live_products || [];
   const visible = useMemo(
@@ -108,7 +106,6 @@ export default function DashboardPage() {
         { label: "Products", value: String(data.products), href: "/products" },
         { label: "Services", value: String(data.services ?? 0), href: "/services" },
         { label: "Staff", value: `${data.users_active}/${data.users_total}`, href: "/settings/users" },
-        { label: "Branches", value: String(data.branches), href: "/settings/branches" },
       ]
     : [];
 
@@ -117,7 +114,7 @@ export default function DashboardPage() {
       <PageHeader
         eyebrow={user?.is_owner ? "Owner overview" : "Business overview"}
         title={`${user?.business_name || "Dashboard"}${user?.first_name ? ` · ${user.first_name}` : ""}`}
-        description={`${branch ? branch.name : "All branches"} · ${data ? `${data.from} → ${data.to}` : "Live sales, stock, cash, people and catalog activity."}`}
+        description={`${data ? `${data.from} → ${data.to}` : "Live sales, stock, cash, people and catalog activity."}`}
         action={
           <div className="flex w-full flex-col items-stretch gap-2 sm:items-end">
             <div className="flex w-full rounded-xl border border-paper-200 bg-white p-1 sm:w-auto">
@@ -255,7 +252,6 @@ export default function DashboardPage() {
                   <tr>
                     <th className="px-4 py-2">Sale</th>
                     <th className="px-4 py-2">Customer</th>
-                    <th className="px-4 py-2">Branch</th>
                     <th className="px-4 py-2">Total</th>
                   </tr>
                 </thead>
@@ -267,7 +263,6 @@ export default function DashboardPage() {
                         <p className="text-xs text-ink-700/55">{row.cashier_name}</p>
                       </td>
                       <td className="px-4 py-3">{row.customer_name}</td>
-                      <td className="px-4 py-3 text-ink-700/80">{row.branch_name}</td>
                       <td className="px-4 py-3 font-medium">{rs(row.total)}</td>
                     </tr>
                   ))}
@@ -442,7 +437,7 @@ export default function DashboardPage() {
                       <span className="font-medium">
                         {row.number}
                         <span className="block text-xs font-normal text-ink-700/55">
-                          {row.branch_name} · {row.opened_by}
+                          {row.opened_by}
                         </span>
                       </span>
                       <Badge tone="good">Open</Badge>
@@ -456,8 +451,7 @@ export default function DashboardPage() {
               </ul>
             )}
             <p className="mt-4 text-xs text-ink-700/55">
-              Catalog: {data.products} products · {data.variants} SKUs · {data.suppliers} suppliers · {data.sku_locations}{" "}
-              stock locations
+              Catalog: {data.products} products · {data.variants} SKUs · {data.suppliers} suppliers
             </p>
           </div>
         </div>

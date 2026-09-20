@@ -31,7 +31,6 @@ import { SaleReturnPanel } from "@/components/SaleReturnPanel";
 import { Badge, Button, Field, Input, Modal, Select } from "@/components/ui";
 import { ApiError, NetworkError, api, asList } from "@/lib/api";
 import { homeFor, isCashier, useAuth } from "@/lib/auth";
-import { useBranch } from "@/lib/branch";
 import { useHardware } from "@/lib/hardware";
 import { money, num, rs } from "@/lib/money";
 import { loadSnapshot, markSynced, pendingCount, queueSale, removePending, saveSnapshot, syncPending } from "@/lib/offline";
@@ -66,7 +65,6 @@ const HELP_COPY: Record<string, string> = {
 
 export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "owner" }) {
   const { user, can, logout, loading } = useAuth();
-  const { branches, branchId, branch, setBranch } = useBranch();
   const [snapshot, setSnapshot] = useState<PosSnapshot | null>(null);
   const [online, setOnline] = useState(true);
   const [queued, setQueued] = useState(0);
@@ -103,11 +101,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const skuOnce = useRef(false);
   const hardware = useHardware();
   const searchRef = useRef<HTMLInputElement>(null);
-  const activeBranch = branchId || user?.default_branch || branches[0]?.id || "";
-
-  useEffect(() => {
-    if (!branchId && branches[0]?.id) setBranch(branches[0].id);
-  }, [branchId, branches, setBranch]);
+  const shopKey = "shop";
 
   useEffect(() => {
     const tick = window.setInterval(() => setNow(new Date()), 1000);
@@ -137,19 +131,18 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   }, [user]);
 
   const load = useCallback(async () => {
-    if (!activeBranch) return;
     try {
-      const data = await api<PosSnapshot>(`/api/pos/snapshot/?branch=${activeBranch}`);
+      const data = await api<PosSnapshot>("/api/pos/snapshot/");
       setSnapshot(data);
-      await saveSnapshot(activeBranch, data);
+      await saveSnapshot(shopKey, data);
       setOnline(true);
     } catch (err) {
-      const cached = await loadSnapshot(activeBranch);
+      const cached = await loadSnapshot(shopKey);
       if (cached) setSnapshot(cached);
       if (err instanceof NetworkError) setOnline(false);
     }
     refreshQueue();
-  }, [activeBranch, refreshQueue]);
+  }, [refreshQueue]);
 
   useEffect(() => {
     load();
@@ -157,7 +150,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
 
   useEffect(() => {
     refreshDash();
-  }, [refreshDash, activeBranch]);
+  }, [refreshDash]);
 
   useEffect(() => {
     function onOnline() {
@@ -196,7 +189,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   }, [quote?.total, couponCode, manualKind, manualValue, redeem, customerId, cart.length]);
 
   useEffect(() => {
-    if (!online || !activeBranch || !remoteQuery.trim()) {
+    if (!online || !remoteQuery.trim()) {
       setRemoteItems(null);
       return;
     }
@@ -211,7 +204,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         setRemoteItems(null);
       });
     return () => ctrl.abort();
-  }, [remoteQuery, online, activeBranch]);
+  }, [remoteQuery, online]);
 
   const categories = useMemo(() => {
     const source = (snapshot?.catalog || []).filter(
@@ -420,7 +413,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   }, [connectOpen, scanToken, snapshot]);
 
   async function checkout() {
-    if (!snapshot || !quote || !activeBranch || cart.length === 0) return;
+    if (!snapshot || !quote || cart.length === 0) return;
     setPending(true);
     setError("");
     setMessage("");
@@ -429,7 +422,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
     const applied = money(Math.min(Math.max(0, tendered), dueTotal));
     const payload: PosSalePayload = {
       client_uuid: crypto.randomUUID(),
-      branch: activeBranch,
+      branch: snapshot.branch?.id,
       customer: customerId || null,
       coupon_code: couponCode || "",
       manual_discount_kind: manualKind,
@@ -453,7 +446,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       });
       const nextSnap = { ...snapshot, catalog: nextCatalog };
       setSnapshot(nextSnap);
-      await saveSnapshot(activeBranch, nextSnap);
+      await saveSnapshot(shopKey, nextSnap);
       setMessage(`Sale ${sale.number} saved.`);
       setOnline(true);
       setCart([]);
@@ -472,7 +465,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         });
         const nextSnap = { ...snapshot, catalog: nextCatalog };
         setSnapshot(nextSnap);
-        await saveSnapshot(activeBranch, nextSnap);
+        await saveSnapshot(shopKey, nextSnap);
         setOnline(false);
         setMessage("Sale saved on this counter. It will sync when the line is back.");
         setCart([]);
@@ -513,7 +506,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       });
       const nextSnap = { ...snapshot, catalog: nextCatalog };
       setSnapshot(nextSnap);
-      if (activeBranch) await saveSnapshot(activeBranch, nextSnap);
+      await saveSnapshot(shopKey, nextSnap);
     }
     refreshDash();
     load();
@@ -851,7 +844,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper-400">Current ticket</p>
-              <p className="font-display text-xl">{branch?.name || "Branch"}</p>
+              <p className="font-display text-xl">{user?.business_name || "Ticket"}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="text-right text-xs text-paper-50/70">
@@ -1280,17 +1273,6 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             </p>
           </div>
           <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
-            <select
-              className="max-w-[8.5rem] min-w-0 rounded-xl border border-white/15 bg-ink-900 px-2 py-2 text-sm sm:max-w-xs sm:px-3"
-              value={activeBranch}
-              onChange={(e) => setBranch(e.target.value)}
-            >
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs ${
                 shift ? "bg-emerald-500/20 text-emerald-200" : "bg-amber-500/20 text-amber-100"

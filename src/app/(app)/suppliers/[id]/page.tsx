@@ -6,30 +6,26 @@ import { useParams } from "next/navigation";
 
 import { Badge, Button, Field, Input, PageHeader, Select } from "@/components/ui";
 import { ApiError, api, asList } from "@/lib/api";
-import type { Branch, LedgerEntry, Payable, Supplier } from "@/lib/types";
+import type { LedgerEntry, Payable, Supplier } from "@/lib/types";
 
 export default function SupplierDetailPage() {
   const params = useParams<{ id: string }>();
   const [supplier, setSupplier] = useState<Supplier | null>(null);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [payables, setPayables] = useState<Payable[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
-  const [form, setForm] = useState({ branch: "", amount: "", method: "cash", notes: "" });
+  const [form, setForm] = useState({ amount: "", method: "cash", notes: "" });
 
   async function load() {
-    const [s, led, pay, br] = await Promise.all([
+    const [s, led, pay] = await Promise.all([
       api<Supplier>(`/api/suppliers/${params.id}/`),
       api<LedgerEntry[]>(`/api/suppliers/${params.id}/ledger/`),
       api<Payable[] | { results: Payable[] }>(`/api/payables/?supplier=${params.id}`),
-      api<Branch[]>("/api/branches/"),
     ]);
     setSupplier(s);
     setLedger(led);
     setPayables(asList(pay));
-    setBranches(br);
-    setForm((prev) => ({ ...prev, branch: prev.branch || br[0]?.id || "" }));
   }
 
   useEffect(() => {
@@ -73,15 +69,6 @@ export default function SupplierDetailPage() {
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <form onSubmit={onPay} className="card grid gap-3 p-5">
           <h2 className="font-display text-xl">Record payment</h2>
-          <Field label="Branch">
-            <Select value={form.branch} onChange={(e) => setForm({ ...form, branch: e.target.value })}>
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </Select>
-          </Field>
           <Field label="Amount">
             <Input value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required />
           </Field>

@@ -30,7 +30,7 @@ export default function CashierReturnsPage() {
       <PageHeader
         eyebrow="Counter"
         title="Customer returns"
-        description="Customer brought an item back? Find the ticket, remove the item, and refund. Stock returns to this branch."
+        description="Customer brought an item back? Find the ticket, remove the item, and refund. Stock comes back."
         action={
           <Link href="/pos" className="btn-copper text-center">
             Open POS

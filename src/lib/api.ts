@@ -142,8 +142,6 @@ export async function api<T>(path: string, init: RequestInit = {}, retry = true)
   }
   const token = getAccessToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
-  const branch = getBranchId();
-  if (branch && !headers.has("X-Branch-Id")) headers.set("X-Branch-Id", branch);
 
   let res: Response;
   try {

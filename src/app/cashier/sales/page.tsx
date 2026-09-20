@@ -57,7 +57,7 @@ export default function CashierSalesPage() {
               <div>
                 <p className="font-medium">{sale.number}</p>
                 <p className="text-xs text-ink-700/55">
-                  {sale.customer_name || "Walk-in"} · {sale.payment_method} · {sale.branch_name}
+                  {sale.customer_name || "Walk-in"} · {sale.payment_method}
                 </p>
                 {sale.status && sale.status !== "completed" ? (
                   <p className="mt-1">

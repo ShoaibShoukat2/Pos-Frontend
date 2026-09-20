@@ -738,7 +738,7 @@ export type PosSnapshot = {
 
 export type PosSalePayload = {
   client_uuid: string;
-  branch: string;
+  branch?: string;
   customer?: string | null;
   coupon_code?: string;
   manual_discount_kind?: string;

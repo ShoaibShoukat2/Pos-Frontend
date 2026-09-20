@@ -5,24 +5,20 @@ import { useEffect, useState } from "react";
 
 import { PageHeader } from "@/components/ui";
 import { api, asList } from "@/lib/api";
-import { useBranch } from "@/lib/branch";
 import { num, rs } from "@/lib/money";
 import { useDebounced } from "@/lib/query";
 import type { PosCatalogItem } from "@/lib/types";
 
 export default function CashierLookupPage() {
-  const { branchId, branches } = useBranch();
   const [query, setQuery] = useState("");
   const remoteQuery = useDebounced(query, 250);
   const [items, setItems] = useState<PosCatalogItem[]>([]);
-  const activeBranch = branchId || branches[0]?.id || "";
 
   useEffect(() => {
-    if (!activeBranch) return;
     const search = remoteQuery.trim();
     const path = search
       ? `/api/pos/catalog/?search=${encodeURIComponent(search)}&page_size=40`
-      : `/api/pos/snapshot/?branch=${activeBranch}`;
+      : "/api/pos/snapshot/";
     const ctrl = new AbortController();
     api<PosCatalogItem[] | { results: PosCatalogItem[]; catalog?: PosCatalogItem[] }>(path, { signal: ctrl.signal })
       .then((data) => {
@@ -35,7 +31,7 @@ export default function CashierLookupPage() {
         setItems([]);
       });
     return () => ctrl.abort();
-  }, [remoteQuery, activeBranch]);
+  }, [remoteQuery]);
 
   return (
     <div>

@@ -3,28 +3,22 @@
 import { FormEvent, useEffect, useState } from "react";
 
 import { ListState, Pager } from "@/components/DataTable";
-import { Badge, Button, Field, Input, PageHeader, Select } from "@/components/ui";
-import { ApiError, api, apiCached } from "@/lib/api";
+import { Badge, Button, Field, Input, PageHeader } from "@/components/ui";
+import { ApiError, api } from "@/lib/api";
 import { usePagedList } from "@/lib/query";
-import type { Branch, CashSession } from "@/lib/types";
+import type { CashSession } from "@/lib/types";
 
 export default function CashPage() {
-  const [branches, setBranches] = useState<Branch[]>([]);
   const sessions = usePagedList<CashSession>("/api/cash-sessions/");
   const [current, setCurrent] = useState<CashSession | null>(null);
-  const [branch, setBranch] = useState("");
   const [opening, setOpening] = useState("10000");
   const [actual, setActual] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
 
-  async function loadCurrent(selected?: string) {
-    const br = await apiCached<Branch[]>("/api/branches/");
-    setBranches(br);
-    const nextBranch = selected || branch || br[0]?.id || "";
-    if (!branch) setBranch(nextBranch);
+  async function loadCurrent() {
     try {
-      setCurrent(await api<CashSession>(`/api/cash-sessions/current/?branch=${nextBranch}`));
+      setCurrent(await api<CashSession>("/api/cash-sessions/current/"));
     } catch {
       setCurrent(null);
     }
@@ -41,9 +35,9 @@ export default function CashPage() {
     try {
       await api("/api/cash-sessions/open/", {
         method: "POST",
-        body: JSON.stringify({ branch, opening_cash: opening }),
+        body: JSON.stringify({ opening_cash: opening }),
       });
-      await loadCurrent(branch);
+      await loadCurrent();
       await sessions.reload();
     } catch (err) {
       const body = err instanceof ApiError ? (err.body as { detail?: string }) : null;
@@ -65,7 +59,7 @@ export default function CashPage() {
       });
       setCurrent(null);
       setActual("");
-      await loadCurrent(branch);
+      await loadCurrent();
       await sessions.reload();
     } catch (err) {
       const body = err instanceof ApiError ? (err.body as { detail?: string }) : null;
@@ -78,7 +72,7 @@ export default function CashPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Module 12"
+        eyebrow="Cash"
         title="Cash drawer"
         description="Opening + sales cash + customer receipts − expenses − refunds − supplier payments = expected cash."
       />
@@ -87,21 +81,6 @@ export default function CashPage() {
         <div className="card p-5">
           <h2 className="font-display text-xl">Open shift</h2>
           <form onSubmit={openShift} className="mt-4 grid gap-3">
-            <Field label="Branch">
-              <Select
-                value={branch}
-                onChange={(e) => {
-                  setBranch(e.target.value);
-                  loadCurrent(e.target.value).catch(() => {});
-                }}
-              >
-                {branches.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
-              </Select>
-            </Field>
             <Field label="Opening cash">
               <Input value={opening} onChange={(e) => setOpening(e.target.value)} />
             </Field>
@@ -131,7 +110,7 @@ export default function CashPage() {
               </form>
             </div>
           ) : (
-            <p className="mt-4 text-sm text-ink-700/70">No open shift on this branch.</p>
+            <p className="mt-4 text-sm text-ink-700/70">No open shift. Open the drawer before taking cash.</p>
           )}
         </div>
       </div>
@@ -151,10 +130,7 @@ export default function CashPage() {
           <tbody>
             {sessions.rows.map((row) => (
               <tr key={row.id} className="border-t border-paper-100">
-                <td className="px-4 py-3">
-                  {row.number}
-                  <p className="text-xs text-ink-700/55">{row.branch_name}</p>
-                </td>
+                <td className="px-4 py-3">{row.number}</td>
                 <td className="px-4 py-3">Rs {row.expected_cash}</td>
                 <td className="px-4 py-3">{row.actual_cash == null ? "—" : `Rs ${row.actual_cash}`}</td>
                 <td className="px-4 py-3">
@@ -178,9 +154,9 @@ export default function CashPage() {
 
 function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
-    <div className="flex justify-between border-b border-paper-100 pb-2">
-      <span className="text-ink-700/65">{label}</span>
-      <span className={strong ? "font-display text-xl" : ""}>Rs {value}</span>
+    <div className={`flex justify-between gap-3 ${strong ? "font-medium" : ""}`}>
+      <span className="text-ink-700/70">{label}</span>
+      <span>Rs {value}</span>
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { VariantPicker } from "@/components/VariantPicker";
 import { Badge, Button, Field, Input, Modal, PageHeader, Select } from "@/components/ui";
 import { ApiError, api, apiCached, asList, fieldErrors } from "@/lib/api";
 import { usePagedList } from "@/lib/query";
-import type { Branch, GoodsReceipt, Payable, PurchaseOrder, Supplier } from "@/lib/types";
+import type { GoodsReceipt, Payable, PurchaseOrder, Supplier } from "@/lib/types";
 
 type Tab = "orders" | "receipts" | "payables";
 
@@ -18,13 +18,11 @@ export default function PurchasesPage() {
   const receipts = usePagedList<GoodsReceipt>("/api/goods-receipts/", { enabled: tab === "receipts" });
   const payables = usePagedList<Payable>("/api/payables/", { enabled: tab === "payables" });
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
     supplier: "",
-    branch: "",
     notes: "",
     variant: "",
     quantity: "10",
@@ -32,17 +30,14 @@ export default function PurchasesPage() {
   });
 
   async function loadLookups() {
-    const [sup, br] = await Promise.all([
+    const [sup] = await Promise.all([
       apiCached<Supplier[] | { results: Supplier[] }>("/api/suppliers/?page_size=50"),
-      apiCached<Branch[]>("/api/branches/"),
     ]);
     const supplierRows = asList(sup);
     setSuppliers(supplierRows);
-    setBranches(br);
     setForm((prev) => ({
       ...prev,
       supplier: prev.supplier || supplierRows[0]?.id || "",
-      branch: prev.branch || br[0]?.id || "",
     }));
   }
 
@@ -59,7 +54,6 @@ export default function PurchasesPage() {
         method: "POST",
         body: JSON.stringify({
           supplier: form.supplier,
-          branch: form.branch,
           notes: form.notes,
           lines: [{ variant: form.variant, quantity: form.quantity, unit_cost: form.unit_cost }],
         }),
@@ -106,7 +100,6 @@ export default function PurchasesPage() {
                   <tr>
                     <th className="px-4 py-3">PO</th>
                     <th className="px-4 py-3">Supplier</th>
-                    <th className="px-4 py-3">Branch</th>
                     <th className="px-4 py-3">Total</th>
                     <th className="px-4 py-3">Status</th>
                   </tr>
@@ -120,7 +113,6 @@ export default function PurchasesPage() {
                         </Link>
                       </td>
                       <td className="px-4 py-3">{row.supplier_name}</td>
-                      <td className="px-4 py-3">{row.branch_name}</td>
                       <td className="px-4 py-3">Rs {row.total}</td>
                       <td className="px-4 py-3">
                         <Badge tone={row.status === "received" ? "good" : "copper"}>{row.status}</Badge>
@@ -186,15 +178,6 @@ export default function PurchasesPage() {
               {suppliers.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Receive into branch">
-            <Select value={form.branch} onChange={(e) => setForm({ ...form, branch: e.target.value })} required>
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
                 </option>
               ))}
             </Select>

@@ -48,7 +48,7 @@ export function CashierShell({ children }: { children: React.ReactNode }) {
             <p className="truncate text-sm font-medium">{user.full_name}</p>
             <p className="truncate text-xs text-paper-50/55">{user.business_name}</p>
             <p className="mt-1 text-[11px] uppercase tracking-wider text-copper-400">
-              {user.default_branch_name || "Cashier"}
+              Cashier
             </p>
           </div>
         </div>
@@ -98,7 +98,7 @@ export function CashierShell({ children }: { children: React.ReactNode }) {
         onClose={() => setMenuOpen(false)}
         subtitle={user.full_name}
         title={user.business_name || ""}
-        meta={user.default_branch_name || "Cashier"}
+        meta="Cashier"
         links={NAV}
         pathname={pathname}
         onLogout={logout}

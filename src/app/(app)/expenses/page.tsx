@@ -6,34 +6,29 @@ import { ListState, Pager } from "@/components/DataTable";
 import { Button, Field, Input, Modal, PageHeader, Select } from "@/components/ui";
 import { ApiError, api, apiCached } from "@/lib/api";
 import { usePagedList } from "@/lib/query";
-import type { Branch, Expense, ExpenseCategory } from "@/lib/types";
+import type { Expense, ExpenseCategory } from "@/lib/types";
 
 export default function ExpensesPage() {
   const list = usePagedList<Expense>("/api/expenses/");
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
     category: "",
-    branch: "",
     amount: "",
     method: "cash",
     notes: "",
   });
 
   async function loadLookups() {
-    const [cats, br] = await Promise.all([
+    const [cats] = await Promise.all([
       apiCached<ExpenseCategory[]>("/api/expense-categories/"),
-      apiCached<Branch[]>("/api/branches/"),
     ]);
     setCategories(cats);
-    setBranches(br);
     setForm((prev) => ({
       ...prev,
       category: prev.category || cats[0]?.id || "",
-      branch: prev.branch || br[0]?.id || "",
     }));
   }
 
@@ -72,7 +67,6 @@ export default function ExpensesPage() {
               <tr>
                 <th className="px-4 py-3">#</th>
                 <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Branch</th>
                 <th className="px-4 py-3">Amount</th>
                 <th className="px-4 py-3">Method</th>
               </tr>
@@ -82,7 +76,6 @@ export default function ExpensesPage() {
                 <tr key={row.id} className="border-t border-paper-100">
                   <td className="px-4 py-3 font-medium">{row.number}</td>
                   <td className="px-4 py-3">{row.category_name}</td>
-                  <td className="px-4 py-3">{row.branch_name}</td>
                   <td className="px-4 py-3">Rs {row.amount}</td>
                   <td className="px-4 py-3">{row.method}</td>
                 </tr>
@@ -100,15 +93,6 @@ export default function ExpensesPage() {
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Branch">
-            <Select value={form.branch} onChange={(e) => setForm({ ...form, branch: e.target.value })}>
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
                 </option>
               ))}
             </Select>

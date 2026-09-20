@@ -1,15 +1,15 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 
 import { ListState, Pager, SearchField } from "@/components/DataTable";
 import { VariantPicker } from "@/components/VariantPicker";
 import { Badge, Button, Field, Input, Modal, PageHeader, Select } from "@/components/ui";
-import { ApiError, api, apiCached, fieldErrors } from "@/lib/api";
+import { ApiError, api, fieldErrors } from "@/lib/api";
 import { usePagedList } from "@/lib/query";
-import type { Branch, StockLevel, StockMovement, StockOperation, StockTransfer } from "@/lib/types";
+import type { StockLevel, StockMovement, StockOperation } from "@/lib/types";
 
-type Tab = "onhand" | "movements" | "operations" | "transfers";
+type Tab = "onhand" | "movements" | "operations";
 
 const OPS = [
   { value: "stock_in", label: "Stock in" },
@@ -29,45 +29,19 @@ export default function StockPage() {
   });
   const movements = usePagedList<StockMovement>("/api/stock-movements/", { enabled: tab === "movements" });
   const operations = usePagedList<StockOperation>("/api/stock-operations/", { enabled: tab === "operations" });
-  const transfers = usePagedList<StockTransfer>("/api/stock-transfers/", { enabled: tab === "transfers" });
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [opOpen, setOpOpen] = useState(false);
-  const [trOpen, setTrOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [op, setOp] = useState({
     kind: "stock_in",
-    branch: "",
     variant: "",
     quantity: "1",
     counted_quantity: "",
     reason: "",
   });
-  const [tr, setTr] = useState({
-    from_branch: "",
-    to_branch: "",
-    variant: "",
-    quantity: "1",
-    reason: "",
-  });
-
-  async function loadLookups() {
-    const br = await apiCached<Branch[]>("/api/branches/");
-    setBranches(br);
-    setOp((prev) => ({ ...prev, branch: prev.branch || br[0]?.id || "" }));
-    setTr((prev) => ({
-      ...prev,
-      from_branch: prev.from_branch || br[0]?.id || "",
-      to_branch: prev.to_branch || br[1]?.id || br[0]?.id || "",
-    }));
-  }
-
-  useEffect(() => {
-    loadLookups().catch(() => {});
-  }, []);
 
   async function refreshActive() {
-    await Promise.all([levels.reload(), movements.reload(), operations.reload(), transfers.reload()]);
+    await Promise.all([levels.reload(), movements.reload(), operations.reload()]);
   }
 
   async function submitOp(e: FormEvent) {
@@ -81,7 +55,6 @@ export default function StockPage() {
         method: "POST",
         body: JSON.stringify({
           kind: op.kind,
-          branch: op.branch,
           reason: op.reason,
           lines: [line],
         }),
@@ -98,49 +71,16 @@ export default function StockPage() {
     }
   }
 
-  async function submitTr(e: FormEvent) {
-    e.preventDefault();
-    setPending(true);
-    setErrors({});
-    try {
-      await api("/api/stock-transfers/", {
-        method: "POST",
-        body: JSON.stringify({
-          from_branch: tr.from_branch,
-          to_branch: tr.to_branch,
-          reason: tr.reason,
-          lines: [{ variant: tr.variant, quantity: tr.quantity }],
-        }),
-      });
-      setTrOpen(false);
-      await refreshActive();
-    } catch (err) {
-      if (err instanceof ApiError) {
-        const body = err.body as { detail?: string };
-        setErrors({ detail: body.detail || "Could not post transfer." });
-      }
-    } finally {
-      setPending(false);
-    }
-  }
-
   return (
     <div>
       <PageHeader
         eyebrow="Module 7"
         title="Stock"
         description="On-hand is a cache. The ledger (movements) is the source of truth."
-        action={
-          <div className="flex gap-2">
-            <Button variant="ghost" onClick={() => setTrOpen(true)}>
-              Transfer
-            </Button>
-            <Button onClick={() => setOpOpen(true)}>Stock operation</Button>
-          </div>
-        }
+        action={<Button onClick={() => setOpOpen(true)}>Stock operation</Button>}
       />
       <div className="mb-6 flex flex-wrap gap-2">
-        {(["onhand", "movements", "operations", "transfers"] as Tab[]).map((item) => (
+        {(["onhand", "movements", "operations"] as Tab[]).map((item) => (
           <button
             key={item}
             type="button"
@@ -173,7 +113,6 @@ export default function StockPage() {
                 <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
                   <tr>
                     <th className="px-4 py-3">Item</th>
-                    <th className="px-4 py-3">Branch</th>
                     <th className="px-4 py-3">Qty</th>
                     <th className="px-4 py-3">Value</th>
                     <th className="px-4 py-3">Status</th>
@@ -189,7 +128,6 @@ export default function StockPage() {
                         </p>
                         <p className="text-xs text-ink-700/55">{row.sku}</p>
                       </td>
-                      <td className="px-4 py-3">{row.branch_name}</td>
                       <td className="px-4 py-3">{row.quantity}</td>
                       <td className="px-4 py-3">Rs {row.stock_value}</td>
                       <td className="px-4 py-3">
@@ -231,7 +169,6 @@ export default function StockPage() {
                       </td>
                       <td className="px-4 py-3">
                         {row.product_name} · {row.variant_name}
-                        <p className="text-xs text-ink-700/55">{row.branch_name}</p>
                       </td>
                       <td className="px-4 py-3">{row.quantity}</td>
                       <td className="px-4 py-3">{row.balance_after}</td>
@@ -254,7 +191,6 @@ export default function StockPage() {
                   <tr key={row.id} className="border-t border-paper-100 first:border-0">
                     <td className="px-4 py-3 font-medium">{row.number}</td>
                     <td className="px-4 py-3">{row.kind}</td>
-                    <td className="px-4 py-3">{row.branch_name}</td>
                     <td className="px-4 py-3">{row.reason}</td>
                   </tr>
                 ))}
@@ -262,32 +198,6 @@ export default function StockPage() {
             </table>
           </div>
           <Pager page={operations.page} pages={operations.pages} count={operations.count} onPage={operations.setPage} />
-        </ListState>
-      ) : null}
-
-      {tab === "transfers" ? (
-        <ListState
-          loading={transfers.loading}
-          count={transfers.count}
-          emptyTitle="No transfers"
-          emptyHint="Need a second branch to move stock."
-        >
-          <div className="card overflow-hidden">
-            <table className="w-full text-left text-sm">
-              <tbody>
-                {transfers.rows.map((row) => (
-                  <tr key={row.id} className="border-t border-paper-100 first:border-0">
-                    <td className="px-4 py-3 font-medium">{row.number}</td>
-                    <td className="px-4 py-3">
-                      {row.from_branch_name} → {row.to_branch_name}
-                    </td>
-                    <td className="px-4 py-3">{row.reason}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <Pager page={transfers.page} pages={transfers.pages} count={transfers.count} onPage={transfers.setPage} />
         </ListState>
       ) : null}
 
@@ -299,15 +209,6 @@ export default function StockPage() {
               {OPS.map((item) => (
                 <option key={item.value} value={item.value}>
                   {item.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Branch">
-            <Select value={op.branch} onChange={(e) => setOp({ ...op, branch: e.target.value })}>
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
                 </option>
               ))}
             </Select>
@@ -329,42 +230,6 @@ export default function StockPage() {
           </Field>
           <Button type="submit" disabled={pending}>
             {pending ? "Posting…" : "Post to ledger"}
-          </Button>
-        </form>
-      </Modal>
-
-      <Modal open={trOpen} title="Branch transfer" onClose={() => setTrOpen(false)}>
-        <form onSubmit={submitTr} className="grid gap-3">
-          {errors.detail ? <p className="text-sm text-red-700">{errors.detail}</p> : null}
-          <Field label="From">
-            <Select value={tr.from_branch} onChange={(e) => setTr({ ...tr, from_branch: e.target.value })}>
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="To">
-            <Select value={tr.to_branch} onChange={(e) => setTr({ ...tr, to_branch: e.target.value })}>
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Variant">
-            <VariantPicker value={tr.variant} onChange={(variant) => setTr({ ...tr, variant })} required />
-          </Field>
-          <Field label="Quantity">
-            <Input value={tr.quantity} onChange={(e) => setTr({ ...tr, quantity: e.target.value })} required />
-          </Field>
-          <Field label="Reason">
-            <Input value={tr.reason} onChange={(e) => setTr({ ...tr, reason: e.target.value })} />
-          </Field>
-          <Button type="submit" disabled={pending}>
-            {pending ? "Moving…" : "Post transfer"}
           </Button>
         </form>
       </Modal>

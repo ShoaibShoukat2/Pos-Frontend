@@ -179,7 +179,7 @@ export default function CashierDashboardPage() {
       <PageHeader
         eyebrow="Cashier desk"
         title={`Hello, ${data?.cashier_name || user?.first_name || "cashier"}`}
-        description={`${data?.business_name || user?.business_name || "Your shop"}${data?.branch_name ? ` · ${data.branch_name}` : ""}. This desk shows only your counter sales and the products on those tickets.`}
+        description={`${data?.business_name || user?.business_name || "Your shop"}. This desk shows only your counter sales and the products on those tickets.`}
         action={
           <Link href="/pos" className="btn-copper text-center">
             Open POS
@@ -352,7 +352,7 @@ export default function CashierDashboardPage() {
                   <span>
                     <span className="block font-medium">{row.number}</span>
                     <span className="block text-xs text-ink-700/55">
-                      {row.customer_name} · {row.payment_method || "sale"} · {row.branch_name}
+                      {row.customer_name} · {row.payment_method || "sale"}
                     </span>
                   </span>
                   <span className="shrink-0 font-medium">{rs(row.total)}</span>

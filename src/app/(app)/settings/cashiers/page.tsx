@@ -2,9 +2,9 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
-import { Badge, Button, Empty, Field, Input, Modal, PageHeader, Select } from "@/components/ui";
+import { Badge, Button, Empty, Field, Input, Modal, PageHeader } from "@/components/ui";
 import { ApiError, api, asList, fieldErrors } from "@/lib/api";
-import type { Branch, Paginated, User } from "@/lib/types";
+import type { Paginated, User } from "@/lib/types";
 
 const blank = {
   first_name: "",
@@ -12,12 +12,10 @@ const blank = {
   email: "",
   phone: "",
   password: "",
-  default_branch: "",
 };
 
 export default function CashiersPage() {
   const [rows, setRows] = useState<User[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(blank);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -27,7 +25,6 @@ export default function CashiersPage() {
   async function load() {
     const cashiers = await api<Paginated<User> | User[]>("/api/cashiers/");
     setRows(asList(cashiers));
-    setBranches(await api<Branch[]>("/api/branches/"));
   }
 
   useEffect(() => {
@@ -35,7 +32,7 @@ export default function CashiersPage() {
   }, []);
 
   function startCreate() {
-    setForm({ ...blank, default_branch: branches[0]?.id || "" });
+    setForm({ ...blank });
     setErrors({});
     setCreated(null);
     setOpen(true);
@@ -54,7 +51,6 @@ export default function CashiersPage() {
           email: form.email,
           phone: form.phone,
           password: form.password,
-          default_branch: form.default_branch || null,
         }),
       });
       setCreated({ email: form.email, password: form.password });
@@ -112,7 +108,6 @@ export default function CashiersPage() {
             <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
               <tr>
                 <th className="px-4 py-3">Cashier</th>
-                <th className="px-4 py-3">Branch</th>
                 <th className="px-4 py-3">Status</th>
               </tr>
             </thead>
@@ -123,7 +118,6 @@ export default function CashiersPage() {
                     <p className="font-medium">{row.full_name}</p>
                     <p className="text-xs text-ink-700/55">{row.email}</p>
                   </td>
-                  <td className="px-4 py-3">{row.default_branch_name || "—"}</td>
                   <td className="px-4 py-3">
                     <Badge tone={row.is_active ? "good" : "warn"}>{row.is_active ? "Active" : "Disabled"}</Badge>
                   </td>
@@ -158,15 +152,6 @@ export default function CashiersPage() {
               required
               minLength={8}
             />
-          </Field>
-          <Field label="Branch" error={errors.default_branch}>
-            <Select value={form.default_branch} onChange={(e) => setForm({ ...form, default_branch: e.target.value })}>
-              {branches.map((branch) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.name}
-                </option>
-              ))}
-            </Select>
           </Field>
           <p className="text-xs text-ink-700/60">
             After you save, tell the cashier to open Sign in, choose Cashier, and use this email and password.

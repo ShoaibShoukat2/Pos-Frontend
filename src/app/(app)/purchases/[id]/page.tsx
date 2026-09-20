@@ -68,7 +68,7 @@ export default function PurchaseOrderDetailPage() {
       <PageHeader
         eyebrow="Purchase order"
         title={order.number}
-        description={`${order.supplier_name} → ${order.branch_name}`}
+        description={order.supplier_name}
         action={
           <Link href="/purchases" className="btn-ghost">
             Back

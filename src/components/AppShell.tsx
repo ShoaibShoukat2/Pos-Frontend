@@ -16,7 +16,6 @@ import {
   BarChart3,
   Shield,
   ShoppingBag,
-  Store,
   Tag,
   Truck,
   UserCircle,
@@ -28,7 +27,6 @@ import {
 
 import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
 import { isCashier, useAuth } from "@/lib/auth";
-import { useBranch } from "@/lib/branch";
 
 const CASHIER_LINKS = new Set(["/cashier", "/pos", "/customers", "/cash", "/returns"]);
 
@@ -48,7 +46,6 @@ const NAV = [
   { href: "/promotions", label: "Loyalty", icon: Tag, perm: "discount.manage" },
   { href: "/cash", label: "Cash drawer", icon: Banknote, perm: "cash.drawer" },
   { href: "/settings/business", label: "Business", icon: Building2, perm: "business.view" },
-  { href: "/settings/branches", label: "Branches", icon: Store, perm: "branch.view" },
   { href: "/settings/invoice", label: "Invoices", icon: FileText, perm: "invoice_settings.manage" },
   { href: "/settings/users", label: "Users", icon: Users, perm: "user.view" },
   { href: "/settings/roles", label: "Roles", icon: Shield, perm: "role.view" },
@@ -56,7 +53,6 @@ const NAV = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, loading, logout, can } = useAuth();
-  const { branches, branchId, setBranch } = useBranch();
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -138,23 +134,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <p className="hidden min-w-0 truncate text-sm text-ink-700/70 md:block">
               {pathname === "/dashboard"
                 ? "Full business overview — sales, stock, people and live product activity"
-                : "Each branch keeps its own stock, sales, cash and reports"}
+                : "Sales, stock, cash and reports for your shop"}
             </p>
           </div>
-          {branches.length > 1 ? (
-            <select
-              className="field max-w-[9.5rem] py-1.5 text-sm sm:max-w-xs"
-              value={branchId || ""}
-              onChange={(e) => setBranch(e.target.value || null)}
-            >
-              {can("branch.view") ? <option value="">All branches</option> : null}
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </select>
-          ) : null}
         </header>
         <main className="page-pad min-h-0 min-w-0 flex-1 overflow-y-auto px-3 sm:px-6">{children}</main>
       </div>

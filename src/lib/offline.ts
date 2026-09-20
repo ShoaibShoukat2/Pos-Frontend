@@ -24,19 +24,19 @@ function req<T>(request: IDBRequest<T>): Promise<T> {
   });
 }
 
-export async function saveSnapshot(branchId: string, data: PosSnapshot) {
+export async function saveSnapshot(_branchId: string, data: PosSnapshot) {
   const db = await openDb();
   const tx = db.transaction("meta", "readwrite");
-  tx.objectStore("meta").put({ ...data, saved_at: new Date().toISOString() }, `snapshot:${branchId}`);
+  tx.objectStore("meta").put({ ...data, saved_at: new Date().toISOString() }, "snapshot:shop");
   await new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve(null);
     tx.onerror = () => reject(tx.error);
   });
 }
 
-export async function loadSnapshot(branchId: string): Promise<PosSnapshot | null> {
+export async function loadSnapshot(_branchId?: string): Promise<PosSnapshot | null> {
   const db = await openDb();
-  return req(db.transaction("meta").objectStore("meta").get(`snapshot:${branchId}`));
+  return req(db.transaction("meta").objectStore("meta").get("snapshot:shop"));
 }
 
 export async function queueSale(payload: PosSalePayload) {

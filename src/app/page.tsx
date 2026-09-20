@@ -28,7 +28,7 @@ export default function HomePage() {
             A POS that starts with the shop, not the register.
           </h1>
           <p className="mt-5 max-w-xl text-lg text-ink-700/75">
-            Business setup, branches, products, POS sales, stock, purchases and reports — priced in
+            Business setup, products, POS sales, stock, purchases and reports — priced in
             Pakistani rupees, with simple ticket totals.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -43,7 +43,7 @@ export default function HomePage() {
         <div className="card p-6">
           <p className="text-xs uppercase tracking-[0.18em] text-copper-600">Now shipping</p>
           <ul className="mt-4 space-y-3 text-sm text-ink-800">
-            <li className="rounded-xl bg-paper-50 px-4 py-3">1 · Business profile, branches and invoices</li>
+            <li className="rounded-xl bg-paper-50 px-4 py-3">1 · Business profile and invoices</li>
             <li className="rounded-xl bg-paper-50 px-4 py-3">2 · Owner, Admin, Manager, Cashier, Accountant + custom roles</li>
             <li className="rounded-xl bg-paper-50 px-4 py-3">3 · Products, POS, stock, purchases and reports</li>
           </ul>

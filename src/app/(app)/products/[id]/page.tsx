@@ -152,7 +152,7 @@ export default function ProductDetailPage() {
               <th className="px-4 py-3">SKU</th>
               <th className="px-4 py-3">Barcode</th>
               <th className="px-4 py-3">Sell</th>
-              <th className="px-4 py-3">Stock by branch</th>
+              <th className="px-4 py-3">Stock</th>
             </tr>
           </thead>
           <tbody>
@@ -172,7 +172,7 @@ export default function ProductDetailPage() {
                     <div className="flex flex-wrap gap-1">
                       {variant.stock_by_branch?.map((row) => (
                         <Badge key={row.branch_id} tone={row.is_low ? "warn" : "good"}>
-                          {row.branch_name}: {row.quantity}
+                          {row.quantity}
                         </Badge>
                       ))}
                     </div>

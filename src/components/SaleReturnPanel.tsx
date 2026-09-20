@@ -167,7 +167,7 @@ export function SaleReturnPanel({
   return (
     <div className="space-y-4">
       <p className="text-sm text-ink-700/70">
-        Find the original ticket, remove the items the customer does not want, then refund them. Stock comes back to this branch.
+        Find the original ticket, remove the items the customer does not want, then refund them. Stock comes back.
       </p>
       <div className="flex gap-2">
         <Input
@@ -218,7 +218,7 @@ export function SaleReturnPanel({
               <div>
                 <p className="font-medium">{sale.number}</p>
                 <p className="text-xs text-ink-700/55">
-                  {sale.customer_name || "Walk-in"} · {sale.branch_name || "Branch"}
+                  {sale.customer_name || "Walk-in"}
                   {sale.payment_method ? ` · ${PAY_LABEL[sale.payment_method] || sale.payment_method}` : ""}
                 </p>
               </div>

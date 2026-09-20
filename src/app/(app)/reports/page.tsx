@@ -6,7 +6,6 @@ import { TableSkeleton } from "@/components/DataTable";
 import { Badge, Empty, PageHeader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { useBranch } from "@/lib/branch";
 import { num, rs } from "@/lib/money";
 import type { FinancialReport, InventoryReport, SalesReport } from "@/lib/types";
 
@@ -20,7 +19,6 @@ type Tab = "sales" | "inventory" | "financial";
 
 export default function ReportsPage() {
   const { can } = useAuth();
-  const { branchId } = useBranch();
   const [period, setPeriod] = useState<(typeof PERIODS)[number]["id"]>("month");
   const [tab, setTab] = useState<Tab>("sales");
   const [sales, setSales] = useState<SalesReport | null>(null);
@@ -65,7 +63,7 @@ export default function ReportsPage() {
     } else {
       done();
     }
-  }, [tab, period, showSales, showInventory, showFinancial, branchId]);
+  }, [tab, period, showSales, showInventory, showFinancial]);
 
   const tabs = [
     showSales && { id: "sales" as const, label: "Sales" },
@@ -170,14 +168,14 @@ function InventoryPanel({ data }: { data: InventoryReport }) {
       <SimpleTable
         title="Low stock"
         empty="Nothing below minimum."
-        headers={["Product", "Variant", "Branch", "Qty"]}
-        rows={data.low_stock.map((r) => [r.product, r.variant, r.branch, r.qty])}
+        headers={["Product", "Variant", "Qty"]}
+        rows={data.low_stock.map((r) => [r.product, r.variant, r.qty])}
       />
       <SimpleTable
         title="Top stock (preview)"
         empty="No stock on hand."
-        headers={["Product", "SKU", "Branch", "Qty", "Value"]}
-        rows={data.current.map((r) => [r.product, r.sku, r.branch, r.qty, rs(r.value)])}
+        headers={["Product", "SKU", "Qty", "Value"]}
+        rows={data.current.map((r) => [r.product, r.sku, r.qty, rs(r.value)])}
       />
       <div className="grid gap-4 lg:grid-cols-2">
         <SimpleTable

@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { Badge, Button, Empty, Field, Input, Modal, PageHeader, Select, Toggle } from "@/components/ui";
 import { ApiError, api, fieldErrors } from "@/lib/api";
-import type { Branch, Paginated, Role, User } from "@/lib/types";
+import type { Paginated, Role, User } from "@/lib/types";
 
 const blank = {
   first_name: "",
@@ -13,15 +13,12 @@ const blank = {
   phone: "",
   password: "",
   role: "",
-  default_branch: "",
-  assigned_branch_ids: [] as string[],
   is_active: true,
 };
 
 export default function UsersPage() {
   const [rows, setRows] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
   const [form, setForm] = useState(blank);
@@ -32,7 +29,6 @@ export default function UsersPage() {
     const users = await api<Paginated<User> | User[]>("/api/users/");
     setRows(Array.isArray(users) ? users : users.results);
     setRoles(await api<Role[]>("/api/roles/"));
-    setBranches(await api<Branch[]>("/api/branches/"));
   }
 
   useEffect(() => {
@@ -41,7 +37,7 @@ export default function UsersPage() {
 
   function startCreate() {
     setEditing(null);
-    setForm({ ...blank, role: roles[0]?.id || "", default_branch: branches[0]?.id || "" });
+    setForm({ ...blank, role: roles[0]?.id || "" });
     setErrors({});
     setOpen(true);
   }
@@ -55,21 +51,10 @@ export default function UsersPage() {
       phone: row.phone,
       password: "",
       role: row.role || "",
-      default_branch: row.default_branch || "",
-      assigned_branch_ids: row.branch_ids || [],
       is_active: row.is_active,
     });
     setErrors({});
     setOpen(true);
-  }
-
-  function toggleBranch(id: string) {
-    setForm((prev) => ({
-      ...prev,
-      assigned_branch_ids: prev.assigned_branch_ids.includes(id)
-        ? prev.assigned_branch_ids.filter((x) => x !== id)
-        : [...prev.assigned_branch_ids, id],
-    }));
   }
 
   async function onSubmit(e: FormEvent) {
@@ -82,8 +67,6 @@ export default function UsersPage() {
       email: form.email,
       phone: form.phone,
       role: form.role || null,
-      default_branch: form.default_branch || null,
-      assigned_branch_ids: form.assigned_branch_ids,
       is_active: form.is_active,
     };
     if (form.password) payload.password = form.password;
@@ -131,7 +114,6 @@ export default function UsersPage() {
               <tr>
                 <th className="px-4 py-3">User</th>
                 <th className="px-4 py-3">Role</th>
-                <th className="px-4 py-3">Branch</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3" />
               </tr>
@@ -144,7 +126,6 @@ export default function UsersPage() {
                     <p className="text-xs text-ink-700/55">{row.email}</p>
                   </td>
                   <td className="px-4 py-3">{row.is_owner ? "Owner" : row.role_name || "—"}</td>
-                  <td className="px-4 py-3">{row.default_branch_name || "—"}</td>
                   <td className="px-4 py-3">
                     <Badge tone={row.is_active ? "good" : "warn"}>{row.is_active ? "Active" : "Disabled"}</Badge>
                   </td>
@@ -194,29 +175,6 @@ export default function UsersPage() {
               ))}
             </Select>
           </Field>
-          <Field label="Default branch">
-            <Select value={form.default_branch} onChange={(e) => setForm({ ...form, default_branch: e.target.value })}>
-              <option value="">None</option>
-              {branches.map((branch) => (
-                <option key={branch.id} value={branch.id}>
-                  {branch.name}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <div>
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-ink-700/70">Assigned branches</p>
-            <div className="grid gap-2">
-              {branches.map((branch) => (
-                <Toggle
-                  key={branch.id}
-                  label={`${branch.name} (${branch.code})`}
-                  checked={form.assigned_branch_ids.includes(branch.id)}
-                  onChange={() => toggleBranch(branch.id)}
-                />
-              ))}
-            </div>
-          </div>
           <Toggle label="Active" checked={form.is_active} onChange={(is_active) => setForm({ ...form, is_active })} />
           <Button type="submit" disabled={pending}>
             {pending ? "Saving…" : "Save user"}

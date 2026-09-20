@@ -9,7 +9,7 @@ import { Button, Field, Input, Modal, PageHeader, Select, Toggle } from "@/compo
 import { ApiError, api, apiCached, fieldErrors, invalidateApiCache } from "@/lib/api";
 import { isCashier, useAuth } from "@/lib/auth";
 import { usePagedList } from "@/lib/query";
-import type { Brand, Branch, Category, Product, Unit } from "@/lib/types";
+import type { Brand, Category, Product, Unit } from "@/lib/types";
 
 type Tab = "products" | "categories" | "brands";
 
@@ -44,7 +44,6 @@ export default function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
-  const [branches, setBranches] = useState<Branch[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -61,7 +60,6 @@ export default function ProductsPage() {
     min_stock: "0",
     has_variants: false,
     opening: "0",
-    branch: "",
   });
   const [variantRows, setVariantRows] = useState<VariantRow[]>([emptyVariant()]);
   const [simpleName, setSimpleName] = useState("");
@@ -71,17 +69,15 @@ export default function ProductsPage() {
   }
 
   async function loadLookups() {
-    const [c, b, u, br] = await Promise.all([
+    const [c, b, u] = await Promise.all([
       apiCached<Category[]>("/api/categories/"),
       apiCached<Brand[]>("/api/brands/"),
       apiCached<Unit[]>("/api/units/"),
-      apiCached<Branch[]>("/api/branches/"),
     ]);
     setCategories(c);
     setBrands(b);
     setUnits(u);
-    setBranches(br);
-    if (!form.unit && u[0]) setForm((prev) => ({ ...prev, unit: defaultUnit(u), branch: br[0]?.id || "" }));
+    if (!form.unit && u[0]) setForm((prev) => ({ ...prev, unit: defaultUnit(u) }));
   }
 
   useEffect(() => {
@@ -108,7 +104,6 @@ export default function ProductsPage() {
       category: categories.find((c) => !c.kind || c.kind === "product")?.id || "",
       brand: brands[0]?.id || "",
       unit: defaultUnit() || prev.unit,
-      branch: branches[0]?.id || prev.branch,
     }));
     setVariantRows([emptyVariant()]);
     setOpen(true);
@@ -129,7 +124,6 @@ export default function ProductsPage() {
       min_stock: row.min_stock || "0",
       has_variants: row.has_variants,
       opening: "0",
-      branch: branches[0]?.id || "",
     });
     setVariantRows([emptyVariant()]);
     setOpen(true);
@@ -163,13 +157,10 @@ export default function ProductsPage() {
             cost_price: row.cost_price || form.cost_price,
             selling_price: row.selling_price || form.selling_price,
             min_stock: row.min_stock || form.min_stock,
-            opening_stock:
-              Number(row.opening) > 0 && form.branch
-                ? [{ branch: form.branch, quantity: row.opening }]
-                : [],
+            opening_stock: Number(row.opening) > 0 ? [{ quantity: row.opening }] : [],
           }));
-      } else if (Number(form.opening) > 0 && form.branch) {
-        payload.opening_stock = [{ branch: form.branch, quantity: form.opening }];
+      } else if (Number(form.opening) > 0) {
+        payload.opening_stock = [{ quantity: form.opening }];
       }
     }
     try {
@@ -377,22 +368,11 @@ export default function ProductsPage() {
             />
           ) : null}
           {!editing ? (
-            <Field label="Opening stock branch">
-              <Select value={form.branch} onChange={(e) => setForm({ ...form, branch: e.target.value })}>
-                <option value="">No opening stock</option>
-                {branches.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-          ) : null}
-          {editing ? null : !form.has_variants ? (
-            <Field label="Opening qty">
-              <Input value={form.opening} onChange={(e) => setForm({ ...form, opening: e.target.value })} />
-            </Field>
-          ) : (
+            !form.has_variants ? (
+              <Field label="Opening qty">
+                <Input value={form.opening} onChange={(e) => setForm({ ...form, opening: e.target.value })} />
+              </Field>
+            ) : (
             <div className="space-y-3">
               {variantRows.map((row, index) => (
                 <div key={index} className="grid gap-2 rounded-xl border border-paper-200 p-3 sm:grid-cols-3">
@@ -408,7 +388,8 @@ export default function ProductsPage() {
                 Add variant row
               </Button>
             </div>
-          )}
+            )
+          ) : null}
           <Button type="submit" disabled={pending}>
             {pending ? "Saving…" : editing ? "Save changes" : "Save product"}
           </Button>
