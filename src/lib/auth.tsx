@@ -129,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             ? "/api/auth/platform/login/"
             : portal === "cashier"
               ? "/api/auth/cashier/login/"
-              : "/api/auth/login/";
+              : "/api/auth/owner/login/";
         const data = await api<AuthPayload>(path, {
           method: "POST",
           body: JSON.stringify({ email, password }),

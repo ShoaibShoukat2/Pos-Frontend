@@ -41,7 +41,7 @@ export default function CustomersPage() {
       <PageHeader
         eyebrow="Module 8"
         title="Customers"
-        description="Profiles, credit sales, receivables and loyalty points. POS will post into this ledger later."
+        description="Profiles, credit sales and receivables."
         action={can("customer.manage") ? <Button onClick={() => setOpen(true)}>Add customer</Button> : undefined}
       />
       <div className="mb-4">
@@ -60,7 +60,6 @@ export default function CustomersPage() {
                 <th className="px-4 py-3">Customer</th>
                 <th className="px-4 py-3">Purchases</th>
                 <th className="px-4 py-3">Due</th>
-                <th className="px-4 py-3">Points</th>
               </tr>
             </thead>
             <tbody>
@@ -78,7 +77,6 @@ export default function CustomersPage() {
                       Rs {row.receivable_balance}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3">{row.loyalty_points}</td>
                 </tr>
               ))}
             </tbody>

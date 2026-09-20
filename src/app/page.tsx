@@ -44,7 +44,7 @@ export default function HomePage() {
           <p className="text-xs uppercase tracking-[0.18em] text-copper-600">Now shipping</p>
           <ul className="mt-4 space-y-3 text-sm text-ink-800">
             <li className="rounded-xl bg-paper-50 px-4 py-3">1 · Business profile and invoices</li>
-            <li className="rounded-xl bg-paper-50 px-4 py-3">2 · Owner, Admin, Manager, Cashier, Accountant + custom roles</li>
+            <li className="rounded-xl bg-paper-50 px-4 py-3">2 · Business owner and cashier logins</li>
             <li className="rounded-xl bg-paper-50 px-4 py-3">3 · Products, POS, purchases and reports</li>
           </ul>
         </div>

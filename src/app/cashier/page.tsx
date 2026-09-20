@@ -62,7 +62,7 @@ const MANUAL = [
   {
     href: "/customers",
     title: "Find or add a customer",
-    hint: "If loyalty or credit is needed, search the shopper or create a walk-in later.",
+    hint: "If credit is needed, search the shopper or create a walk-in later.",
     icon: UserCircle,
   },
   {

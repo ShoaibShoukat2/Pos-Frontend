@@ -61,6 +61,10 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const visibleRoles = useMemo(
+    () => (role === "platform" ? ROLES : ROLES.filter((item) => item.id !== "platform")),
+    [role],
+  );
   const selected = useMemo(() => ROLES.find((r) => r.id === role) || ROLES[0], [role]);
 
   async function onSubmit(e: FormEvent) {
@@ -87,8 +91,8 @@ function LoginForm() {
           <h1 className="font-display text-2xl">Sign in</h1>
           <p className="mt-1 text-sm text-ink-700/70">First choose who you are, then enter your email and password.</p>
 
-          <div className="mt-5 grid gap-2 sm:grid-cols-3">
-            {ROLES.map((item) => {
+          <div className={`mt-5 grid gap-2 ${visibleRoles.length > 2 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
+            {visibleRoles.map((item) => {
               const Icon = item.icon;
               const active = role === item.id;
               return (

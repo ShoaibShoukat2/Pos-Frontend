@@ -85,10 +85,9 @@ export default function CustomerDetailPage() {
           </Link>
         }
       />
-      <div className="mb-6 grid gap-4 md:grid-cols-4">
+      <div className="mb-6 grid gap-4 md:grid-cols-3">
         <Stat label="Total purchases" value={`Rs ${customer.total_purchases}`} />
         <Stat label="Outstanding" value={`Rs ${customer.receivable_balance}`} warn={Number(customer.receivable_balance) > 0} />
-        <Stat label="Loyalty points" value={String(customer.loyalty_points)} />
         <Stat label="Credit limit" value={Number(customer.credit_limit) > 0 ? `Rs ${customer.credit_limit}` : "Open"} />
       </div>
       {error ? <p className="mb-4 text-sm text-red-700">{error}</p> : null}

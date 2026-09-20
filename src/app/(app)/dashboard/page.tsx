@@ -103,7 +103,7 @@ export default function DashboardPage() {
         { label: "Expenses", value: rs(data.expenses), href: "/expenses" },
         { label: "Products", value: String(data.products), href: "/products" },
         { label: "Services", value: String(data.services ?? 0), href: "/services" },
-        { label: "Staff", value: `${data.users_active}/${data.users_total}`, href: "/settings/users" },
+        { label: "Staff", value: `${data.users_active}/${data.users_total}`, href: "/settings/cashiers" },
       ]
     : [];
 
@@ -397,8 +397,8 @@ export default function DashboardPage() {
           <div className="card p-6">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-xl">Team</h2>
-              <Link href="/settings/users" className="text-xs text-copper-700 hover:underline">
-                Manage users
+              <Link href="/settings/cashiers" className="text-xs text-copper-700 hover:underline">
+                Cashiers
               </Link>
             </div>
             <p className="mt-1 text-xs text-ink-700/55">

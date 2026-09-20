@@ -77,10 +77,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const [category, setCategory] = useState("");
   const [kindFilter, setKindFilter] = useState<"all" | "product" | "service">("product");
   const [customerId, setCustomerId] = useState("");
-  const [couponCode, setCouponCode] = useState("");
   const [manualKind, setManualKind] = useState("");
   const [manualValue, setManualValue] = useState("");
-  const [redeem, setRedeem] = useState("");
   const [payMethod, setPayMethod] = useState("cash");
   const [payAmount, setPayAmount] = useState("");
   const [message, setMessage] = useState("");
@@ -176,17 +174,15 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const customer = snapshot?.customers.find((c) => c.id === customerId) || null;
   const quote = snapshot
     ? quoteCart(cart, snapshot, {
-        couponCode,
         customer,
         manualKind,
         manualValue: Number(manualValue || 0),
-        redeemPoints: Number(redeem || 0),
       })
     : null;
 
   useEffect(() => {
     if (quote) setPayAmount(money(quote.total).toFixed(2));
-  }, [quote?.total, couponCode, manualKind, manualValue, redeem, customerId, cart.length]);
+  }, [quote?.total, manualKind, manualValue, customerId, cart.length]);
 
   useEffect(() => {
     if (!online || !remoteQuery.trim()) {
@@ -310,14 +306,6 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       searchRef.current?.focus();
       return;
     }
-    const coupon = snapshot?.coupons.find((row) => row.code.toLowerCase() === raw.toLowerCase());
-    if (coupon) {
-      setCouponCode(coupon.code);
-      setMessage(`Coupon ${coupon.code} applied`);
-      setQuery("");
-      searchRef.current?.focus();
-      return;
-    }
     try {
       const found = asList(
         await api<PosCatalogItem[] | { results: PosCatalogItem[] }>(
@@ -424,10 +412,10 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       client_uuid: crypto.randomUUID(),
       branch: snapshot.branch?.id,
       customer: customerId || null,
-      coupon_code: couponCode || "",
+      coupon_code: "",
       manual_discount_kind: manualKind,
       manual_discount_value: manualValue || "0",
-      redeem_points: redeem || "0",
+      redeem_points: "0",
       sold_at: new Date().toISOString(),
       lines: cart.map((row) => ({ variant: row.item.id, quantity: String(row.qty) })),
       payments: applied > 0 ? [{ method: payMethod, amount: applied.toFixed(2) }] : [],
@@ -451,10 +439,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       setOnline(true);
       setCart([]);
       setTicketOpen(false);
-      setCouponCode("");
       setManualKind("");
       setManualValue("");
-      setRedeem("");
       refreshDash();
     } catch (err) {
       if (err instanceof NetworkError) {
@@ -470,10 +456,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         setMessage("Sale saved on this counter. It will sync when the line is back.");
         setCart([]);
         setTicketOpen(false);
-        setCouponCode("");
         setManualKind("");
         setManualValue("");
-        setRedeem("");
       } else {
         await removePending(payload.client_uuid);
         const body = err instanceof ApiError ? (err.body as { detail?: string; branch?: string[] }) : null;
@@ -597,7 +581,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                 e.preventDefault();
                 applyCode(query);
               }}
-              placeholder="Scan or type SKU, name, coupon"
+              placeholder="Scan or type SKU or name"
               className="field h-12 !pl-12 text-base"
               autoFocus
             />
@@ -869,8 +853,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               <option value="">Walk-in customer</option>
               {(snapshot?.customers || []).map((c: PosCustomer) => (
                 <option key={c.id} value={c.id}>
-                  {c.name} · {c.loyalty_points} pts
-                  {c.membership_name ? ` · ${c.membership_name}` : ""}
+                  {c.name}
+                  {c.phone ? ` · ${c.phone}` : ""}
                 </option>
               ))}
             </Select>
@@ -879,8 +863,6 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           {customer ? (
             <div className="grid grid-cols-2 gap-2 rounded-xl bg-paper-50 p-3 text-xs">
               <DetailRow label="Phone" value={customer.phone || "—"} />
-              <DetailRow label="Points" value={String(customer.loyalty_points)} />
-              <DetailRow label="Member" value={customer.membership_name || "None"} />
               <DetailRow label="Credit" value={rs(customer.receivable_balance)} />
             </div>
           ) : null}
@@ -1017,30 +999,16 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             </ul>
           </div>
 
-          <div className="grid gap-2">
-            <Field label="Coupon">
-              <Input value={couponCode} onChange={(e) => setCouponCode(e.target.value.toUpperCase())} placeholder="SAVE10" />
-            </Field>
-            {can("sale.discount") ? (
-              <Field label="Manual discount">
-                <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-2">
-                  <Select value={manualKind} onChange={(e) => setManualKind(e.target.value)}>
-                    <option value="">None</option>
-                    <option value="percent">%</option>
-                    <option value="fixed">Rs</option>
-                  </Select>
-                  <Input value={manualValue} onChange={(e) => setManualValue(e.target.value)} disabled={!manualKind} />
-                </div>
-              </Field>
-            ) : (
-              <Field label="Redeem points">
-                <Input value={redeem} onChange={(e) => setRedeem(e.target.value)} disabled={!customer} />
-              </Field>
-            )}
-          </div>
           {can("sale.discount") ? (
-            <Field label="Redeem points">
-              <Input value={redeem} onChange={(e) => setRedeem(e.target.value)} disabled={!customer} />
+            <Field label="Manual discount">
+              <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-2">
+                <Select value={manualKind} onChange={(e) => setManualKind(e.target.value)}>
+                  <option value="">None</option>
+                  <option value="percent">%</option>
+                  <option value="fixed">Rs</option>
+                </Select>
+                <Input value={manualValue} onChange={(e) => setManualValue(e.target.value)} disabled={!manualKind} />
+              </div>
             </Field>
           ) : null}
 
@@ -1103,35 +1071,16 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                 <dt className="shrink-0">Subtotal</dt>
                 <dd className="tabular-nums">{rs(quote.subtotal)}</dd>
               </div>
-              {quote.couponDisc > 0 ? (
-                <div className="flex items-baseline justify-between gap-3 text-copper-700">
-                  <dt className="shrink-0">Coupon{quote.coupon ? ` · ${quote.coupon.code}` : ""}</dt>
-                  <dd className="tabular-nums">- {rs(quote.couponDisc)}</dd>
-                </div>
-              ) : null}
-              {quote.memberDisc > 0 ? (
-                <div className="flex items-baseline justify-between gap-3 text-copper-700">
-                  <dt className="shrink-0">Membership</dt>
-                  <dd className="tabular-nums">- {rs(quote.memberDisc)}</dd>
-                </div>
-              ) : null}
               {quote.manualDisc > 0 ? (
                 <div className="flex items-baseline justify-between gap-3 text-copper-700">
                   <dt className="shrink-0">Manual discount</dt>
                   <dd className="tabular-nums">- {rs(quote.manualDisc)}</dd>
                 </div>
               ) : null}
-              {quote.pointsDisc > 0 ? (
-                <div className="flex items-baseline justify-between gap-3 text-copper-700">
-                  <dt className="shrink-0">Points ({Math.round(quote.usedPoints)})</dt>
-                  <dd className="tabular-nums">- {rs(quote.pointsDisc)}</dd>
-                </div>
-              ) : null}
               <div className="flex items-baseline justify-between gap-3 border-t border-paper-200 pt-2">
                 <dt className="shrink-0 text-sm text-ink-700/70">Total due</dt>
                 <dd className="text-right font-display text-xl leading-none tabular-nums">{rs(quote.total)}</dd>
               </div>
-              {customer ? <p className="text-xs text-ink-700/55">This sale earns {quote.earn} points.</p> : null}
             </dl>
           ) : null}
 

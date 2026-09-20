@@ -11,7 +11,7 @@ const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
 
 export const metadata: Metadata = {
   title: "Universal POS",
-  description: "POS with offline selling, loyalty and reports",
+  description: "POS with offline selling and reports",
   manifest: "/manifest.json",
 };
 

@@ -61,7 +61,7 @@ export default function RegisterPage() {
         <div className="card mt-6 p-6">
           <h1 className="font-display text-2xl">Create your business</h1>
           <p className="mt-1 text-sm text-ink-700/70">
-            This creates the owner account, PKR, GST 18%, and default roles.
+            This creates the owner account, PKR and GST 18%.
           </p>
           <form onSubmit={onSubmit} className="mt-6 grid gap-4 sm:grid-cols-2">
             {errors.detail ? (

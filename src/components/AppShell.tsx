@@ -14,13 +14,10 @@ import {
   Receipt,
   RotateCcw,
   BarChart3,
-  Shield,
   ShoppingBag,
-  Tag,
   Truck,
   UserCircle,
   UserPlus,
-  Users,
   Wrench,
 } from "lucide-react";
 
@@ -41,12 +38,9 @@ const NAV = [
   { href: "/purchases", label: "Purchases", icon: ShoppingBag, perm: "purchase.view" },
   { href: "/suppliers", label: "Suppliers", icon: Truck, perm: "supplier.view" },
   { href: "/expenses", label: "Expenses", icon: Receipt, perm: "expense.view" },
-  { href: "/promotions", label: "Loyalty", icon: Tag, perm: "discount.manage" },
   { href: "/cash", label: "Cash drawer", icon: Banknote, perm: "cash.drawer" },
   { href: "/settings/business", label: "Business", icon: Building2, perm: "business.view" },
   { href: "/settings/invoice", label: "Invoices", icon: FileText, perm: "invoice_settings.manage" },
-  { href: "/settings/users", label: "Users", icon: Users, perm: "user.view" },
-  { href: "/settings/roles", label: "Roles", icon: Shield, perm: "role.view" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
