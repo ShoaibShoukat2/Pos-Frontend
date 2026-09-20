@@ -2,23 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import {
-  Banknote,
-  BarChart3,
-  Building2,
-  Monitor,
-  Package,
-  Receipt,
-  Shield,
-  ShoppingBag,
-  Store,
-  Tag,
-  UserCircle,
-  UserPlus,
-  Users,
-  Warehouse,
-  Wrench,
-} from "lucide-react";
+import { UserPlus } from "lucide-react";
 
 import { TableSkeleton } from "@/components/DataTable";
 import { Badge, PageHeader } from "@/components/ui";
@@ -33,24 +17,6 @@ const PERIODS = [
   { id: "week", label: "7 days" },
   { id: "month", label: "This month" },
 ] as const;
-
-const ACTIONS = [
-  { href: "/pos", label: "Open POS", hint: "Sell now", icon: Monitor },
-  { href: "/products", label: "Products", hint: "Add or edit catalog", icon: Package },
-  { href: "/services", label: "Services", hint: "Repair and jobs", icon: Wrench },
-  { href: "/stock", label: "Stock", hint: "On-hand and alerts", icon: Warehouse },
-  { href: "/customers", label: "Customers", hint: "Credit and loyalty", icon: UserCircle },
-  { href: "/purchases", label: "Purchases", hint: "Orders and payables", icon: ShoppingBag },
-  { href: "/expenses", label: "Expenses", hint: "Record a cost", icon: Receipt },
-  { href: "/cash", label: "Cash drawer", hint: "Open or close shift", icon: Banknote },
-  { href: "/reports", label: "Reports", hint: "Sales and profit", icon: BarChart3 },
-  { href: "/settings/cashiers", label: "Add cashier", hint: "Create cashier login", icon: UserPlus },
-  { href: "/settings/users", label: "Users", hint: "Staff access", icon: Users },
-  { href: "/settings/roles", label: "Roles", hint: "Permissions", icon: Shield },
-  { href: "/settings/branches", label: "Branches", hint: "Stores", icon: Store },
-  { href: "/settings/business", label: "Business", hint: "Shop profile", icon: Building2 },
-  { href: "/promotions", label: "Loyalty", hint: "Coupons and points", icon: Tag },
-];
 
 const FILTERS = [
   { id: "all", label: "All products" },
@@ -223,27 +189,6 @@ export default function DashboardPage() {
       ) : !loading ? (
         <p className="text-sm text-ink-700/70">Numbers appear once you have report access.</p>
       ) : null}
-
-      <section className="mt-8">
-        <h2 className="font-display text-xl">Owner controls</h2>
-        <p className="mt-1 text-sm text-ink-700/60">Jump into any part of the system.</p>
-        <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-4">
-          {ACTIONS.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link key={item.href} href={item.href} className="card flex items-start gap-3 p-4 hover:border-copper-400">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-ink-950 text-paper-50">
-                  <Icon size={18} />
-                </span>
-                <span>
-                  <span className="block font-medium">{item.label}</span>
-                  <span className="block text-xs text-ink-700/55">{item.hint}</span>
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
 
       {data ? (
         <div className="mt-6 grid gap-4 lg:grid-cols-2">

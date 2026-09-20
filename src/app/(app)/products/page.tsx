@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
 import { ListState, Pager, SearchField } from "@/components/DataTable";
-import { Badge, Button, Field, Input, Modal, PageHeader, Select, Toggle } from "@/components/ui";
+import { Button, Field, Input, Modal, PageHeader, Select, Toggle } from "@/components/ui";
 import { ApiError, api, apiCached, fieldErrors, invalidateApiCache } from "@/lib/api";
 import { isCashier, useAuth } from "@/lib/auth";
 import { usePagedList } from "@/lib/query";
 import type { Brand, Branch, Category, Product, Unit } from "@/lib/types";
 
-type Tab = "products" | "categories" | "brands" | "units";
+type Tab = "products" | "categories" | "brands";
 
 type VariantRow = {
   size: string;
@@ -39,13 +39,14 @@ export default function ProductsPage() {
   const [tab, setTab] = useState<Tab>("products");
   const products = usePagedList<Product>("/api/products/", {
     enabled: tab === "products",
-    extraParams: { item_kind: "product" },
+    extraParams: { item_kind: "product", is_active: "true" },
   });
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Product | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
   const [form, setForm] = useState({
@@ -65,6 +66,10 @@ export default function ProductsPage() {
   const [variantRows, setVariantRows] = useState<VariantRow[]>([emptyVariant()]);
   const [simpleName, setSimpleName] = useState("");
 
+  function defaultUnit(list: Unit[] = units) {
+    return list.find((row) => row.short_code.toLowerCase() === "pcs")?.id || list[0]?.id || "";
+  }
+
   async function loadLookups() {
     const [c, b, u, br] = await Promise.all([
       apiCached<Category[]>("/api/categories/"),
@@ -76,7 +81,7 @@ export default function ProductsPage() {
     setBrands(b);
     setUnits(u);
     setBranches(br);
-    if (!form.unit && u[0]) setForm((prev) => ({ ...prev, unit: u[0].id, branch: br[0]?.id || "" }));
+    if (!form.unit && u[0]) setForm((prev) => ({ ...prev, unit: defaultUnit(u), branch: br[0]?.id || "" }));
   }
 
   useEffect(() => {
@@ -88,6 +93,7 @@ export default function ProductsPage() {
   }, []);
 
   function startCreate() {
+    setEditing(null);
     setErrors({});
     setForm((prev) => ({
       ...prev,
@@ -101,9 +107,30 @@ export default function ProductsPage() {
       opening: "0",
       category: categories.find((c) => !c.kind || c.kind === "product")?.id || "",
       brand: brands[0]?.id || "",
-      unit: units[0]?.id || prev.unit,
+      unit: defaultUnit() || prev.unit,
       branch: branches[0]?.id || prev.branch,
     }));
+    setVariantRows([emptyVariant()]);
+    setOpen(true);
+  }
+
+  function startEdit(row: Product) {
+    setEditing(row);
+    setErrors({});
+    setForm({
+      name: row.name,
+      sku: row.sku || "",
+      barcode: row.barcode || "",
+      category: row.category || "",
+      brand: row.brand || "",
+      unit: row.unit || defaultUnit(),
+      cost_price: row.cost_price,
+      selling_price: row.selling_price,
+      min_stock: row.min_stock || "0",
+      has_variants: row.has_variants,
+      opening: "0",
+      branch: branches[0]?.id || "",
+    });
     setVariantRows([emptyVariant()]);
     setOpen(true);
   }
@@ -118,34 +145,41 @@ export default function ProductsPage() {
       barcode: form.barcode,
       category: form.category || null,
       brand: form.brand || null,
-      unit: form.unit,
+      unit: form.unit || defaultUnit() || undefined,
       cost_price: form.cost_price,
       selling_price: form.selling_price,
       min_stock: form.min_stock,
-      has_variants: form.has_variants,
       item_kind: "product",
     };
-    if (form.has_variants) {
-      payload.variants = variantRows
-        .filter((row) => row.sku && (row.size || row.color))
-        .map((row) => ({
-          sku: row.sku,
-          name: [row.size, row.color].filter(Boolean).join(" / "),
-          attributes: { ...(row.size ? { Size: row.size } : {}), ...(row.color ? { Color: row.color } : {}) },
-          cost_price: row.cost_price || form.cost_price,
-          selling_price: row.selling_price || form.selling_price,
-          min_stock: row.min_stock || form.min_stock,
-          opening_stock:
-            Number(row.opening) > 0 && form.branch
-              ? [{ branch: form.branch, quantity: row.opening }]
-              : [],
-        }));
-    } else if (Number(form.opening) > 0 && form.branch) {
-      payload.opening_stock = [{ branch: form.branch, quantity: form.opening }];
+    if (!editing) {
+      payload.has_variants = form.has_variants;
+      if (form.has_variants) {
+        payload.variants = variantRows
+          .filter((row) => row.sku && (row.size || row.color))
+          .map((row) => ({
+            sku: row.sku,
+            name: [row.size, row.color].filter(Boolean).join(" / "),
+            attributes: { ...(row.size ? { Size: row.size } : {}), ...(row.color ? { Color: row.color } : {}) },
+            cost_price: row.cost_price || form.cost_price,
+            selling_price: row.selling_price || form.selling_price,
+            min_stock: row.min_stock || form.min_stock,
+            opening_stock:
+              Number(row.opening) > 0 && form.branch
+                ? [{ branch: form.branch, quantity: row.opening }]
+                : [],
+          }));
+      } else if (Number(form.opening) > 0 && form.branch) {
+        payload.opening_stock = [{ branch: form.branch, quantity: form.opening }];
+      }
     }
     try {
-      await api("/api/products/", { method: "POST", body: JSON.stringify(payload) });
+      if (editing) {
+        await api(`/api/products/${editing.id}/`, { method: "PATCH", body: JSON.stringify(payload) });
+      } else {
+        await api("/api/products/", { method: "POST", body: JSON.stringify(payload) });
+      }
       setOpen(false);
+      setEditing(null);
       invalidateApiCache("/api/products");
       await products.reload();
       await loadLookups();
@@ -154,6 +188,13 @@ export default function ProductsPage() {
     } finally {
       setPending(false);
     }
+  }
+
+  async function remove(row: Product) {
+    if (!confirm(`Delete ${row.name}? If it was already sold it will be hidden instead.`)) return;
+    await api(`/api/products/${row.id}/`, { method: "DELETE" });
+    invalidateApiCache("/api/products");
+    await products.reload();
   }
 
   async function addNamed(kind: "categories" | "brands", name: string) {
@@ -165,16 +206,23 @@ export default function ProductsPage() {
     await loadLookups();
   }
 
+  async function removeNamed(kind: "categories" | "brands", row: { id: string; name: string }) {
+    if (!confirm(`Delete ${row.name}?`)) return;
+    await api(`/api/${kind}/${row.id}/`, { method: "DELETE" });
+    invalidateApiCache(`/api/${kind}`);
+    await loadLookups();
+  }
+
   return (
     <div>
       <PageHeader
-        eyebrow="Module 3"
-        title="Products & catalog"
-        description="Simple SKUs or variant products such as T-Shirt → Small / Black. Opening stock writes a stock-in movement. Repair and installation jobs live in Services."
+        eyebrow="Catalog"
+        title="Products"
+        description="Add, edit or delete items in your catalog. Repair and installation jobs live in Services."
         action={can("product.manage") ? <Button onClick={startCreate}>Add product</Button> : undefined}
       />
       <div className="mb-6 flex flex-wrap gap-2">
-        {(["products", "categories", "brands", "units"] as Tab[]).map((item) => (
+        {(["products", "categories", "brands"] as Tab[]).map((item) => (
           <button
             key={item}
             type="button"
@@ -199,7 +247,7 @@ export default function ProductsPage() {
             cols={8}
           >
             <div className="card overflow-x-auto">
-              <table className="min-w-[72rem] w-full text-left text-sm">
+              <table className="min-w-[64rem] w-full text-left text-sm">
                 <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
                   <tr>
                     <th className="px-4 py-3">Product</th>
@@ -207,13 +255,11 @@ export default function ProductsPage() {
                     <th className="px-4 py-3">Barcode</th>
                     <th className="px-4 py-3">Category</th>
                     <th className="px-4 py-3">Brand</th>
-                    <th className="px-4 py-3">Unit</th>
                     <th className="px-4 py-3">Cost</th>
                     <th className="px-4 py-3">Sell</th>
                     <th className="px-4 py-3">Stock</th>
                     <th className="px-4 py-3">Min</th>
-                    <th className="px-4 py-3">Type</th>
-                    <th className="px-4 py-3">Status</th>
+                    {can("product.manage") ? <th className="px-4 py-3" /> : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -231,19 +277,22 @@ export default function ProductsPage() {
                       <td className="px-4 py-3 font-mono text-xs">{row.barcode || "—"}</td>
                       <td className="px-4 py-3">{row.category_name || "—"}</td>
                       <td className="px-4 py-3">{row.brand_name || "—"}</td>
-                      <td className="px-4 py-3">{row.unit_code || "—"}</td>
                       <td className="px-4 py-3">Rs {row.cost_price}</td>
                       <td className="px-4 py-3 font-medium">Rs {row.selling_price}</td>
                       <td className="px-4 py-3">{row.total_stock ?? "0"}</td>
                       <td className="px-4 py-3">{row.min_stock || "0"}</td>
-                      <td className="px-4 py-3">
-                        <Badge tone={row.has_variants ? "copper" : "neutral"}>
-                          {row.has_variants ? `${row.variant_count || 0} variants` : "Simple"}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge tone={row.is_active ? "good" : "warn"}>{row.is_active ? "Active" : "Inactive"}</Badge>
-                      </td>
+                      {can("product.manage") ? (
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex justify-end gap-2">
+                            <button type="button" className="text-xs text-copper-700" onClick={() => startEdit(row)}>
+                              Edit
+                            </button>
+                            <button type="button" className="text-xs text-red-700" onClick={() => remove(row)}>
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>
@@ -258,35 +307,22 @@ export default function ProductsPage() {
         <NamedList
           rows={categories.filter((c) => !c.kind || c.kind === "product")}
           onAdd={(name) => addNamed("categories", name)}
+          onDelete={can("category.manage") || can("product.manage") ? (row) => removeNamed("categories", row) : undefined}
           value={simpleName}
           setValue={setSimpleName}
         />
       ) : null}
       {tab === "brands" ? (
-        <NamedList rows={brands} onAdd={(name) => addNamed("brands", name)} value={simpleName} setValue={setSimpleName} />
-      ) : null}
-      {tab === "units" ? (
-        <div className="card overflow-hidden">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
-              <tr>
-                <th className="px-4 py-3">Unit</th>
-                <th className="px-4 py-3">Code</th>
-              </tr>
-            </thead>
-            <tbody>
-              {units.map((unit) => (
-                <tr key={unit.id} className="border-t border-paper-100">
-                  <td className="px-4 py-3">{unit.name}</td>
-                  <td className="px-4 py-3">{unit.short_code}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <NamedList
+          rows={brands}
+          onAdd={(name) => addNamed("brands", name)}
+          onDelete={can("brand.manage") || can("product.manage") ? (row) => removeNamed("brands", row) : undefined}
+          value={simpleName}
+          setValue={setSimpleName}
+        />
       ) : null}
 
-      <Modal open={open} title="New product" onClose={() => setOpen(false)}>
+      <Modal open={open} title={editing ? "Edit product" : "New product"} onClose={() => setOpen(false)}>
         <form onSubmit={onSubmit} className="grid max-h-[70vh] gap-3 overflow-y-auto pr-1">
           {errors.detail || errors.variants ? <p className="text-sm text-red-700">{errors.detail || errors.variants}</p> : null}
           <Field label="Name" error={errors.name}>
@@ -322,15 +358,6 @@ export default function ProductsPage() {
               </Select>
             </Field>
           </div>
-          <Field label="Unit">
-            <Select value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} required>
-              {units.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name} ({u.short_code})
-                </option>
-              ))}
-            </Select>
-          </Field>
           <div className="grid gap-3 sm:grid-cols-3">
             <Field label="Cost">
               <Input value={form.cost_price} onChange={(e) => setForm({ ...form, cost_price: e.target.value })} />
@@ -342,22 +369,26 @@ export default function ProductsPage() {
               <Input value={form.min_stock} onChange={(e) => setForm({ ...form, min_stock: e.target.value })} />
             </Field>
           </div>
-          <Toggle
-            label="This product has variants (size / color)"
-            checked={form.has_variants}
-            onChange={(has_variants) => setForm({ ...form, has_variants })}
-          />
-          <Field label="Opening stock branch">
-            <Select value={form.branch} onChange={(e) => setForm({ ...form, branch: e.target.value })}>
-              <option value="">No opening stock</option>
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.name}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          {!form.has_variants ? (
+          {!editing ? (
+            <Toggle
+              label="This product has variants (size / color)"
+              checked={form.has_variants}
+              onChange={(has_variants) => setForm({ ...form, has_variants })}
+            />
+          ) : null}
+          {!editing ? (
+            <Field label="Opening stock branch">
+              <Select value={form.branch} onChange={(e) => setForm({ ...form, branch: e.target.value })}>
+                <option value="">No opening stock</option>
+                {branches.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          ) : null}
+          {editing ? null : !form.has_variants ? (
             <Field label="Opening qty">
               <Input value={form.opening} onChange={(e) => setForm({ ...form, opening: e.target.value })} />
             </Field>
@@ -379,7 +410,7 @@ export default function ProductsPage() {
             </div>
           )}
           <Button type="submit" disabled={pending}>
-            {pending ? "Saving…" : "Save product"}
+            {pending ? "Saving…" : editing ? "Save changes" : "Save product"}
           </Button>
         </form>
       </Modal>
@@ -394,11 +425,13 @@ export default function ProductsPage() {
 function NamedList({
   rows,
   onAdd,
+  onDelete,
   value,
   setValue,
 }: {
   rows: { id: string; name: string; product_count?: number; kind?: string }[];
   onAdd: (name: string) => void;
+  onDelete?: (row: { id: string; name: string }) => void;
   value: string;
   setValue: (v: string) => void;
 }) {
@@ -422,6 +455,13 @@ function NamedList({
                   ) : null}
                 </td>
                 <td className="px-4 py-3 text-right text-ink-700/60">{row.product_count ?? ""}</td>
+                {onDelete ? (
+                  <td className="px-4 py-3 text-right">
+                    <button type="button" className="text-xs text-red-700" onClick={() => onDelete(row)}>
+                      Delete
+                    </button>
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
