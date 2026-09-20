@@ -118,3 +118,63 @@ td {
     @apply rounded-xl;
   }
 }
+
+.receipt-slip {
+  @apply rounded-sm bg-white px-3 py-4 font-mono text-ink-950 shadow-sm;
+}
+
+.receipt-paper-58 {
+  width: 58mm;
+  max-width: 100%;
+}
+
+.receipt-paper-80 {
+  width: 80mm;
+  max-width: 100%;
+}
+
+.receipt-paper-a4 {
+  width: 190mm;
+  max-width: 100%;
+}
+
+.receipt-rule {
+  @apply my-2 border-t border-dashed border-ink-950/25;
+}
+
+@media print {
+  @page {
+    margin: 4mm;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #receipt-print-root,
+  #receipt-print-root * {
+    visibility: visible !important;
+  }
+
+  #receipt-print-root {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    background: white !important;
+  }
+
+  .receipt-slip {
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .receipt-no-print {
+    display: none !important;
+  }
+}

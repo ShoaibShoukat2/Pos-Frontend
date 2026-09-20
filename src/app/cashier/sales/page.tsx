@@ -4,17 +4,23 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { RotateCcw } from "lucide-react";
 
+import { ReceiptReview } from "@/components/ReceiptSlip";
 import { SaleReturnPanel } from "@/components/SaleReturnPanel";
 import { TableSkeleton } from "@/components/DataTable";
 import { Badge, Button, Modal, PageHeader } from "@/components/ui";
 import { api, asList } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { rs } from "@/lib/money";
-import type { PosSale } from "@/lib/types";
+import type { InvoiceSettings, PosSale, PosSnapshot, ReceiptShop } from "@/lib/types";
 
 export default function CashierSalesPage() {
+  const { user } = useAuth();
   const [rows, setRows] = useState<PosSale[]>([]);
   const [loading, setLoading] = useState(true);
   const [returnTicket, setReturnTicket] = useState<string | null>(null);
+  const [slip, setSlip] = useState<PosSale | null>(null);
+  const [shop, setShop] = useState<ReceiptShop | null>(null);
+  const [invoice, setInvoice] = useState<InvoiceSettings | null>(null);
 
   function load() {
     setLoading(true);
@@ -26,6 +32,12 @@ export default function CashierSalesPage() {
 
   useEffect(() => {
     load();
+    api<PosSnapshot>("/api/pos/snapshot/")
+      .then((data) => {
+        setShop(data.shop || null);
+        setInvoice(data.invoice || null);
+      })
+      .catch(() => {});
   }, []);
 
   return (
@@ -78,6 +90,13 @@ export default function CashierSalesPage() {
                     Return items
                   </button>
                 ) : null}
+                <button
+                  type="button"
+                  className="mt-1 block text-xs text-ink-700/70 underline"
+                  onClick={() => setSlip(sale)}
+                >
+                  View slip
+                </button>
               </div>
             </div>
             {sale.lines?.length ? (
@@ -113,6 +132,13 @@ export default function CashierSalesPage() {
           />
         ) : null}
       </Modal>
+      <ReceiptReview
+        open={!!slip}
+        sale={slip}
+        shop={shop || { name: user?.business_name || "Shop" }}
+        invoice={invoice}
+        onClose={() => setSlip(null)}
+      />
     </div>
   );
 }

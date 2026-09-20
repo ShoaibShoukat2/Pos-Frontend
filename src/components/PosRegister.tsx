@@ -27,6 +27,7 @@ import {
 import { CameraScan } from "@/components/CameraScan";
 import { HardwareSetup, HardwareStatus, HardwareToasts } from "@/components/HardwareBar";
 import { QrImage } from "@/components/QrImage";
+import { ReceiptReview } from "@/components/ReceiptSlip";
 import { SaleReturnPanel } from "@/components/SaleReturnPanel";
 import { Badge, Button, Field, Input, Modal, Select } from "@/components/ui";
 import { ApiError, NetworkError, api, asList } from "@/lib/api";
@@ -41,6 +42,7 @@ import type {
   OwnerOverview,
   PosCatalogItem,
   PosCustomer,
+  PosSale,
   PosSalePayload,
   PosSaleReturn,
   PosSnapshot,
@@ -95,6 +97,9 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const [ticketOpen, setTicketOpen] = useState(false);
   const [returnOpen, setReturnOpen] = useState(false);
   const [returnQuery, setReturnQuery] = useState("");
+  const [slip, setSlip] = useState<PosSale | null>(null);
+  const [slipAutoPrint, setSlipAutoPrint] = useState(false);
+  const [slipTendered, setSlipTendered] = useState<number | null>(null);
   const helpOnce = useRef(false);
   const skuOnce = useRef(false);
   const hardware = useHardware();
@@ -422,7 +427,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
     };
     await queueSale(payload);
     try {
-      const sale = await api<{ number: string }>("/api/pos/checkout/", {
+      const sale = await api<PosSale>("/api/pos/checkout/", {
         method: "POST",
         body: JSON.stringify(payload),
       });
@@ -435,6 +440,11 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       const nextSnap = { ...snapshot, catalog: nextCatalog };
       setSnapshot(nextSnap);
       await saveSnapshot(shopKey, nextSnap);
+      const preview =
+        sale.lines && sale.lines.length
+          ? sale
+          : slipFromCart(sale.number, applied, money(dueTotal - applied));
+      openSlip(preview, { autoPrint: true, tendered });
       setMessage(`Sale ${sale.number} saved.`);
       setOnline(true);
       setCart([]);
@@ -452,6 +462,10 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         const nextSnap = { ...snapshot, catalog: nextCatalog };
         setSnapshot(nextSnap);
         await saveSnapshot(shopKey, nextSnap);
+        openSlip(slipFromCart(`LOCAL-${Date.now().toString().slice(-6)}`, applied, money(dueTotal - applied)), {
+          autoPrint: true,
+          tendered,
+        });
         setOnline(false);
         setMessage("Sale saved on this counter. It will sync when the line is back.");
         setCart([]);
@@ -469,6 +483,67 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       setPending(false);
       refreshQueue();
     }
+  }
+
+  function openSlip(sale: PosSale, opts?: { autoPrint?: boolean; tendered?: number }) {
+    setSlip(sale);
+    setSlipAutoPrint(!!opts?.autoPrint);
+    setSlipTendered(opts?.tendered ?? null);
+    setTicketOpen(false);
+  }
+
+  async function reviewSlip(id: string, number: string) {
+    setError("");
+    try {
+      const sale = await api<PosSale>(`/api/pos/sales/${id}/`);
+      openSlip(sale);
+    } catch {
+      try {
+        const sale = await api<PosSale>(`/api/pos/returns/lookup/?q=${encodeURIComponent(number)}`);
+        openSlip(sale);
+      } catch {
+        setError("Could not open this slip.");
+      }
+    }
+  }
+
+  function slipFromCart(number: string, paid: number, due: number): PosSale {
+    const quoted = snapshot
+      ? quoteCart(cart, snapshot, {
+          customer,
+          manualKind,
+          manualValue: Number(manualValue || 0),
+        })
+      : null;
+    return {
+      id: crypto.randomUUID(),
+      number,
+      client_uuid: "",
+      subtotal: String(quoted?.subtotal ?? 0),
+      total: String(quoted?.total ?? 0),
+      paid_amount: String(paid),
+      due_amount: String(due),
+      discount_total: String(quoted?.discountTotal ?? 0),
+      net_total: String(quoted?.total ?? 0),
+      loyalty_earned: "0",
+      payment_method: payMethod,
+      customer_name: customer?.name || "Walk-in",
+      cashier_name: user?.full_name || "",
+      sold_at: new Date().toISOString(),
+      lines: cart.map((row, i) => {
+        const priced = quoted?.priced[i];
+        return {
+          id: row.item.id,
+          product_name: row.item.product,
+          variant_name: row.item.variant,
+          sku: row.item.sku,
+          quantity: String(row.qty),
+          unit_price: String(priced?.list ?? row.item.selling_price),
+          promo_price: String(priced?.unit ?? row.item.selling_price),
+          line_total: String(priced?.lineTotal ?? money(num(row.item.selling_price) * row.qty)),
+        };
+      }),
+    };
   }
 
   function openReturn(ticket = "") {
@@ -1024,16 +1099,12 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               </div>
               <ul className="mt-2 space-y-2 text-sm">
                 {recentSales.slice(0, 4).map((row) => (
-                  <li key={row.id}>
-                    <button
-                      type="button"
-                      className="flex w-full justify-between gap-2 border-b border-paper-100 pb-2 text-left hover:text-copper-800"
-                      onClick={() => openReturn(row.number)}
-                    >
+                  <li key={row.id} className="border-b border-paper-100 pb-2">
+                    <div className="flex justify-between gap-2">
                       <span className="min-w-0">
                         <span className="block truncate font-medium">{row.number}</span>
                         <span className="block truncate text-xs text-ink-700/55">
-                          {row.customer_name} · tap to return
+                          {row.customer_name || "Walk-in"}
                         </span>
                       </span>
                       <span className="shrink-0 text-right">
@@ -1042,7 +1113,15 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                           <span className="block text-[11px] text-ink-700/45">{row.cashier_name}</span>
                         ) : null}
                       </span>
-                    </button>
+                    </div>
+                    <div className="mt-1 flex gap-3 text-xs">
+                      <button type="button" className="text-copper-700 underline" onClick={() => reviewSlip(row.id, row.number)}>
+                        View slip
+                      </button>
+                      <button type="button" className="text-ink-700/70 underline" onClick={() => openReturn(row.number)}>
+                        Return
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -1188,6 +1267,19 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       <Modal open={returnOpen} title="Customer return" onClose={() => setReturnOpen(false)}>
         {returnOpen ? <SaleReturnPanel initialQuery={returnQuery} onDone={onReturned} /> : null}
       </Modal>
+      <ReceiptReview
+        open={!!slip}
+        sale={slip}
+        shop={snapshot?.shop || { name: user?.business_name || "Shop" }}
+        invoice={snapshot?.invoice}
+        tendered={slipTendered}
+        autoPrint={slipAutoPrint}
+        onClose={() => {
+          setSlip(null);
+          setSlipAutoPrint(false);
+          setSlipTendered(null);
+        }}
+      />
     </div>
   );
 

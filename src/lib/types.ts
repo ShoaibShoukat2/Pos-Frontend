@@ -719,6 +719,16 @@ export type PosCustomer = Customer & {
   membership_discount?: string;
 };
 
+export type ReceiptShop = {
+  name: string;
+  legal_name?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  tax_number?: string;
+  logo?: string;
+};
+
 export type PosSnapshot = {
   branch: Branch;
   branches: Branch[];
@@ -734,6 +744,8 @@ export type PosSnapshot = {
   tiers: MembershipTier[];
   loyalty: LoyaltySettings;
   open_shift: CashSession | null;
+  shop?: ReceiptShop;
+  invoice?: InvoiceSettings;
 };
 
 export type PosSalePayload = {
@@ -755,6 +767,7 @@ export type PosSale = {
   number: string;
   client_uuid: string;
   status?: string;
+  subtotal?: string;
   total: string;
   paid_amount: string;
   due_amount: string;
@@ -767,7 +780,9 @@ export type PosSale = {
   customer_name?: string;
   branch_name?: string;
   cashier_name?: string;
+  sold_at?: string;
   created_at?: string;
+  payments?: { id?: string; method: string; amount: string }[];
   lines?: {
     id: string;
     variant?: string;
@@ -778,6 +793,8 @@ export type PosSale = {
     returned_qty?: string;
     returned_amount?: string;
     returnable_qty?: string;
+    unit_price?: string;
+    promo_price?: string;
     line_total: string;
     promo_name?: string;
   }[];

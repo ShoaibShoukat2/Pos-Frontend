@@ -33,7 +33,7 @@ export default function InvoicePage() {
       <PageHeader
         eyebrow="Module 1"
         title="Invoice settings"
-        description="Number format and receipt layout. POS printing will read these values later."
+        description="Number format and the customer slip printed from POS."
       />
       <form onSubmit={onSubmit} className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="card grid gap-4 p-6 md:grid-cols-2">
