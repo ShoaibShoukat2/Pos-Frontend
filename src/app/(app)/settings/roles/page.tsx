@@ -27,7 +27,14 @@ export default function RolesPage() {
   }, []);
 
   const grouped = useMemo(() => {
-    const hidden = new Set(["tax.manage", "currency.manage"]);
+    const hidden = new Set([
+      "tax.manage",
+      "currency.manage",
+      "stock.view",
+      "stock.adjust",
+      "stock.transfer",
+      "report.inventory",
+    ]);
     const map = new Map<string, Permission[]>();
     for (const perm of permissions) {
       if (hidden.has(perm.codename)) continue;

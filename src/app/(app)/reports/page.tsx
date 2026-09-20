@@ -7,7 +7,7 @@ import { Badge, Empty, PageHeader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { num, rs } from "@/lib/money";
-import type { FinancialReport, InventoryReport, SalesReport } from "@/lib/types";
+import type { FinancialReport, SalesReport } from "@/lib/types";
 
 const PERIODS = [
   { id: "today", label: "Today" },
@@ -15,31 +15,28 @@ const PERIODS = [
   { id: "month", label: "This month" },
 ] as const;
 
-type Tab = "sales" | "inventory" | "financial";
+type Tab = "sales" | "financial";
 
 export default function ReportsPage() {
   const { can } = useAuth();
   const [period, setPeriod] = useState<(typeof PERIODS)[number]["id"]>("month");
   const [tab, setTab] = useState<Tab>("sales");
   const [sales, setSales] = useState<SalesReport | null>(null);
-  const [inventory, setInventory] = useState<InventoryReport | null>(null);
   const [financial, setFinancial] = useState<FinancialReport | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   const showSales = can("report.sales") || can("report.cashier");
-  const showInventory = can("report.inventory") || can("stock.view");
   const showFinancial = can("report.profit") || can("ledger.view");
 
   useEffect(() => {
-    const first = showSales ? "sales" : showInventory ? "inventory" : showFinancial ? "financial" : "sales";
+    const first = showSales ? "sales" : showFinancial ? "financial" : "sales";
     setTab((current) => {
       if (current === "sales" && !showSales) return first;
-      if (current === "inventory" && !showInventory) return first;
       if (current === "financial" && !showFinancial) return first;
       return current;
     });
-  }, [showSales, showInventory, showFinancial]);
+  }, [showSales, showFinancial]);
 
   useEffect(() => {
     setError("");
@@ -50,11 +47,6 @@ export default function ReportsPage() {
         .then(setSales)
         .catch(() => setError("Could not load sales report."))
         .finally(done);
-    } else if (tab === "inventory" && showInventory) {
-      api<InventoryReport>(`/api/reports/inventory/?period=${period}`)
-        .then(setInventory)
-        .catch(() => setError("Could not load inventory report."))
-        .finally(done);
     } else if (tab === "financial" && showFinancial) {
       api<FinancialReport>(`/api/reports/financial/?period=${period}`)
         .then(setFinancial)
@@ -63,11 +55,10 @@ export default function ReportsPage() {
     } else {
       done();
     }
-  }, [tab, period, showSales, showInventory, showFinancial]);
+  }, [tab, period, showSales, showFinancial]);
 
   const tabs = [
     showSales && { id: "sales" as const, label: "Sales" },
-    showInventory && { id: "inventory" as const, label: "Inventory" },
     showFinancial && { id: "financial" as const, label: "Financial" },
   ].filter(Boolean) as { id: Tab; label: string }[];
 
@@ -76,7 +67,7 @@ export default function ReportsPage() {
       <PageHeader
         eyebrow="Module 12"
         title="Reports"
-        description="Daily, weekly and monthly numbers — sales, stock and the profit the owner actually cares about."
+        description="Daily, weekly and monthly numbers — sales and the profit the owner actually cares about."
         action={
           <div className="flex w-full rounded-xl border border-paper-200 bg-white p-1 sm:w-auto">
             {PERIODS.map((p) => (
@@ -114,7 +105,6 @@ export default function ReportsPage() {
       {loading ? <TableSkeleton rows={8} cols={4} /> : null}
 
       {!loading && tab === "sales" && sales ? <SalesPanel data={sales} /> : null}
-      {!loading && tab === "inventory" && inventory ? <InventoryPanel data={inventory} /> : null}
       {!loading && tab === "financial" && financial ? <FinancialPanel data={financial} /> : null}
       {!tabs.length ? <Empty title="No report access" hint="Ask the owner to grant report permissions." /> : null}
     </div>
@@ -142,7 +132,7 @@ function SalesPanel({ data }: { data: SalesReport }) {
         />
         <SimpleTable
           title="Category-wise sales"
-          empty="No category breakdown until items are sold through inventory."
+          empty="No category breakdown until items are sold."
           headers={["Category", "Qty", "Revenue"]}
           rows={data.categories.map((r) => [r.category, r.qty, rs(r.revenue)])}
         />
@@ -153,44 +143,6 @@ function SalesPanel({ data }: { data: SalesReport }) {
         headers={["Cashier", "Orders", "Total"]}
         rows={data.cashiers.map((r) => [r.name, String(r.orders), rs(r.total)])}
       />
-    </div>
-  );
-}
-
-function InventoryPanel({ data }: { data: InventoryReport }) {
-  return (
-    <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Stock valuation" value={rs(data.valuation)} />
-        <Stat label="SKU locations" value={String(data.sku_locations)} />
-        <Stat label="Low stock" value={String(data.low_count)} />
-      </div>
-      <SimpleTable
-        title="Low stock"
-        empty="Nothing below minimum."
-        headers={["Product", "Variant", "Qty"]}
-        rows={data.low_stock.map((r) => [r.product, r.variant, r.qty])}
-      />
-      <SimpleTable
-        title="Top stock (preview)"
-        empty="No stock on hand."
-        headers={["Product", "SKU", "Qty", "Value"]}
-        rows={data.current.map((r) => [r.product, r.sku, r.qty, rs(r.value)])}
-      />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <SimpleTable
-          title="Fast-moving products"
-          empty="No sold units in this period — POS sale movements are required."
-          headers={["Product", "On hand", "Sold"]}
-          rows={data.fast_moving.map((r) => [r.product, r.on_hand, r.sold])}
-        />
-        <SimpleTable
-          title="Slow-moving products"
-          empty="No stock to rank."
-          headers={["Product", "On hand", "Sold"]}
-          rows={data.slow_moving.map((r) => [r.product, r.on_hand, r.sold])}
-        />
-      </div>
     </div>
   );
 }

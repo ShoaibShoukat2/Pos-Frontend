@@ -21,7 +21,6 @@ import {
   UserCircle,
   UserPlus,
   Users,
-  Warehouse,
   Wrench,
 } from "lucide-react";
 
@@ -38,7 +37,6 @@ const NAV = [
   { href: "/reports", label: "Reports", icon: BarChart3, perm: "report.sales" },
   { href: "/products", label: "Products", icon: Package, perm: "product.view" },
   { href: "/services", label: "Services", icon: Wrench, perm: "product.view" },
-  { href: "/stock", label: "Stock", icon: Warehouse, perm: "stock.view" },
   { href: "/customers", label: "Customers", icon: UserCircle, perm: "customer.view" },
   { href: "/purchases", label: "Purchases", icon: ShoppingBag, perm: "purchase.view" },
   { href: "/suppliers", label: "Suppliers", icon: Truck, perm: "supplier.view" },
@@ -133,8 +131,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <p className="truncate text-sm font-medium text-ink-950 lg:hidden">{user.business_name || "Workspace"}</p>
             <p className="hidden min-w-0 truncate text-sm text-ink-700/70 md:block">
               {pathname === "/dashboard"
-                ? "Full business overview — sales, stock, people and live product activity"
-                : "Sales, stock, cash and reports for your shop"}
+                ? "Full business overview — sales, people and live product activity"
+                : "Sales, cash and reports for your shop"}
             </p>
           </div>
         </header>

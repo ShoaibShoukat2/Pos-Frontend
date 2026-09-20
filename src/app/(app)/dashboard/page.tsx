@@ -98,8 +98,6 @@ export default function DashboardPage() {
         { label: "Net profit", value: rs(data.today_profit), href: "/reports" },
         { label: "Orders", value: String(data.orders), href: "/reports" },
         { label: "Customers", value: String(data.customers), href: "/customers" },
-        { label: "Stock value", value: rs(data.stock_value), href: "/stock" },
-        { label: "Low stock", value: String(data.low_stock), href: "/stock" },
         { label: "Receivables", value: rs(data.outstanding), href: "/customers" },
         { label: "Payables", value: rs(data.payables), href: "/purchases" },
         { label: "Expenses", value: rs(data.expenses), href: "/expenses" },
@@ -114,7 +112,7 @@ export default function DashboardPage() {
       <PageHeader
         eyebrow={user?.is_owner ? "Owner overview" : "Business overview"}
         title={`${user?.business_name || "Dashboard"}${user?.first_name ? ` · ${user.first_name}` : ""}`}
-        description={`${data ? `${data.from} → ${data.to}` : "Live sales, stock, cash, people and catalog activity."}`}
+        description={`${data ? `${data.from} → ${data.to}` : "Live sales, cash, people and catalog activity."}`}
         action={
           <div className="flex w-full flex-col items-stretch gap-2 sm:items-end">
             <div className="flex w-full rounded-xl border border-paper-200 bg-white p-1 sm:w-auto">
