@@ -21,6 +21,7 @@ import {
   Wrench,
 } from "lucide-react";
 
+import { FounderCredit } from "@/components/FounderCredit";
 import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
 import { isCashier, useAuth } from "@/lib/auth";
 
@@ -108,6 +109,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
         <div className="shrink-0 border-t border-white/10 px-5 py-4">
+          <FounderCredit variant="sidebar" />
           <button
             type="button"
             onClick={logout}

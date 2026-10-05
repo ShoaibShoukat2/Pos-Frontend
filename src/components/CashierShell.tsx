@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Banknote, LayoutDashboard, LogOut, Monitor, Receipt, RotateCcw, Search, UserCircle } from "lucide-react";
 
+import { FounderCredit } from "@/components/FounderCredit";
 import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
 import { useAuth } from "@/lib/auth";
 
@@ -73,6 +74,7 @@ export function CashierShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
         <div className="border-t border-white/10 px-5 py-4">
+          <FounderCredit variant="sidebar" />
           <button
             type="button"
             onClick={logout}

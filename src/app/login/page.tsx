@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useMemo, useState } from "react";
 import { Building2, Monitor, Shield } from "lucide-react";
 
+import { FounderCredit } from "@/components/FounderCredit";
 import { Alert, Button, Field, Input } from "@/components/ui";
 import { ApiError, fieldErrors } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -125,6 +126,7 @@ function LoginForm() {
             </Button>
           </form>
         </div>
+        <FounderCredit variant="compact" />
         <p className="mt-4 text-sm text-ink-700/70">
           New shop?{" "}
           <Link href="/register" className="text-copper-600 underline">

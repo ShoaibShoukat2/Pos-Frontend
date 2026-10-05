@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
+import { FounderCredit } from "@/components/FounderCredit";
 import { Alert, Button, Field, Input, Select } from "@/components/ui";
 import { ApiError, fieldErrors } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -106,6 +107,7 @@ export default function RegisterPage() {
             </div>
           </form>
         </div>
+        <FounderCredit variant="compact" />
         <p className="mt-4 text-sm text-ink-700/70">
           Already set up?{" "}
           <Link href="/login" className="text-copper-600 underline">

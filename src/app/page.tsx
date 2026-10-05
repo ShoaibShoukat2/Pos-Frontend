@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FounderCredit } from "@/components/FounderCredit";
 import { homeFor, useAuth } from "@/lib/auth";
 
 export default function HomePage() {
@@ -52,7 +53,11 @@ export default function HomePage() {
           </ul>
         </div>
       </main>
-      <footer className="mx-auto max-w-6xl px-4 pb-8 text-xs text-ink-700/45 sm:px-6">
+      <FounderCredit />
+      <footer className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 pb-8 text-xs text-ink-700/45 sm:px-6">
+        <a href="https://senvante.com/" target="_blank" rel="noreferrer" className="hover:text-ink-700">
+          A Senvante product
+        </a>
         <Link href="/login?role=platform" className="hover:text-ink-700">
           Platform admin
         </Link>

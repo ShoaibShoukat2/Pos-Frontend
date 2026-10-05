@@ -12,7 +12,7 @@ const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces" });
 
 export const metadata: Metadata = {
   title: "Universal POS",
-  description: "POS with offline selling and reports",
+  description: "Universal POS, a product of Senvante. Founded and led by Shoaib Ahmad, CEO and Founder.",
   manifest: "/manifest.json",
 };
 

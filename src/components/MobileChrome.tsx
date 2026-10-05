@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FounderCredit } from "@/components/FounderCredit";
 import { useEffect } from "react";
 import { LogOut, Menu, MoreHorizontal, X, type LucideIcon } from "lucide-react";
 
@@ -116,6 +117,7 @@ export function NavDrawer({
           })}
         </nav>
         <div className="border-t border-white/10 px-3 py-3">
+          <FounderCredit variant="sidebar" />
           <button
             type="button"
             onClick={onLogout}
