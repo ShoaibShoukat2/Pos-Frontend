@@ -109,9 +109,19 @@ export default function DashboardPage() {
   return (
     <div>
       <PageHeader
-        eyebrow={user?.is_owner ? "Owner overview" : "Business overview"}
+        eyebrow={
+          user?.business_type === "pizza"
+            ? "Pizza shop"
+            : user?.is_owner
+              ? "Owner overview"
+              : "Business overview"
+        }
         title={`${user?.business_name || "Dashboard"}${user?.first_name ? ` · ${user.first_name}` : ""}`}
-        description={`${data ? `${data.from} → ${data.to}` : "Live sales, cash, people and catalog activity."}`}
+        description={
+          user?.business_type === "pizza"
+            ? "Menu, counter, today’s pizzas, cash and staff."
+            : `${data ? `${data.from} → ${data.to}` : "Live sales, cash, people and catalog activity."}`
+        }
         action={
           <div className="flex w-full flex-col items-stretch gap-2 sm:items-end">
             <div className="flex w-full rounded-xl border border-paper-200 bg-white p-1 sm:w-auto">
@@ -139,6 +149,8 @@ export default function DashboardPage() {
           </div>
         }
       />
+
+      {user?.business_type === "pizza" ? <PizzaBoard data={data} period={period} /> : null}
 
       <Link
         href="/settings/cashiers"
@@ -308,97 +320,111 @@ export default function DashboardPage() {
       ) : null}
 
       <section className="mt-8">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="font-display text-xl">Live catalog</h2>
             <p className="mt-1 text-sm text-ink-700/60">
-              Goods being sold, purchased, added or updated. Services stay on the Services page. {counts?.total || 0} moving now.
+              Products moving right now. {counts?.total || 0} with a recent change. Services stay on the Services page.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap rounded-xl border border-paper-200 bg-white p-1">
             {FILTERS.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => setFilter(item.id)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-                  filter === item.id ? "bg-ink-950 text-paper-50" : "bg-white text-ink-700"
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium ${
+                  filter === item.id ? "bg-ink-950 text-paper-50" : "text-ink-700/70 hover:text-ink-950"
                 }`}
               >
                 {item.label}
-                {item.id !== "all" && counts ? ` · ${counts[item.id]}` : ""}
+                {item.id !== "all" && counts ? ` ${counts[item.id]}` : ""}
               </button>
             ))}
           </div>
         </div>
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {visible.slice(0, 12).map((item) => (
-              <button
-                key={`${item.id}-${item.action}-${item.at}`}
-                type="button"
-                onClick={() => setSelectedId(item.id)}
-                className={`card p-4 text-left hover:border-copper-400 ${
-                  selected?.id === item.id ? "border-copper-500 ring-2 ring-copper-500/25" : ""
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <Badge tone={ACTION_TONE[item.action]}>{ACTION_LABEL[item.action]}</Badge>
-                  <span className="text-[11px] text-ink-700/50">{timeAgo(item.at)}</span>
-                </div>
-                <p className="mt-2 font-medium text-ink-950">{item.name}</p>
-                <p className="text-xs text-ink-700/55">{[item.category, item.sku].filter(Boolean).join(" · ") || "No SKU"}</p>
-                <p className="mt-2 text-xs text-ink-700/70">{item.detail}</p>
-                <div className="mt-3 flex items-end justify-between">
-                  <p className="font-display text-lg">{rs(item.selling_price)}</p>
-                  <p className="text-xs text-ink-700/55">{item.qty} on hand</p>
-                </div>
-              </button>
-            ))}
-            {!loading && visible.length === 0 ? (
-              <p className="card px-4 py-8 text-sm text-ink-700/65 sm:col-span-2">
-                Nothing in this filter yet. Sell, receive a purchase, or add a product.
-              </p>
-            ) : null}
+        <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="overflow-hidden rounded-2xl border border-paper-200 bg-white shadow-card">
+            <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_6.5rem_5.5rem] gap-3 border-b border-paper-200 bg-paper-50 px-4 py-2 text-[11px] font-medium uppercase tracking-wide text-ink-700/55 md:grid">
+              <span>Product</span>
+              <span>What happened</span>
+              <span className="text-right">Price</span>
+              <span className="text-right">Stock</span>
+            </div>
+            <div className="max-h-[32rem] overflow-y-auto">
+              {visible.map((item) => {
+                const active = selected?.id === item.id && selected?.action === item.action;
+                return (
+                  <button
+                    key={`${item.id}-${item.action}-${item.at}`}
+                    type="button"
+                    onClick={() => setSelectedId(item.id)}
+                    className={`grid w-full gap-1 border-b border-paper-100 px-4 py-3 text-left last:border-b-0 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_6.5rem_5.5rem] md:items-center md:gap-3 ${
+                      active ? "bg-copper-400/10" : "hover:bg-paper-50"
+                    }`}
+                  >
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-2">
+                        <Badge tone={ACTION_TONE[item.action]}>{ACTION_LABEL[item.action]}</Badge>
+                        <span className="truncate font-medium text-ink-950">{item.name}</span>
+                      </span>
+                      <span className="mt-1 block truncate text-xs text-ink-700/55">
+                        {[item.category, item.sku].filter(Boolean).join(" · ") || "No SKU"}
+                        <span className="md:hidden"> · {timeAgo(item.at)}</span>
+                      </span>
+                    </span>
+                    <span className="truncate text-xs text-ink-700/70">{item.detail}</span>
+                    <span className="text-sm font-medium tabular-nums text-ink-950 md:text-right">{rs(item.selling_price)}</span>
+                    <span className="text-xs tabular-nums text-ink-700/60 md:text-right">{fmtQty(item.qty)} in stock</span>
+                  </button>
+                );
+              })}
+              {!loading && visible.length === 0 ? (
+                <p className="px-4 py-10 text-sm text-ink-700/65">
+                  Nothing in this filter yet. Sell, receive a purchase, or add a product.
+                </p>
+              ) : null}
+            </div>
           </div>
-          <aside className="card space-y-4 p-5">
+          <aside className="rounded-2xl border border-paper-200 bg-white p-5 shadow-card xl:sticky xl:top-4">
             {selected ? (
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper-600">
-                  {ACTION_LABEL[selected.action]} · {timeAgo(selected.at)}
-                </p>
-                <h3 className="mt-1 font-display text-2xl text-ink-950">{selected.name}</h3>
+                <div className="flex items-center justify-between gap-2">
+                  <Badge tone={ACTION_TONE[selected.action]}>{ACTION_LABEL[selected.action]}</Badge>
+                  <span className="text-[11px] text-ink-700/50">{timeAgo(selected.at)}</span>
+                </div>
+                <h3 className="mt-3 font-display text-2xl leading-tight text-ink-950">{selected.name}</h3>
                 <p className="mt-1 text-sm text-ink-700/70">{selected.detail}</p>
-                <dl className="mt-3 space-y-1.5 text-sm">
+                <dl className="mt-4 space-y-2 border-t border-paper-100 pt-3 text-sm">
                   <Row label="SKU" value={selected.sku || "—"} />
                   <Row label="Barcode" value={selected.barcode || "—"} />
                   <Row label="Category" value={selected.category || "—"} />
                   <Row label="Sell" value={rs(selected.selling_price)} />
                   <Row label="Cost" value={rs(selected.cost_price)} />
-                  <Row label="Stock" value={`${selected.qty} on hand`} />
+                  <Row label="Stock" value={`${fmtQty(selected.qty)} in stock`} />
                 </dl>
-                <Link href={`/products/${selected.id}`} className="mt-3 inline-block text-sm text-copper-700 underline">
+                <Link href={`/products/${selected.id}`} className="mt-4 inline-block text-sm font-medium text-copper-600 underline">
                   Open product
                 </Link>
               </div>
             ) : (
-              <p className="text-sm text-ink-700/65">Select a product to see details.</p>
+              <p className="text-sm text-ink-700/65">Select a product to see its fields.</p>
             )}
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-700/55">What just happened</p>
-              <ul className="mt-2 space-y-2">
-                {(data?.activity || []).slice(0, 8).map((row, index) => (
+            <div className="mt-5 border-t border-paper-100 pt-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-700/55">Latest movement</p>
+              <ul className="mt-3 space-y-2">
+                {(data?.activity || []).slice(0, 6).map((row, index) => (
                   <li key={`${row.kind}-${row.at}-${index}`}>
-                    <Link href={row.href} className="flex items-start justify-between gap-2 border-b border-paper-100 pb-2">
-                      <span className="min-w-0">
-                        <span className="block truncate text-sm font-medium">{row.title}</span>
-                        <span className="block truncate text-xs text-ink-700/55">{row.detail}</span>
+                    <Link href={row.href} className="block rounded-xl px-2 py-2 hover:bg-paper-50">
+                      <span className="flex items-start justify-between gap-2">
+                        <span className="min-w-0 truncate text-sm font-medium text-ink-950">{row.title}</span>
+                        <span className="shrink-0 text-[11px] text-ink-700/45">{timeAgo(row.at)}</span>
                       </span>
-                      <span className="shrink-0 text-[11px] text-ink-700/45">{timeAgo(row.at)}</span>
+                      <span className="mt-0.5 block truncate text-xs text-ink-700/55">{row.detail}</span>
                     </Link>
                   </li>
                 ))}
-                {!data?.activity.length ? <li className="text-sm text-ink-700/60">No recent activity.</li> : null}
+                {!data?.activity.length ? <li className="text-sm text-ink-700/60">No recent movement.</li> : null}
               </ul>
             </div>
           </aside>
@@ -468,6 +494,74 @@ export default function DashboardPage() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+const PIZZA_CATEGORIES = [
+  "Classic pizzas",
+  "Specialty pizzas",
+  "Sides",
+  "Drinks",
+  "Desserts",
+  "Deals",
+];
+
+const PIZZA_LINKS = [
+  { href: "/pos", label: "Open counter" },
+  { href: "/products", label: "Menu" },
+  { href: "/customers", label: "Customers" },
+  { href: "/cash", label: "Cash drawer" },
+  { href: "/purchases", label: "Ingredients" },
+  { href: "/expenses", label: "Expenses" },
+  { href: "/reports", label: "Reports" },
+  { href: "/settings/invoice", label: "Invoice slip" },
+  { href: "/settings/cashiers", label: "Cashiers" },
+];
+
+function PizzaBoard({ data, period }: { data: OwnerOverview | null; period: string }) {
+  const sales = data?.category_sales || [];
+  const byName = new Map(sales.map((row) => [row.category, row]));
+  return (
+    <section className="card mb-6 p-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper-600">Pizza shop</p>
+          <h2 className="font-display text-2xl text-ink-950">Handle the shop from here</h2>
+          <p className="mt-1 max-w-2xl text-sm text-ink-700/70">
+            Categories are Classic, Specialty, Sides, Drinks, Desserts and Deals. Starter pizzas include small, medium and large. Change prices on the menu.
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-[11px] uppercase tracking-wide text-ink-700/50">{period === "today" ? "Today’s sale" : "Sales"}</p>
+          <p className="font-display text-3xl text-ink-950">{data ? rs(data.today_sales) : "—"}</p>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {PIZZA_LINKS.map((item) => (
+          <Link key={item.href} href={item.href} className="rounded-full border border-paper-200 bg-paper-50 px-3 py-1.5 text-xs font-medium text-ink-800 hover:border-copper-400">
+            {item.label}
+          </Link>
+        ))}
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {PIZZA_CATEGORIES.map((name) => {
+          const row = byName.get(name);
+          return (
+            <div key={name} className="rounded-xl bg-paper-50 px-4 py-3">
+              <p className="text-sm font-medium text-ink-950">{name}</p>
+              <p className="mt-1 font-display text-2xl">{row ? rs(row.revenue) : rs(0)}</p>
+              <p className="text-xs text-ink-700/55">
+                {row
+                  ? `${fmtQty(row.qty)} sold · ${num(row.share).toFixed(0)}% of sales`
+                  : period === "today"
+                    ? "No sales today"
+                    : "No sales in this period"}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 

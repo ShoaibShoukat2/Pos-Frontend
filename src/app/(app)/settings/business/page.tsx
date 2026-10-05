@@ -111,6 +111,7 @@ export default function BusinessPage() {
             <option value="restaurant">Restaurant</option>
             <option value="pharmacy">Pharmacy</option>
             <option value="electronics">Electronics</option>
+            <option value="pizza">Pizza shop</option>
           </Select>
         </Field>
         <Field label="Timezone">

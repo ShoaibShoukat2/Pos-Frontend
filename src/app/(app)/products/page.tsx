@@ -234,7 +234,11 @@ export default function ProductsPage() {
             loading={products.loading}
             count={products.count}
             emptyTitle="No products yet"
-            emptyHint="Add a grocery item or a clothing product with size/color variants."
+            emptyHint={
+              user?.business_type === "pizza"
+                ? "Add a pizza with small, medium and large, or a side, drink or deal."
+                : "Add a grocery item or a clothing product with size/color variants."
+            }
             cols={8}
           >
             <div className="card overflow-x-auto">

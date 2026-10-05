@@ -12,6 +12,7 @@ const TYPE_LABEL: Record<string, string> = {
   restaurant: "Restaurant",
   pharmacy: "Pharmacy",
   electronics: "Electronics",
+  pizza: "Pizza shop",
   general: "General",
 };
 

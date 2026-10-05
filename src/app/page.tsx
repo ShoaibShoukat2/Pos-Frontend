@@ -50,6 +50,7 @@ const INDUSTRIES = [
   { title: "Grocery", text: "Fast tickets, stock on hand, and a daily sales picture." },
   { title: "Clothing", text: "Variants, sizes and a catalog the cashier can search." },
   { title: "Restaurant", text: "Counter sales, a printed slip, and the day’s takings." },
+  { title: "Pizza shop", text: "Sizes, sides, drinks and deals, with today’s pizza sales on the owner dashboard." },
   { title: "Pharmacy", text: "Products, customers and a record of what left the shelf." },
   { title: "Electronics", text: "Higher-value items, invoices and purchase history." },
   { title: "General retail", text: "One setup for a shop that sells a mixed counter." },

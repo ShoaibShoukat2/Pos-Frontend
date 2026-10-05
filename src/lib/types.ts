@@ -538,6 +538,7 @@ export type OwnerOverview = DashboardReport & {
   users_active: number;
   daily: ReportSeries[];
   top_products: { product: string; qty: string; revenue: string; share: string }[];
+  category_sales: { category: string; qty: string; revenue: string; share: string }[];
   recent_sales: {
     id: string;
     number: string;

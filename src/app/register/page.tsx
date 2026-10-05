@@ -15,6 +15,7 @@ const TYPES = [
   { value: "restaurant", label: "Restaurant" },
   { value: "pharmacy", label: "Pharmacy" },
   { value: "electronics", label: "Electronics" },
+  { value: "pizza", label: "Pizza shop" },
 ];
 
 export default function RegisterPage() {
