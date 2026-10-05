@@ -528,6 +528,8 @@ export type OwnerOverview = DashboardReport & {
   stock_value: string;
   sku_locations: number;
   products: number;
+  products_sold: number;
+  product_sale_percent: string;
   services: number;
   variants: number;
   suppliers: number;
@@ -535,7 +537,7 @@ export type OwnerOverview = DashboardReport & {
   users_total: number;
   users_active: number;
   daily: ReportSeries[];
-  top_products: { product: string; qty: string; revenue: string }[];
+  top_products: { product: string; qty: string; revenue: string; share: string }[];
   recent_sales: {
     id: string;
     number: string;

@@ -9,7 +9,7 @@ import { Badge, PageHeader } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { num, rs } from "@/lib/money";
-import type { LiveProduct, OwnerOverview } from "@/lib/types";
+import type { LiveProduct, OwnerOverview, ReportSeries } from "@/lib/types";
 
 const PERIODS = [
   { id: "today", label: "Today" },
@@ -90,7 +90,6 @@ export default function DashboardPage() {
   );
   const selected = visible.find((row) => row.id === selectedId) || visible[0] || products[0] || null;
   const counts = data?.live_counts;
-  const maxDaily = Math.max(...(data?.daily.map((row) => num(row.total)) || [0]), 1);
 
   const kpis = data
     ? [
@@ -205,30 +204,21 @@ export default function DashboardPage() {
             </dl>
           </div>
           <div className="card p-6">
-            <h2 className="font-display text-xl">Sales trend</h2>
-            {data.daily.length === 0 ? (
-              <p className="mt-4 text-sm text-ink-700/70">No sales in this period yet.</p>
-            ) : (
-              <ul className="mt-4 space-y-2">
-                {data.daily.slice(-10).map((row) => (
-                  <li key={row.date}>
-                    <div className="mb-1 flex justify-between text-xs">
-                      <span>{row.date}</span>
-                      <span>
-                        {rs(row.total)}
-                        <span className="ml-2 text-ink-700/45">{row.orders} orders</span>
-                      </span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-paper-100">
-                      <div
-                        className="h-2 rounded-full bg-copper-500"
-                        style={{ width: `${Math.max((num(row.total) / maxDaily) * 100, 4)}%` }}
-                      />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="font-display text-xl">{period === "today" ? "Today's sale" : "Sales"}</h2>
+                <p className="mt-1 text-xs text-ink-700/55">
+                  {data.from} → {data.to}
+                </p>
+              </div>
+              <p className="font-display text-2xl text-ink-950">{rs(data.today_sales)}</p>
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-2 text-sm">
+              <Stat label="Orders" value={String(data.orders)} />
+              <Stat label="Products sold" value={String(data.products_sold ?? 0)} />
+              <Stat label="Catalog sold" value={`${num(data.product_sale_percent).toFixed(0)}%`} />
+            </div>
+            <SalesChart rows={data.daily} />
           </div>
         </div>
       ) : null}
@@ -269,26 +259,49 @@ export default function DashboardPage() {
             )}
           </div>
           <div className="card p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-xl">Top products</h2>
-              <Link href="/products" className="text-xs text-copper-700 hover:underline">
-                Manage catalog
-              </Link>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="font-display text-xl">Products sold</h2>
+                <p className="mt-1 text-xs text-ink-700/55">
+                  {data.products_sold ?? 0} of {data.products} catalog products sold
+                  {period === "today" ? " today" : " in this period"}
+                </p>
+              </div>
+              <SoldRing percent={num(data.product_sale_percent)} />
             </div>
             {data.top_products.length === 0 ? (
-              <p className="mt-4 text-sm text-ink-700/70">Product mix appears after POS sales.</p>
+              <p className="mt-4 text-sm text-ink-700/70">Product amounts appear after POS sales.</p>
             ) : (
-              <ul className="mt-4 space-y-2 text-sm">
-                {data.top_products.map((row) => (
-                  <li key={row.product} className="flex justify-between gap-3 border-b border-paper-100 pb-2">
-                    <span>
-                      {row.product}
-                      <span className="block text-xs text-ink-700/55">{row.qty} sold</span>
-                    </span>
-                    <span className="font-medium">{rs(row.revenue)}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full min-w-[28rem] text-left text-sm">
+                  <thead className="text-[11px] uppercase tracking-wide text-ink-700/55">
+                    <tr>
+                      <th className="pb-2 font-medium">Product</th>
+                      <th className="pb-2 text-right font-medium">Qty</th>
+                      <th className="pb-2 text-right font-medium">Amount</th>
+                      <th className="pb-2 text-right font-medium">Share</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.top_products.map((row) => (
+                      <tr key={row.product} className="border-t border-paper-100">
+                        <td className="py-2 pr-3">
+                          <p className="font-medium text-ink-950">{row.product}</p>
+                          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-paper-100">
+                            <div
+                              className="h-1.5 rounded-full bg-copper-500"
+                              style={{ width: `${Math.max(num(row.share), 2)}%` }}
+                            />
+                          </div>
+                        </td>
+                        <td className="py-2 text-right tabular-nums">{fmtQty(row.qty)}</td>
+                        <td className="py-2 text-right font-medium tabular-nums">{rs(row.revenue)}</td>
+                        <td className="py-2 text-right tabular-nums">{num(row.share).toFixed(1)}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
@@ -455,6 +468,83 @@ export default function DashboardPage() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+function fmtQty(value: string | number) {
+  const n = num(value);
+  return n.toLocaleString("en-PK", { maximumFractionDigits: n % 1 === 0 ? 0 : 2 });
+}
+
+function shortDate(iso: string) {
+  const at = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(at.getTime())) return iso.slice(5);
+  return at.toLocaleDateString("en-PK", { day: "2-digit", month: "short" });
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-paper-50 px-3 py-2">
+      <p className="text-[11px] uppercase tracking-wide text-ink-700/55">{label}</p>
+      <p className="mt-0.5 font-medium text-ink-950">{value}</p>
+    </div>
+  );
+}
+
+function SalesChart({ rows }: { rows: ReportSeries[] }) {
+  const points = rows.slice(-10);
+  if (points.length === 0) {
+    return <p className="mt-4 text-sm text-ink-700/70">No sales in this period yet.</p>;
+  }
+  const max = Math.max(...points.map((row) => num(row.total)), 1);
+  const width = 560;
+  const height = 150;
+  const gap = 14;
+  const barW = Math.min(42, (width - gap * (points.length + 1)) / points.length);
+  const group = points.length * barW + (points.length + 1) * gap;
+  const offset = Math.max(0, (width - group) / 2);
+  return (
+    <svg viewBox={`0 0 ${width} ${height + 28}`} className="mt-4 h-44 w-full" role="img" aria-label="Sales by day">
+      {points.map((row, index) => {
+        const barH = Math.max((num(row.total) / max) * (height - 8), 3);
+        const x = offset + gap + index * (barW + gap);
+        const y = height - barH;
+        return (
+          <g key={row.date}>
+            <rect x={x} y={y} width={barW} height={barH} rx="4" fill="#d4892a" />
+            <text x={x + barW / 2} y={height + 16} textAnchor="middle" fill="#3d342c" fontSize="10">
+              {shortDate(row.date)}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function SoldRing({ percent }: { percent: number }) {
+  const safe = Math.min(100, Math.max(0, percent));
+  const radius = 28;
+  const circ = 2 * Math.PI * radius;
+  const dash = (safe / 100) * circ;
+  return (
+    <svg viewBox="0 0 72 72" className="h-16 w-16 shrink-0" role="img" aria-label={`${safe.toFixed(0)} percent of products sold`}>
+      <circle cx="36" cy="36" r={radius} fill="none" stroke="#e8dfd0" strokeWidth="7" />
+      <circle
+        cx="36"
+        cy="36"
+        r={radius}
+        fill="none"
+        stroke="#d4892a"
+        strokeWidth="7"
+        strokeLinecap="round"
+        strokeDasharray={`${dash} ${circ - dash}`}
+        transform="rotate(-90 36 36)"
+      />
+      <text x="36" y="40" textAnchor="middle" fill="#14110e" fontSize="13" fontWeight="600">
+        {safe.toFixed(0)}%
+      </text>
+    </svg>
   );
 }
 

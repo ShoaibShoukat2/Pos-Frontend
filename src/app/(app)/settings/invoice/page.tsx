@@ -2,9 +2,48 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
+import { ReceiptSlip } from "@/components/ReceiptSlip";
 import { Button, Field, Input, PageHeader, Select, Textarea, Toggle } from "@/components/ui";
 import { api } from "@/lib/api";
-import type { InvoiceSettings } from "@/lib/types";
+import type { InvoiceSettings, PosSale } from "@/lib/types";
+
+const SAMPLE_SALE: PosSale = {
+  id: "preview",
+  number: "INV-000001",
+  client_uuid: "preview",
+  subtotal: "680.00",
+  total: "650.00",
+  net_total: "650.00",
+  paid_amount: "700.00",
+  due_amount: "0.00",
+  discount_total: "30.00",
+  loyalty_earned: "0",
+  payment_method: "cash",
+  customer_name: "Walk-in",
+  cashier_name: "Cashier",
+  branch_name: "Head office",
+  sold_at: new Date().toISOString(),
+  lines: [
+    {
+      id: "1",
+      product_name: "Sample product",
+      variant_name: "Sample product",
+      sku: "SKU-100",
+      quantity: "2",
+      unit_price: "250.00",
+      line_total: "500.00",
+    },
+    {
+      id: "2",
+      product_name: "Second item",
+      variant_name: "Second item",
+      sku: "SKU-240",
+      quantity: "1",
+      unit_price: "180.00",
+      line_total: "180.00",
+    },
+  ],
+};
 
 export default function InvoicePage() {
   const [form, setForm] = useState<Partial<InvoiceSettings>>({});
@@ -87,10 +126,17 @@ export default function InvoicePage() {
             {saved ? <span className="text-sm text-emerald-700">Saved</span> : null}
           </div>
         </div>
-        <div className="card p-6">
-          <p className="text-xs uppercase tracking-[0.16em] text-copper-600">Preview number</p>
-          <p className="stat-value mt-3">{form.preview_number || "INV-000001"}</p>
-          <p className="mt-4 text-sm text-ink-700/70">{form.footer_note}</p>
+        <div className="card bg-paper-50 p-4">
+          <p className="text-xs uppercase tracking-[0.16em] text-copper-600">Slip preview</p>
+          <p className="mt-1 text-sm text-ink-700/70">This is the invoice the owner and cashier print.</p>
+          <div className="mt-4 overflow-x-auto">
+            <ReceiptSlip
+              sale={{ ...SAMPLE_SALE, number: form.preview_number || SAMPLE_SALE.number }}
+              shop={{ name: "Your business", city: "City", phone: "03xx-xxxxxxx" }}
+              invoice={form as InvoiceSettings}
+              tendered={700}
+            />
+          </div>
         </div>
       </form>
     </div>
