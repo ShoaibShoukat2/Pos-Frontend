@@ -12,6 +12,7 @@ import {
   Minus,
   Package,
   Plus,
+  Printer,
   QrCode,
   RotateCcw,
   Search,
@@ -27,7 +28,7 @@ import {
 import { CameraScan } from "@/components/CameraScan";
 import { HardwareSetup, HardwareStatus, HardwareToasts } from "@/components/HardwareBar";
 import { QrImage } from "@/components/QrImage";
-import { ReceiptReview } from "@/components/ReceiptSlip";
+import { ReceiptSlip } from "@/components/ReceiptSlip";
 import { SaleReturnPanel } from "@/components/SaleReturnPanel";
 import { Badge, Button, Field, Input, Modal, Select } from "@/components/ui";
 import { ApiError, NetworkError, api, asList } from "@/lib/api";
@@ -98,8 +99,9 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const [returnOpen, setReturnOpen] = useState(false);
   const [returnQuery, setReturnQuery] = useState("");
   const [slip, setSlip] = useState<PosSale | null>(null);
-  const [slipAutoPrint, setSlipAutoPrint] = useState(false);
   const [slipTendered, setSlipTendered] = useState<number | null>(null);
+  const [printEverySale, setPrintEverySale] = useState(false);
+  const [pendingPrintId, setPendingPrintId] = useState<string | null>(null);
   const helpOnce = useRef(false);
   const skuOnce = useRef(false);
   const hardware = useHardware();
@@ -110,6 +112,20 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
     const tick = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(tick);
   }, []);
+
+  useEffect(() => {
+    setPrintEverySale(window.localStorage.getItem("upos_print_every_sale") === "1");
+  }, []);
+
+  useEffect(() => {
+    if (!pendingPrintId || !slip) return;
+    if ((slip.id || slip.number) !== pendingPrintId) return;
+    const tick = window.setTimeout(() => {
+      window.print();
+      setPendingPrintId(null);
+    }, 300);
+    return () => window.clearTimeout(tick);
+  }, [pendingPrintId, slip]);
 
   function matchItem(code: string, rows: PosCatalogItem[] | null | undefined) {
     const key = code.trim().toLowerCase();
@@ -444,8 +460,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         sale.lines && sale.lines.length
           ? sale
           : slipFromCart(sale.number, applied, money(dueTotal - applied));
-      openSlip(preview, { autoPrint: true, tendered });
-      setMessage(`Sale ${sale.number} saved.`);
+      parkSlip(preview, tendered, true);
+      setMessage(saleSavedNote(sale.number));
       setOnline(true);
       setCart([]);
       setTicketOpen(false);
@@ -462,12 +478,13 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         const nextSnap = { ...snapshot, catalog: nextCatalog };
         setSnapshot(nextSnap);
         await saveSnapshot(shopKey, nextSnap);
-        openSlip(slipFromCart(`LOCAL-${Date.now().toString().slice(-6)}`, applied, money(dueTotal - applied)), {
-          autoPrint: true,
-          tendered,
-        });
+        parkSlip(slipFromCart(`LOCAL-${Date.now().toString().slice(-6)}`, applied, money(dueTotal - applied)), tendered, true);
         setOnline(false);
-        setMessage("Sale saved on this counter. It will sync when the line is back.");
+        setMessage(
+          printEverySale && hardware.printer.connected
+            ? "Sale saved on this counter and the slip was sent to the printer. It will sync when the line is back."
+            : "Sale saved on this counter. It will sync when the line is back.",
+        );
         setCart([]);
         setTicketOpen(false);
         setManualKind("");
@@ -485,22 +502,34 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
     }
   }
 
-  function openSlip(sale: PosSale, opts?: { autoPrint?: boolean; tendered?: number }) {
+  function allowPrintEverySale(on: boolean) {
+    setPrintEverySale(on);
+    window.localStorage.setItem("upos_print_every_sale", on ? "1" : "0");
+  }
+
+  function saleSavedNote(number: string) {
+    if (!printEverySale) return `Sale ${number} saved.`;
+    if (!hardware.printer.connected) return `Sale ${number} saved. Printer is off, so no slip was printed.`;
+    return `Sale ${number} saved. Slip sent to the printer.`;
+  }
+
+  function parkSlip(sale: PosSale, tendered: number | null, fromCheckout: boolean) {
     setSlip(sale);
-    setSlipAutoPrint(!!opts?.autoPrint);
-    setSlipTendered(opts?.tendered ?? null);
-    setTicketOpen(false);
+    setSlipTendered(tendered);
+    if (fromCheckout && printEverySale && hardware.printer.connected) {
+      setPendingPrintId(sale.id || sale.number);
+    }
   }
 
   async function reviewSlip(id: string, number: string) {
     setError("");
     try {
       const sale = await api<PosSale>(`/api/pos/sales/${id}/`);
-      openSlip(sale);
+      parkSlip(sale, null, false);
     } catch {
       try {
         const sale = await api<PosSale>(`/api/pos/returns/lookup/?q=${encodeURIComponent(number)}`);
-        openSlip(sale);
+        parkSlip(sale, null, false);
       } catch {
         setError("Could not open this slip.");
       }
@@ -923,6 +952,53 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         </div>
 
         <div className="min-h-0 min-w-0 flex-1 space-y-4 overflow-y-auto p-4">
+          <div className="rounded-xl border border-paper-200 bg-paper-50/70">
+            <div className="receipt-no-print flex items-start justify-between gap-3 px-3 py-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper-600">Slip</p>
+                <p className="text-xs text-ink-700/65">
+                  {slip ? slip.number : "Stays on this side. It does not pop up after each sale."}
+                </p>
+              </div>
+              <label className="flex max-w-[11rem] cursor-pointer items-start gap-2 text-xs text-ink-800">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={printEverySale}
+                  onChange={(e) => allowPrintEverySale(e.target.checked)}
+                />
+                Print a slip on every sale
+              </label>
+            </div>
+            {printEverySale && !hardware.printer.connected ? (
+              <p className="receipt-no-print px-3 pb-2 text-xs text-amber-800">
+                Printer is off. Sales will still be saved, and slips will print when the printer is connected.
+              </p>
+            ) : null}
+            {slip ? (
+              <div id="receipt-print-root" className="border-t border-paper-200 bg-white px-2 py-3">
+                <ReceiptSlip
+                  sale={slip}
+                  shop={snapshot?.shop || { name: user?.business_name || "Shop" }}
+                  invoice={snapshot?.invoice}
+                  tendered={slipTendered}
+                />
+                <div className="receipt-no-print px-2 pb-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-10 w-full"
+                    disabled={!hardware.printer.connected}
+                    onClick={() => window.print()}
+                  >
+                    <Printer size={15} />
+                    {hardware.printer.connected ? "Print this slip" : "Connect printer to print"}
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+          </div>
+
           <Field label="Customer">
             <Select value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
               <option value="">Walk-in customer</option>
@@ -1267,19 +1343,6 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       <Modal open={returnOpen} title="Customer return" onClose={() => setReturnOpen(false)}>
         {returnOpen ? <SaleReturnPanel initialQuery={returnQuery} onDone={onReturned} /> : null}
       </Modal>
-      <ReceiptReview
-        open={!!slip}
-        sale={slip}
-        shop={snapshot?.shop || { name: user?.business_name || "Shop" }}
-        invoice={snapshot?.invoice}
-        tendered={slipTendered}
-        autoPrint={slipAutoPrint}
-        onClose={() => {
-          setSlip(null);
-          setSlipAutoPrint(false);
-          setSlipTendered(null);
-        }}
-      />
     </div>
   );
 

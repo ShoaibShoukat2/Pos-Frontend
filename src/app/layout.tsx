@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Outfit } from "next/font/google";
 
 import { PwaRegister } from "@/components/PwaRegister";
+import { UpdateNotice } from "@/components/UpdateNotice";
 import { AuthProvider } from "@/lib/auth";
 
 import "./globals.css";
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${outfit.variable} ${fraunces.variable} font-sans`}>
         <AuthProvider>
           <PwaRegister />
+          <UpdateNotice />
           {children}
         </AuthProvider>
       </body>

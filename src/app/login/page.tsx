@@ -61,10 +61,6 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
-  const visibleRoles = useMemo(
-    () => (role === "platform" ? ROLES : ROLES.filter((item) => item.id !== "platform")),
-    [role],
-  );
   const selected = useMemo(() => ROLES.find((r) => r.id === role) || ROLES[0], [role]);
 
   async function onSubmit(e: FormEvent) {
@@ -75,7 +71,7 @@ function LoginForm() {
       await login(email, password, selected.portal);
     } catch (err) {
       if (err instanceof ApiError) setError(loginMessage(err.body));
-      else setError("Could not reach the server. Is Django running on :8000?");
+      else setError("Could not reach Universal POS. Close the app and open it again.");
     } finally {
       setPending(false);
     }
@@ -91,8 +87,8 @@ function LoginForm() {
           <h1 className="font-display text-2xl">Sign in</h1>
           <p className="mt-1 text-sm text-ink-700/70">First choose who you are, then enter your email and password.</p>
 
-          <div className={`mt-5 grid gap-2 ${visibleRoles.length > 2 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
-            {visibleRoles.map((item) => {
+          <div className="mt-5 grid gap-2 sm:grid-cols-3">
+            {ROLES.map((item) => {
               const Icon = item.icon;
               const active = role === item.id;
               return (

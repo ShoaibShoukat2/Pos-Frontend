@@ -11,6 +11,9 @@ export default function HomePage() {
       <header className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-5 sm:px-6 sm:py-6">
         <p className="font-display text-2xl">Universal POS</p>
         <div className="flex flex-wrap gap-2 sm:gap-3">
+          <Link href="/login?role=platform" className="btn-ghost">
+            Admin login
+          </Link>
           <Link href="/login" className="btn-ghost">
             Sign in
           </Link>

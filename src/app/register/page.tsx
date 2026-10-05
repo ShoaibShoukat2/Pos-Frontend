@@ -45,7 +45,7 @@ export default function RegisterPage() {
       if (err instanceof ApiError) {
         setErrors(fieldErrors(err.body));
       } else {
-        setErrors({ detail: "Could not reach the server. Is Django running on :8000?" });
+        setErrors({ detail: "Could not reach Universal POS. Close the app and open it again." });
       }
     } finally {
       setPending(false);
