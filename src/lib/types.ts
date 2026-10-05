@@ -195,6 +195,7 @@ export type InvoiceSettings = {
   show_tax_breakdown: boolean;
   show_cashier_name: boolean;
   paper_size: "80mm" | "58mm" | "A4";
+  design: "classic" | "compact" | "bold" | "formal";
   preview_number: string;
 };
 

@@ -28,7 +28,7 @@ import {
 import { CameraScan } from "@/components/CameraScan";
 import { HardwareSetup, HardwareStatus, HardwareToasts } from "@/components/HardwareBar";
 import { QrImage } from "@/components/QrImage";
-import { ReceiptSlip } from "@/components/ReceiptSlip";
+import { INVOICE_DESIGNS, ReceiptSlip, type InvoiceDesign } from "@/components/ReceiptSlip";
 import { SaleReturnPanel } from "@/components/SaleReturnPanel";
 import { Badge, Button, Field, Input, Modal, Select } from "@/components/ui";
 import { ApiError, NetworkError, api, asList } from "@/lib/api";
@@ -101,6 +101,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const [slip, setSlip] = useState<PosSale | null>(null);
   const [slipTendered, setSlipTendered] = useState<number | null>(null);
   const [printEverySale, setPrintEverySale] = useState(false);
+  const [slipDesign, setSlipDesign] = useState<InvoiceDesign | null>(null);
   const [pendingPrintId, setPendingPrintId] = useState<string | null>(null);
   const helpOnce = useRef(false);
   const skuOnce = useRef(false);
@@ -977,10 +978,30 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             ) : null}
             {slip ? (
               <div id="receipt-print-root" className="border-t border-paper-200 bg-white px-2 py-3">
+                <div className="receipt-no-print mb-2 flex flex-wrap gap-1 px-1">
+                  {INVOICE_DESIGNS.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setSlipDesign(item.id)}
+                      className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                        (slipDesign || snapshot?.invoice?.design || "classic") === item.id
+                          ? "bg-ink-950 text-paper-50"
+                          : "bg-paper-100 text-ink-800"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
                 <ReceiptSlip
                   sale={slip}
                   shop={snapshot?.shop || { name: user?.business_name || "Shop" }}
-                  invoice={snapshot?.invoice}
+                  invoice={
+                    snapshot?.invoice
+                      ? { ...snapshot.invoice, design: slipDesign || snapshot.invoice.design }
+                      : undefined
+                  }
                   tendered={slipTendered}
                 />
                 <div className="receipt-no-print px-2 pb-1">

@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 
-import { ReceiptSlip } from "@/components/ReceiptSlip";
+import { INVOICE_DESIGNS, ReceiptSlip } from "@/components/ReceiptSlip";
 import { Button, Field, Input, PageHeader, Select, Textarea, Toggle } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { InvoiceSettings, PosSale } from "@/lib/types";
@@ -72,7 +72,7 @@ export default function InvoicePage() {
       <PageHeader
         eyebrow="Module 1"
         title="Invoice settings"
-        description="Number format and the customer slip printed from POS."
+        description="Number format, paper size, and the invoice design used when you print."
       />
       <form onSubmit={onSubmit} className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="card grid gap-4 p-6 md:grid-cols-2">
@@ -103,6 +103,27 @@ export default function InvoicePage() {
               <option value="A4">A4</option>
             </Select>
           </Field>
+          <div className="md:col-span-2">
+            <p className="text-sm font-medium text-ink-950">Invoice design</p>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {INVOICE_DESIGNS.map((item) => {
+                const active = (form.design || "classic") === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setForm({ ...form, design: item.id })}
+                    className={`rounded-xl border px-3 py-3 text-left ${
+                      active ? "border-copper-500 bg-copper-400/10 ring-2 ring-copper-500/20" : "border-paper-200 bg-white"
+                    }`}
+                  >
+                    <span className="block text-sm font-medium text-ink-950">{item.label}</span>
+                    <span className="mt-1 block text-xs text-ink-700/70">{item.hint}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <div className="md:col-span-2">
             <Field label="Footer note">
               <Input value={form.footer_note || ""} onChange={(e) => setForm({ ...form, footer_note: e.target.value })} />
