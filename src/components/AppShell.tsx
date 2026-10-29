@@ -73,8 +73,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-dvh lg:grid lg:h-dvh lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] lg:overflow-hidden">
       <aside className="hidden flex-col border-ink-800 bg-ink-950 text-paper-50 lg:flex lg:h-dvh lg:overflow-hidden lg:border-r">
         <div className="shrink-0 px-5 py-5">
-          <p className="truncate font-display text-2xl tracking-tight">Universal POS</p>
-          <p className="mt-0.5 text-[11px] uppercase tracking-[0.2em] text-copper-400">Phase 6 · SaaS</p>
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-copper-500/15">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#d4892a" />
+                <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.55" />
+                <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.55" />
+                <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.25" />
+              </svg>
+            </div>
+            <p className="truncate font-display text-xl tracking-tight text-paper-50">Universal POS</p>
+          </div>
         </div>
         <div className="shrink-0 px-5 pb-3">
           <div className="rounded-xl border border-white/10 bg-ink-900 px-3 py-3">

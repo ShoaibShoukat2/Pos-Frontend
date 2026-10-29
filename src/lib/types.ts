@@ -652,20 +652,6 @@ export type Role = {
   user_count: number;
 };
 
-export type Coupon = {
-  id: string;
-  code: string;
-  kind: "percent" | "fixed";
-  value: string;
-  min_spend: string;
-  max_discount: string;
-  starts_at: string | null;
-  ends_at: string | null;
-  usage_limit: number;
-  used_count: number;
-  is_active: boolean;
-};
-
 export type Promotion = {
   id: string;
   name: string;
@@ -681,22 +667,6 @@ export type Promotion = {
   variant_name?: string;
   starts_at: string | null;
   ends_at: string | null;
-  is_active: boolean;
-};
-
-export type MembershipTier = {
-  id: string;
-  name: string;
-  min_points: string;
-  discount_percent: string;
-  is_active: boolean;
-};
-
-export type LoyaltySettings = {
-  id: string;
-  points_per_amount: string;
-  redemption_rate: string;
-  min_redeem_points: string;
   is_active: boolean;
 };
 
@@ -718,10 +688,7 @@ export type PosCatalogItem = {
   qty: string;
 };
 
-export type PosCustomer = Customer & {
-  membership_name?: string;
-  membership_discount?: string;
-};
+export type PosCustomer = Customer;
 
 export type ReceiptShop = {
   name: string;
@@ -743,10 +710,7 @@ export type PosSnapshot = {
   catalog_services?: number;
   customers: PosCustomer[];
   customer_truncated?: boolean;
-  coupons: Coupon[];
   promotions: Promotion[];
-  tiers: MembershipTier[];
-  loyalty: LoyaltySettings;
   open_shift: CashSession | null;
   shop?: ReceiptShop;
   invoice?: InvoiceSettings;
@@ -756,10 +720,8 @@ export type PosSalePayload = {
   client_uuid: string;
   branch?: string;
   customer?: string | null;
-  coupon_code?: string;
   manual_discount_kind?: string;
   manual_discount_value?: string;
-  redeem_points?: string;
   notes?: string;
   sold_at?: string;
   lines: { variant: string; quantity: string }[];

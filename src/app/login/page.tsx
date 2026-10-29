@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useMemo, useState } from "react";
 import { Building2, Monitor, Shield } from "lucide-react";
 
-import { FounderCredit } from "@/components/FounderCredit";
 import { Alert, Button, Field, Input } from "@/components/ui";
 import { ApiError, fieldErrors } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -16,39 +15,45 @@ const ROLES: {
   id: RoleId;
   portal: "tenant" | "cashier" | "platform";
   title: string;
-  hint: string;
+  sub: string;
   button: string;
   icon: typeof Building2;
 }[] = [
   {
     id: "owner",
     portal: "tenant",
-    title: "Business owner",
-    hint: "Full shop dashboard, products, reports and staff.",
-    button: "Enter workspace",
+    title: "Owner",
+    sub: "Dashboard, reports, staff",
+    button: "Sign in",
     icon: Building2,
   },
   {
     id: "cashier",
     portal: "cashier",
     title: "Cashier",
-    hint: "POS, customers and cash drawer only.",
-    button: "Open my desk",
+    sub: "POS counter only",
+    button: "Sign in",
     icon: Monitor,
   },
   {
     id: "platform",
     portal: "platform",
-    title: "Platform admin",
-    hint: "Software owner. All businesses and users.",
-    button: "Open platform",
+    title: "Admin",
+    sub: "Platform management",
+    button: "Sign in",
     icon: Shield,
   },
 ];
 
 function loginMessage(body: unknown) {
   const fields = fieldErrors(body);
-  return fields.detail || fields.email || fields.password || fields.non_field_errors || "Could not sign in.";
+  return (
+    fields.detail ||
+    fields.email ||
+    fields.password ||
+    fields.non_field_errors ||
+    "Incorrect email or password."
+  );
 }
 
 function LoginForm() {
@@ -72,26 +77,36 @@ function LoginForm() {
       await login(email, password, selected.portal);
     } catch (err) {
       if (err instanceof ApiError) setError(loginMessage(err.body));
-      else setError("Could not reach Universal POS. Close the app and open it again.");
+      else setError("Could not connect. Check your internet and try again.");
     } finally {
       setPending(false);
     }
   }
 
   return (
-    <div className="grid min-h-dvh place-items-center px-4 py-8 sm:py-10">
-      <div className="w-full max-w-lg">
-        <Link href="/" className="font-display text-3xl text-ink-950">
-          Universal POS
-        </Link>
-        <div className="card mt-6 p-6">
-          <h1 className="font-display text-2xl">Sign in</h1>
-          <p className="mt-1 text-sm text-ink-700/70">First choose who you are, then enter your email and password.</p>
+    <div className="grid min-h-dvh place-items-center bg-paper-50 px-4 py-10">
+      <div className="w-full max-w-sm">
 
-          <div className="mt-5 grid gap-2 sm:grid-cols-3">
+        {/* Brand */}
+        <div className="mb-8 text-center">
+          <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-ink-950 mb-4">
+            <svg width="20" height="20" viewBox="0 0 14 14" fill="none">
+              <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#d4892a" />
+              <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.6" />
+              <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.6" />
+              <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.3" />
+            </svg>
+          </div>
+          <h1 className="font-display text-2xl text-ink-950">Universal POS</h1>
+          <p className="mt-1 text-sm text-ink-700/60">Sign in to your workspace</p>
+        </div>
+
+        <div className="card p-6">
+          {/* Role selector */}
+          <div className="mb-5 grid grid-cols-3 gap-1.5 rounded-xl bg-paper-100 p-1">
             {ROLES.map((item) => {
-              const Icon = item.icon;
               const active = role === item.id;
+              const Icon = item.icon;
               return (
                 <button
                   key={item.id}
@@ -101,35 +116,50 @@ function LoginForm() {
                     setError("");
                     router.replace(`/login?role=${item.id}`, { scroll: false });
                   }}
-                  className={`rounded-2xl border px-3 py-3 text-left transition ${
-                    active ? "border-copper-500 bg-copper-50 ring-2 ring-copper-500/20" : "border-paper-200 bg-white hover:border-copper-300"
+                  className={`flex flex-col items-center gap-1 rounded-lg py-2.5 text-center transition ${
+                    active
+                      ? "bg-white shadow-sm text-ink-950"
+                      : "text-ink-700/50 hover:text-ink-700"
                   }`}
                 >
-                  <Icon size={18} className={active ? "text-copper-600" : "text-ink-700/50"} />
-                  <p className="mt-2 text-sm font-medium text-ink-950">{item.title}</p>
+                  <Icon size={15} />
+                  <span className="text-[11px] font-medium">{item.title}</span>
                 </button>
               );
             })}
           </div>
-          <p className="mt-3 text-xs text-ink-700/60">{selected.hint}</p>
 
-          <form onSubmit={onSubmit} className="mt-5 space-y-4">
+          <p className="mb-4 text-xs text-ink-700/50">{selected.sub}</p>
+
+          <form onSubmit={onSubmit} className="space-y-4">
             {error ? <Alert>{error}</Alert> : null}
             <Field label="Email">
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                required
+              />
             </Field>
             <Field label="Password">
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
             </Field>
             <Button type="submit" disabled={pending} className="w-full">
               {pending ? "Signing in…" : selected.button}
             </Button>
           </form>
         </div>
-        <FounderCredit variant="compact" />
-        <p className="mt-4 text-sm text-ink-700/70">
-          New shop?{" "}
-          <Link href="/register" className="text-copper-600 underline">
+
+        <p className="mt-5 text-center text-sm text-ink-700/55">
+          No account?{" "}
+          <Link href="/register" className="text-copper-600 hover:text-copper-500 font-medium">
             Create a business
           </Link>
         </p>
@@ -140,11 +170,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="grid min-h-screen place-items-center text-sm text-ink-700/70">Loading sign in…</div>
-      }
-    >
+    <Suspense fallback={<div className="grid min-h-screen place-items-center text-sm text-ink-700/60">Loading…</div>}>
       <LoginForm />
     </Suspense>
   );
