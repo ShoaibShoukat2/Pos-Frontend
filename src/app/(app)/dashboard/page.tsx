@@ -131,7 +131,9 @@ export default function DashboardPage() {
                   type="button"
                   onClick={() => setPeriod(p.id)}
                   className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium sm:flex-none ${
-                    period === p.id ? "bg-ink-950 text-paper-50" : "text-ink-700/70 hover:text-ink-950"
+                    period === p.id
+                      ? "bg-surface-900 text-white"
+                      : "text-surface-500 hover:text-surface-900"
                   }`}
                 >
                   {p.label}

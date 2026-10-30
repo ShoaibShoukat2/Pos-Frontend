@@ -8,11 +8,11 @@ export function TableSkeleton({ rows = 6, cols = 4 }: { rows?: number; cols?: nu
   return (
     <div className="card overflow-hidden">
       <div className="animate-pulse">
-        <div className="h-10 bg-paper-100" />
+        <div className="h-10 bg-surface-100" />
         {Array.from({ length: rows }).map((_, i) => (
-          <div key={i} className="flex gap-3 border-t border-paper-100 px-4 py-3">
+          <div key={i} className="flex gap-3 border-t border-surface-100 px-4 py-3">
             {Array.from({ length: cols }).map((__, j) => (
-              <div key={j} className="h-4 flex-1 rounded bg-paper-100" />
+              <div key={j} className="h-4 flex-1 rounded bg-surface-100" />
             ))}
           </div>
         ))}
@@ -53,7 +53,7 @@ export function Pager({
 }) {
   if (count === 0) return null;
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-ink-700/70">
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-surface-400">
       <p>
         {count.toLocaleString()} record{count === 1 ? "" : "s"}
       </p>

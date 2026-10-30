@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { FounderCredit } from "@/components/FounderCredit";
 import { useEffect } from "react";
 import { LogOut, Menu, MoreHorizontal, X, type LucideIcon } from "lucide-react";
+
+import { FounderCredit } from "@/components/FounderCredit";
 
 export type ChromeLink = {
   href: string;
@@ -23,7 +24,7 @@ export function MenuButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-paper-200 bg-white lg:hidden"
+      className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-surface-200 bg-white text-surface-500 hover:text-surface-900 lg:hidden"
       aria-label="Open menu"
     >
       <Menu size={18} />
@@ -54,9 +55,7 @@ export function NavDrawer({
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = prev;
@@ -66,38 +65,52 @@ export function NavDrawer({
 
   return (
     <div className="lg:hidden">
+      {/* Backdrop */}
       <button
         type="button"
         aria-label="Close menu"
-        className={`fixed inset-0 z-40 bg-ink-950/50 transition-opacity ${
+        className={`fixed inset-0 z-40 bg-surface-900/40 backdrop-blur-sm transition-opacity ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
         onClick={onClose}
       />
+
+      {/* Drawer */}
       <aside
-        className={`safe-top safe-bottom fixed inset-y-0 left-0 z-50 flex w-[min(20rem,calc(100vw-2.5rem))] flex-col bg-ink-950 text-paper-50 shadow-2xl transition-transform duration-200 ${
+        className={`safe-top safe-bottom fixed inset-y-0 left-0 z-50 flex w-[min(20rem,calc(100vw-2.5rem))] flex-col shadow-2xl transition-transform duration-200 ${
           open ? "translate-x-0" : "pointer-events-none -translate-x-full"
         }`}
+        style={{ background: "var(--brand-primary, #1e293b)", color: "#f8fafc" }}
         aria-hidden={!open}
         {...(!open ? { inert: true } : {})}
       >
+        {/* Header */}
         <div className="flex items-start justify-between gap-3 px-4 py-4">
           <div className="min-w-0">
-            <p className="truncate font-display text-xl">Universal POS</p>
-            {subtitle ? <p className="mt-1 truncate text-sm text-paper-50/75">{subtitle}</p> : null}
-            {title ? <p className="truncate text-xs text-paper-50/55">{title}</p> : null}
-            {meta ? <p className="mt-1 text-[11px] uppercase tracking-wider text-copper-400">{meta}</p> : null}
+            <p className="truncate font-display text-xl text-white">Universal POS</p>
+            {subtitle ? <p className="mt-1 truncate text-sm text-white/65">{subtitle}</p> : null}
+            {title   ? <p className="truncate text-xs text-white/45">{title}</p> : null}
+            {meta    ? (
+              <p
+                className="mt-1 text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: "var(--brand-accent, #6366f1)" }}
+              >
+                {meta}
+              </p>
+            ) : null}
           </div>
           <button
             type="button"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-xl hover:bg-white/10"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-white/40 hover:bg-white/8 hover:text-white"
             onClick={onClose}
             aria-label="Close menu"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
-        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 pb-3">
+
+        {/* Nav */}
+        <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-3 pb-3">
           {links.map((item) => {
             const Icon = item.icon;
             const active = isActivePath(pathname, item.href);
@@ -106,24 +119,35 @@ export function NavDrawer({
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
-                className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm ${
-                  active ? "bg-copper-500 text-ink-950" : "text-paper-50/80 hover:bg-white/5"
-                }`}
+                className="flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors"
+                style={
+                  active
+                    ? { background: "var(--brand-accent, #6366f1)", color: "#fff", fontWeight: 500 }
+                    : { color: "rgba(248,250,252,0.65)" }
+                }
+                onMouseOver={(e) => {
+                  if (!active) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+                }}
+                onMouseOut={(e) => {
+                  if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
+                }}
               >
-                <Icon size={18} className="shrink-0" />
+                <Icon size={16} className="shrink-0" />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="border-t border-white/10 px-3 py-3">
+
+        {/* Footer */}
+        <div className="border-t px-3 py-3" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
           <FounderCredit variant="sidebar" />
           <button
             type="button"
             onClick={onLogout}
-            className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-paper-50/70 hover:bg-white/5"
+            className="flex min-h-10 w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-white/40 transition-colors hover:bg-white/5 hover:text-white"
           >
-            <LogOut size={18} />
+            <LogOut size={16} />
             Sign out
           </button>
         </div>
@@ -145,17 +169,20 @@ export function BottomNav({
 }) {
   const tabs = items.slice(0, 4);
   return (
-    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-paper-200 bg-white/95 backdrop-blur lg:hidden">
-      <div className="grid" style={{ gridTemplateColumns: `repeat(${tabs.length + 1}, minmax(0, 1fr))` }}>
+    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-surface-200 bg-white/95 backdrop-blur lg:hidden">
+      <div
+        className="grid"
+        style={{ gridTemplateColumns: `repeat(${tabs.length + 1}, minmax(0, 1fr))` }}
+      >
         {tabs.map((item) => {
           const Icon = item.icon;
-          const active = isActivePath(pathname, item.href);
+          const active = isActivePath(pathname, item.href) && !moreOpen;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-medium ${
-                active && !moreOpen ? "text-copper-600" : "text-ink-700/60"
+              className={`flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-medium transition-colors ${
+                active ? "text-brand-600" : "text-surface-400"
               }`}
             >
               <Icon size={18} />
@@ -166,8 +193,8 @@ export function BottomNav({
         <button
           type="button"
           onClick={onMore}
-          className={`flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-medium ${
-            moreOpen ? "text-copper-600" : "text-ink-700/60"
+          className={`flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-medium transition-colors ${
+            moreOpen ? "text-brand-600" : "text-surface-400"
           }`}
         >
           <MoreHorizontal size={18} />
