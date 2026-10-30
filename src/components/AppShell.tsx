@@ -104,8 +104,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     >
       {/* ── Sidebar ── */}
       <aside
-        className="hidden flex-col text-paper-50 lg:flex lg:h-dvh lg:overflow-hidden lg:border-r"
-        style={{ background: "var(--brand-primary, #1c1814)", borderColor: "rgba(255,255,255,0.07)" }}
+        className="hidden flex-col lg:flex lg:h-dvh lg:overflow-hidden lg:border-r"
+        style={{
+          background: "var(--brand-primary, #1e293b)",
+          borderColor: "rgba(255,255,255,0.07)",
+          color: "#f8fafc",
+        }}
       >
         {/* Brand / Logo */}
         <div className="shrink-0 px-4 py-4">

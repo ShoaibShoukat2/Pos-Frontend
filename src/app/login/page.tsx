@@ -16,44 +16,16 @@ const ROLES: {
   portal: "tenant" | "cashier" | "platform";
   title: string;
   sub: string;
-  button: string;
   icon: typeof Building2;
 }[] = [
-  {
-    id: "owner",
-    portal: "tenant",
-    title: "Owner",
-    sub: "Dashboard, reports, staff",
-    button: "Sign in",
-    icon: Building2,
-  },
-  {
-    id: "cashier",
-    portal: "cashier",
-    title: "Cashier",
-    sub: "POS counter only",
-    button: "Sign in",
-    icon: Monitor,
-  },
-  {
-    id: "platform",
-    portal: "platform",
-    title: "Admin",
-    sub: "Platform management",
-    button: "Sign in",
-    icon: Shield,
-  },
+  { id: "owner",    portal: "tenant",   title: "Owner",   sub: "Dashboard & reports", icon: Building2 },
+  { id: "cashier",  portal: "cashier",  title: "Cashier", sub: "POS counter only",    icon: Monitor   },
+  { id: "platform", portal: "platform", title: "Admin",   sub: "Platform access",     icon: Shield    },
 ];
 
 function loginMessage(body: unknown) {
-  const fields = fieldErrors(body);
-  return (
-    fields.detail ||
-    fields.email ||
-    fields.password ||
-    fields.non_field_errors ||
-    "Incorrect email or password."
-  );
+  const f = fieldErrors(body);
+  return f.detail || f.email || f.password || f.non_field_errors || "Incorrect email or password.";
 }
 
 function LoginForm() {
@@ -62,12 +34,12 @@ function LoginForm() {
   const search = useSearchParams();
   const preset = search.get("role");
   const initial = ROLES.some((r) => r.id === preset) ? (preset as RoleId) : "owner";
-  const [role, setRole] = useState<RoleId>(initial);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [role, setRole]       = useState<RoleId>(initial);
+  const [email, setEmail]     = useState("");
+  const [password, setPass]   = useState("");
+  const [error, setError]     = useState("");
   const [pending, setPending] = useState(false);
-  const selected = useMemo(() => ROLES.find((r) => r.id === role) || ROLES[0], [role]);
+  const selected = useMemo(() => ROLES.find((r) => r.id === role)!, [role]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -84,26 +56,28 @@ function LoginForm() {
   }
 
   return (
-    <div className="grid min-h-dvh place-items-center bg-paper-50 px-4 py-10">
+    <div className="flex min-h-dvh items-center justify-center bg-surface-50 px-4 py-10">
       <div className="w-full max-w-sm">
 
-        {/* Brand */}
+        {/* Brand mark */}
         <div className="mb-8 text-center">
-          <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-ink-950 mb-4">
-            <svg width="20" height="20" viewBox="0 0 14 14" fill="none">
-              <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#d4892a" />
-              <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.6" />
-              <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.6" />
-              <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.3" />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-600 shadow-lg shadow-brand-500/25">
+            <svg width="22" height="22" viewBox="0 0 14 14" fill="none">
+              <rect x="1" y="1" width="5" height="5" rx="1.2" fill="white" />
+              <rect x="8" y="1" width="5" height="5" rx="1.2" fill="white" opacity="0.7" />
+              <rect x="1" y="8" width="5" height="5" rx="1.2" fill="white" opacity="0.7" />
+              <rect x="8" y="8" width="5" height="5" rx="1.2" fill="white" opacity="0.35" />
             </svg>
           </div>
-          <h1 className="font-display text-2xl text-ink-950">Universal POS</h1>
-          <p className="mt-1 text-sm text-ink-700/60">Sign in to your workspace</p>
+          <h1 className="font-display text-2xl font-semibold text-surface-900">Universal POS</h1>
+          <p className="mt-1 text-sm text-surface-400">Sign in to your workspace</p>
         </div>
 
-        <div className="card p-6">
-          {/* Role selector */}
-          <div className="mb-5 grid grid-cols-3 gap-1.5 rounded-xl bg-paper-100 p-1">
+        {/* Card */}
+        <div className="rounded-2xl border border-surface-200 bg-surface-0 p-6 shadow-card">
+
+          {/* Role tabs */}
+          <div className="mb-5 grid grid-cols-3 gap-1 rounded-xl bg-surface-100 p-1">
             {ROLES.map((item) => {
               const active = role === item.id;
               const Icon = item.icon;
@@ -116,23 +90,26 @@ function LoginForm() {
                     setError("");
                     router.replace(`/login?role=${item.id}`, { scroll: false });
                   }}
-                  className={`flex flex-col items-center gap-1 rounded-lg py-2.5 text-center transition ${
+                  className={`flex flex-col items-center gap-1 rounded-lg py-2.5 text-center text-[11px] font-medium transition-all ${
                     active
-                      ? "bg-white shadow-sm text-ink-950"
-                      : "text-ink-700/50 hover:text-ink-700"
+                      ? "bg-white text-brand-600 shadow-sm"
+                      : "text-surface-400 hover:text-surface-700"
                   }`}
                 >
-                  <Icon size={15} />
-                  <span className="text-[11px] font-medium">{item.title}</span>
+                  <Icon size={14} />
+                  {item.title}
                 </button>
               );
             })}
           </div>
-
-          <p className="mb-4 text-xs text-ink-700/50">{selected.sub}</p>
+          <p className="mb-4 text-xs text-surface-400">{selected.sub}</p>
 
           <form onSubmit={onSubmit} className="space-y-4">
-            {error ? <Alert>{error}</Alert> : null}
+            {error ? (
+              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {error}
+              </div>
+            ) : null}
             <Field label="Email">
               <Input
                 type="email"
@@ -140,26 +117,32 @@ function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
+                placeholder="you@example.com"
               />
             </Field>
             <Field label="Password">
               <Input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => setPass(e.target.value)}
                 autoComplete="current-password"
                 required
+                placeholder="••••••••"
               />
             </Field>
-            <Button type="submit" disabled={pending} className="w-full">
-              {pending ? "Signing in…" : selected.button}
-            </Button>
+            <button
+              type="submit"
+              disabled={pending}
+              className="w-full rounded-xl bg-brand-600 py-2.5 text-sm font-medium text-white shadow-sm shadow-brand-500/20 transition hover:bg-brand-700 disabled:opacity-50"
+            >
+              {pending ? "Signing in…" : "Sign in"}
+            </button>
           </form>
         </div>
 
-        <p className="mt-5 text-center text-sm text-ink-700/55">
+        <p className="mt-5 text-center text-sm text-surface-400">
           No account?{" "}
-          <Link href="/register" className="text-copper-600 hover:text-copper-500 font-medium">
+          <Link href="/register" className="font-medium text-brand-600 hover:text-brand-700">
             Create a business
           </Link>
         </p>
@@ -170,7 +153,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="grid min-h-screen place-items-center text-sm text-ink-700/60">Loading…</div>}>
+    <Suspense fallback={<div className="grid min-h-screen place-items-center text-sm text-surface-400">Loading…</div>}>
       <LoginForm />
     </Suspense>
   );
