@@ -200,3 +200,16 @@ td {
     display: none !important;
   }
 }
+
+.bg-white\/8 {
+  background-color: rgb(255 255 255 / 0.08);
+}
+.bg-white\/12 {
+  background-color: rgb(255 255 255 / 0.12);
+}
+.border-white\/8 {
+  border-color: rgb(255 255 255 / 0.08);
+}
+.bg-copper-500\/8 {
+  background-color: rgb(212 137 42 / 0.08);
+}
