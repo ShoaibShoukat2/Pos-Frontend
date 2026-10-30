@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Printer } from "lucide-react";
 
 import { Button } from "@/components/ui";
-import { useLang } from "@/lib/lang";
 import { num, rs } from "@/lib/money";
 import type { InvoiceSettings, PosSale, ReceiptShop } from "@/lib/types";
 
@@ -472,18 +471,17 @@ export function ReceiptReview({
   autoPrint?: boolean;
   onClose: () => void;
 }) {
-  const { isUrdu } = useLang();
   const [design, setDesign] = useState<InvoiceDesign>(designOf(invoice));
-  const [urduSlip, setUrduSlip] = useState(isUrdu);
+  const [urduSlip, setUrduSlip] = useState(false);
   const printed = { ...(invoice || {}), design } as InvoiceSettings;
   const wide = printed.paper_size === "A4" || design === "formal";
 
   useEffect(() => {
     if (open) {
       setDesign(designOf(invoice));
-      setUrduSlip(isUrdu);
+      setUrduSlip(false);
     }
-  }, [open, invoice, isUrdu]);
+  }, [open, invoice]);
 
   useEffect(() => {
     if (!open || !sale || !autoPrint) return;

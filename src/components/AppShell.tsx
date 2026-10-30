@@ -25,26 +25,25 @@ import {
 import { FounderCredit } from "@/components/FounderCredit";
 import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
 import { isCashier, useAuth } from "@/lib/auth";
-import { useLang } from "@/lib/lang";
 
 const CASHIER_LINKS = new Set(["/cashier", "/pos", "/customers", "/cash", "/returns"]);
 
 const NAV = [
-  { href: "/dashboard",         labelKey: "nav_overview",     icon: LayoutDashboard, perm: null },
-  { href: "/settings/cashiers", labelKey: "nav_add_cashier",  icon: UserPlus,        perm: "user.create" },
-  { href: "/pos",               labelKey: "nav_pos",          icon: Monitor,         perm: "pos.access" },
-  { href: "/returns",           labelKey: "nav_returns",      icon: RotateCcw,       perm: "pos.access" },
-  { href: "/reports",           labelKey: "nav_reports",      icon: BarChart3,       perm: "report.sales" },
-  { href: "/products",          labelKey: "nav_products",     icon: Package,         perm: "product.view" },
-  { href: "/services",          labelKey: "nav_services",     icon: Wrench,          perm: "product.view" },
-  { href: "/customers",         labelKey: "nav_customers",    icon: UserCircle,      perm: "customer.view" },
-  { href: "/purchases",         labelKey: "nav_purchases",    icon: ShoppingBag,     perm: "purchase.view" },
-  { href: "/suppliers",         labelKey: "nav_suppliers",    icon: Truck,           perm: "supplier.view" },
-  { href: "/expenses",          labelKey: "nav_expenses",     icon: Receipt,         perm: "expense.view" },
-  { href: "/cash",              labelKey: "nav_cash",         icon: Banknote,        perm: "cash.drawer" },
-  { href: "/settings/business", labelKey: "nav_business",     icon: Building2,       perm: "business.view" },
-  { href: "/settings/invoice",  labelKey: "nav_invoices",     icon: FileText,        perm: "invoice_settings.manage" },
-] as const;
+  { href: "/dashboard",         label: "Overview",      icon: LayoutDashboard, perm: null },
+  { href: "/settings/cashiers", label: "Add cashier",   icon: UserPlus,        perm: "user.create" },
+  { href: "/pos",               label: "POS",           icon: Monitor,         perm: "pos.access" },
+  { href: "/returns",           label: "Returns",       icon: RotateCcw,       perm: "pos.access" },
+  { href: "/reports",           label: "Reports",       icon: BarChart3,       perm: "report.sales" },
+  { href: "/products",          label: "Products",      icon: Package,         perm: "product.view" },
+  { href: "/services",          label: "Services",      icon: Wrench,          perm: "product.view" },
+  { href: "/customers",         label: "Customers",     icon: UserCircle,      perm: "customer.view" },
+  { href: "/purchases",         label: "Purchases",     icon: ShoppingBag,     perm: "purchase.view" },
+  { href: "/suppliers",         label: "Suppliers",     icon: Truck,           perm: "supplier.view" },
+  { href: "/expenses",          label: "Expenses",      icon: Receipt,         perm: "expense.view" },
+  { href: "/cash",              label: "Cash drawer",   icon: Banknote,        perm: "cash.drawer" },
+  { href: "/settings/business", label: "Business",      icon: Building2,       perm: "business.view" },
+  { href: "/settings/invoice",  label: "Invoices",      icon: FileText,        perm: "invoice_settings.manage" },
+];
 
 /** Initials fallback when no logo */
 function BusinessInitials({ name }: { name: string }) {
@@ -66,7 +65,6 @@ function BusinessInitials({ name }: { name: string }) {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, loading, logout, can } = useAuth();
-  const { lang, setLang, t } = useLang();
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -74,7 +72,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const links = NAV.filter((item) => !item.perm || can(item.perm))
     .map((item) => ({
       ...item,
-      label: t(item.labelKey),
       href: item.href === "/dashboard" && isCashier(user) ? "/cashier" : item.href,
     }))
     .filter((item) => !isCashier(user) || CASHIER_LINKS.has(item.href));
@@ -89,7 +86,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (loading && !user) {
     return (
       <div className="grid min-h-dvh place-items-center text-sm text-ink-700/70">
-        {t("dash_loading")}
+        Loading workspace…
       </div>
     );
   }
@@ -193,25 +190,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           className="shrink-0 px-4 py-4"
           style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
         >
-          {/* Language toggle */}
-          <div className="mb-3 flex items-center gap-1 rounded-xl p-1" style={{ background: "rgba(255,255,255,0.05)" }}>
-            <button
-              type="button"
-              onClick={() => setLang("en")}
-              className="flex-1 rounded-lg py-1.5 text-xs font-medium transition-colors"
-              style={lang === "en" ? { background: "rgba(255,255,255,0.12)", color: "#fbf7f0" } : { color: "rgba(251,247,240,0.35)" }}
-            >
-              English
-            </button>
-            <button
-              type="button"
-              onClick={() => setLang("ur")}
-              className="flex-1 rounded-lg py-1.5 text-xs font-medium transition-colors"
-              style={lang === "ur" ? { background: "rgba(255,255,255,0.12)", color: "#fbf7f0" } : { color: "rgba(251,247,240,0.35)" }}
-            >
-              اردو
-            </button>
-          </div>
           <FounderCredit variant="sidebar" />
           <button
             type="button"
@@ -219,7 +197,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-paper-50/50 transition-colors hover:bg-white/5 hover:text-paper-50"
           >
             <LogOut size={15} />
-            {t("nav_sign_out")}
+            Sign out
           </button>
         </div>
       </aside>
