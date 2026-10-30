@@ -33,7 +33,6 @@ export default function PlatformUsersPage() {
         description="Every owner and staff account across all businesses."
         action={<SearchField value={list.search} onChange={list.setSearch} placeholder="Search users…" />}
       />
-
       <ListState
         loading={list.loading}
         count={list.count}
@@ -43,7 +42,7 @@ export default function PlatformUsersPage() {
       >
         <div className="card overflow-x-auto">
           <table className="w-full min-w-[60rem] text-left text-sm">
-            <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
+            <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
               <tr>
                 <th className="px-4 py-3">User</th>
                 <th className="px-4 py-3">Business</th>
@@ -55,15 +54,15 @@ export default function PlatformUsersPage() {
             </thead>
             <tbody>
               {list.rows.map((row) => (
-                <tr key={row.id} className="border-t border-paper-100">
+                <tr key={row.id} className="border-t border-surface-100">
                   <td className="px-4 py-3">
-                    <p className="font-medium text-ink-950">{row.full_name}</p>
-                    <p className="text-xs text-ink-700/60">{row.email}</p>
+                    <p className="font-medium text-surface-900">{row.full_name}</p>
+                    <p className="text-xs text-surface-400">{row.email}</p>
                   </td>
                   <td className="px-4 py-3">{row.business_name || "—"}</td>
                   <td className="px-4 py-3">{row.is_owner ? "Business owner" : row.role_name || "Staff"}</td>
-                  <td className="px-4 py-3 text-ink-700/80">{fmtDate(row.date_joined)}</td>
-                  <td className="px-4 py-3 text-ink-700/80">{fmtDate(row.last_login)}</td>
+                  <td className="px-4 py-3 text-surface-500">{fmtDate(row.date_joined)}</td>
+                  <td className="px-4 py-3 text-surface-500">{fmtDate(row.last_login)}</td>
                   <td className="px-4 py-3">
                     <button type="button" onClick={() => toggleActive(row)} className="text-left">
                       <Badge tone={row.is_active ? "good" : "warn"}>{row.is_active ? "Active" : "Disabled"}</Badge>

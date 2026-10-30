@@ -607,8 +607,8 @@ function SalesChart({ rows }: { rows: ReportSeries[] }) {
         const y = height - barH;
         return (
           <g key={row.date}>
-            <rect x={x} y={y} width={barW} height={barH} rx="4" fill="#d4892a" />
-            <text x={x + barW / 2} y={height + 16} textAnchor="middle" fill="#3d342c" fontSize="10">
+            <rect x={x} y={y} width={barW} height={barH} rx="4" fill="#6366f1" />
+            <text x={x + barW / 2} y={height + 16} textAnchor="middle" fill="#475569" fontSize="10">
               {shortDate(row.date)}
             </text>
           </g>
@@ -625,19 +625,19 @@ function SoldRing({ percent }: { percent: number }) {
   const dash = (safe / 100) * circ;
   return (
     <svg viewBox="0 0 72 72" className="h-16 w-16 shrink-0" role="img" aria-label={`${safe.toFixed(0)} percent of products sold`}>
-      <circle cx="36" cy="36" r={radius} fill="none" stroke="#e8dfd0" strokeWidth="7" />
+      <circle cx="36" cy="36" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="7" />
       <circle
         cx="36"
         cy="36"
         r={radius}
         fill="none"
-        stroke="#d4892a"
+        stroke="#6366f1"
         strokeWidth="7"
         strokeLinecap="round"
         strokeDasharray={`${dash} ${circ - dash}`}
         transform="rotate(-90 36 36)"
       />
-      <text x="36" y="40" textAnchor="middle" fill="#14110e" fontSize="13" fontWeight="600">
+      <text x="36" y="40" textAnchor="middle" fill="#0f172a" fontSize="13" fontWeight="600">
         {safe.toFixed(0)}%
       </text>
     </svg>

@@ -29,49 +29,35 @@ export default function CustomerDetailPage() {
     setSales(asList(sl));
   }
 
-  useEffect(() => {
-    load().catch(() => {});
-  }, [params.id]);
+  useEffect(() => { load().catch(() => {}); }, [params.id]);
 
   async function postSale(e: FormEvent) {
     e.preventDefault();
     if (!customer) return;
-    setPending(true);
-    setError("");
+    setPending(true); setError("");
     try {
-      await api("/api/customer-sales/", {
-        method: "POST",
-        body: JSON.stringify({ ...sale, customer: customer.id }),
-      });
+      await api("/api/customer-sales/", { method: "POST", body: JSON.stringify({ ...sale, customer: customer.id }) });
       await load();
     } catch (err) {
       const body = err instanceof ApiError ? (err.body as { detail?: string }) : null;
       setError(body?.detail || "Could not post sale.");
-    } finally {
-      setPending(false);
-    }
+    } finally { setPending(false); }
   }
 
   async function postPay(e: FormEvent) {
     e.preventDefault();
     if (!customer) return;
-    setPending(true);
-    setError("");
+    setPending(true); setError("");
     try {
-      await api("/api/customer-payments/", {
-        method: "POST",
-        body: JSON.stringify({ ...pay, customer: customer.id }),
-      });
+      await api("/api/customer-payments/", { method: "POST", body: JSON.stringify({ ...pay, customer: customer.id }) });
       await load();
     } catch (err) {
       const body = err instanceof ApiError ? (err.body as { detail?: string }) : null;
       setError(body?.detail || "Could not post payment.");
-    } finally {
-      setPending(false);
-    }
+    } finally { setPending(false); }
   }
 
-  if (!customer) return <p className="text-sm text-ink-700/70">Loading customer…</p>;
+  if (!customer) return <p className="text-sm text-surface-400">Loading customer…</p>;
 
   return (
     <div>
@@ -79,69 +65,56 @@ export default function CustomerDetailPage() {
         eyebrow="Customer ledger"
         title={customer.name}
         description={`${customer.phone || "No phone"} · ${customer.city || "—"}`}
-        action={
-          <Link href="/customers" className="btn-ghost">
-            Back
-          </Link>
-        }
+        action={<Link href="/customers" className="btn-ghost">Back</Link>}
       />
+
       <div className="mb-6 grid gap-4 md:grid-cols-3">
         <Stat label="Total purchases" value={`Rs ${customer.total_purchases}`} />
         <Stat label="Outstanding" value={`Rs ${customer.receivable_balance}`} warn={Number(customer.receivable_balance) > 0} />
         <Stat label="Credit limit" value={Number(customer.credit_limit) > 0 ? `Rs ${customer.credit_limit}` : "Open"} />
       </div>
-      {error ? <p className="mb-4 text-sm text-red-700">{error}</p> : null}
+
+      {error ? <p className="mb-4 text-sm text-red-600">{error}</p> : null}
+
       <div className="grid gap-6 lg:grid-cols-2">
         <form onSubmit={postSale} className="card grid gap-3 p-5">
           <h2 className="font-display text-xl">Credit / partial sale</h2>
-          <p className="text-sm text-ink-700/65">Example: buy 10,000, pay 6,000, due 4,000 stays on the ledger.</p>
+          <p className="text-sm text-surface-400">Buy 10,000, pay 6,000, due 4,000 stays on the ledger.</p>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Total">
-              <Input value={sale.total} onChange={(e) => setSale({ ...sale, total: e.target.value })} />
-            </Field>
-            <Field label="Paid now">
-              <Input value={sale.paid_amount} onChange={(e) => setSale({ ...sale, paid_amount: e.target.value })} />
-            </Field>
+            <Field label="Total"><Input value={sale.total} onChange={(e) => setSale({ ...sale, total: e.target.value })} /></Field>
+            <Field label="Paid now"><Input value={sale.paid_amount} onChange={(e) => setSale({ ...sale, paid_amount: e.target.value })} /></Field>
           </div>
           <Field label="Paid via">
             <Select value={sale.payment_method} onChange={(e) => setSale({ ...sale, payment_method: e.target.value })}>
-              <option value="cash">Cash</option>
-              <option value="card">Card</option>
-              <option value="bank">Bank</option>
+              <option value="cash">Cash</option><option value="card">Card</option><option value="bank">Bank</option>
             </Select>
           </Field>
-          <Button type="submit" disabled={pending}>
-            Post sale
-          </Button>
+          <Button type="submit" disabled={pending}>Post sale</Button>
         </form>
+
         <form onSubmit={postPay} className="card grid gap-3 p-5">
           <h2 className="font-display text-xl">Receive payment</h2>
-          <p className="text-sm text-ink-700/65">Reduces receivable. Cash payments need an open drawer.</p>
-          <Field label="Amount">
-            <Input value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} required />
-          </Field>
+          <p className="text-sm text-surface-400">Reduces receivable. Cash payments need an open drawer.</p>
+          <Field label="Amount"><Input value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} required /></Field>
           <Field label="Method">
             <Select value={pay.method} onChange={(e) => setPay({ ...pay, method: e.target.value })}>
-              <option value="cash">Cash</option>
-              <option value="card">Card</option>
-              <option value="bank">Bank</option>
+              <option value="cash">Cash</option><option value="card">Card</option><option value="bank">Bank</option>
             </Select>
           </Field>
-          <Button type="submit" disabled={pending}>
-            Post payment
-          </Button>
+          <Button type="submit" disabled={pending}>Post payment</Button>
         </form>
       </div>
+
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <div className="card overflow-hidden">
           <h2 className="px-4 pt-4 font-display text-xl">Ledger</h2>
           <table className="mt-2 w-full text-left text-sm">
             <tbody>
               {ledger.map((row) => (
-                <tr key={row.id} className="border-t border-paper-100">
+                <tr key={row.id} className="border-t border-surface-100">
                   <td className="px-4 py-3">
                     <Badge>{row.entry_type}</Badge>
-                    <p className="mt-1 text-xs text-ink-700/55">{row.reason}</p>
+                    <p className="mt-1 text-xs text-surface-400">{row.reason}</p>
                   </td>
                   <td className="px-4 py-3">{row.amount}</td>
                   <td className="px-4 py-3">Rs {row.balance_after}</td>
@@ -155,7 +128,7 @@ export default function CustomerDetailPage() {
           <table className="mt-2 w-full text-left text-sm">
             <tbody>
               {sales.map((row) => (
-                <tr key={row.id} className="border-t border-paper-100">
+                <tr key={row.id} className="border-t border-surface-100">
                   <td className="px-4 py-3 font-medium">{row.number}</td>
                   <td className="px-4 py-3">Rs {row.total}</td>
                   <td className="px-4 py-3">Paid {row.paid_amount}</td>
@@ -173,8 +146,8 @@ export default function CustomerDetailPage() {
 function Stat({ label, value, warn }: { label: string; value: string; warn?: boolean }) {
   return (
     <div className="card p-4">
-      <p className="text-xs uppercase tracking-[0.16em] text-ink-700/55">{label}</p>
-      <p className={`stat-value mt-1 ${warn ? "text-red-800" : ""}`}>{value}</p>
+      <p className="text-xs uppercase tracking-[0.16em] text-surface-400">{label}</p>
+      <p className={`stat-value mt-1 ${warn ? "text-red-700" : ""}`}>{value}</p>
     </div>
   );
 }

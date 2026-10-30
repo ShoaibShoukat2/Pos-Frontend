@@ -100,7 +100,7 @@ export default function ProductDetailPage() {
   }
 
   if (!product) {
-    return <p className="text-sm text-ink-700/70">Loading product…</p>;
+    return <p className="text-sm text-surface-400">Loading product…</p>;
   }
 
   return (
@@ -146,7 +146,7 @@ export default function ProductDetailPage() {
       </div>
       <div className="card overflow-hidden">
         <table className="w-full text-left text-sm">
-          <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
+          <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
             <tr>
               <th className="px-4 py-3">Variant</th>
               <th className="px-4 py-3">SKU</th>
@@ -157,7 +157,7 @@ export default function ProductDetailPage() {
           </thead>
           <tbody>
             {(product.variants || []).map((variant) => (
-              <tr key={variant.id} className="border-t border-paper-100">
+              <tr key={variant.id} className="border-t border-surface-100">
                 <td className="px-4 py-3">
                   <p className="font-medium">{variant.display_name}</p>
                   {variant.is_default ? <Badge>Default</Badge> : null}
@@ -167,7 +167,7 @@ export default function ProductDetailPage() {
                 <td className="px-4 py-3">Rs {variant.selling_price}</td>
                 <td className="px-4 py-3">
                   {(variant.stock_by_branch || []).length === 0 ? (
-                    <span className="text-ink-700/50">0</span>
+                    <span className="text-surface-400">0</span>
                   ) : (
                     <div className="flex flex-wrap gap-1">
                       {variant.stock_by_branch?.map((row) => (
@@ -243,7 +243,7 @@ export default function ProductDetailPage() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="card p-4">
-      <p className="text-xs uppercase tracking-[0.16em] text-ink-700/55">{label}</p>
+      <p className="text-xs uppercase tracking-[0.16em] text-surface-400">{label}</p>
       <p className="stat-value mt-1">{value}</p>
     </div>
   );

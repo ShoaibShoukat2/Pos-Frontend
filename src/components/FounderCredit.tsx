@@ -20,7 +20,7 @@ export function FounderCredit({ variant = "panel" }: { variant?: "panel" | "comp
         rel="noreferrer"
         className="mb-3 flex items-center gap-3 rounded-xl border border-white/10 bg-surface-800 px-3 py-2.5 hover:border-brand-400/40"
       >
-        <Portrait className="h-10 w-10 shrink-0 rounded-full object-cover object-[center_18%] ring-2 ring-copper-400/50" />
+        <Portrait className="h-10 w-10 shrink-0 rounded-full object-cover object-[center_18%] ring-2 ring-brand-400/50" />
         <span className="min-w-0">
           <span className="block truncate text-sm font-medium text-white">{NAME}</span>
           <span className="block truncate text-[11px] text-brand-400">CEO & Founder · Senvante</span>
@@ -37,7 +37,7 @@ export function FounderCredit({ variant = "panel" }: { variant?: "panel" | "comp
         rel="noreferrer"
         className="mt-4 flex items-center gap-3 rounded-2xl border border-surface-200 bg-white p-3 shadow-card transition hover:border-brand-400"
       >
-        <Portrait className="h-14 w-14 shrink-0 rounded-full object-cover object-[center_18%] ring-2 ring-copper-400/70" />
+        <Portrait className="h-14 w-14 shrink-0 rounded-full object-cover object-[center_18%] ring-2 ring-brand-400/70" />
         <span className="min-w-0">
           <span className="block text-sm font-medium text-surface-900">{NAME}</span>
           <span className="mt-0.5 block text-xs text-surface-400">CEO & Founder · Senvante</span>
@@ -52,7 +52,7 @@ export function FounderCredit({ variant = "panel" }: { variant?: "panel" | "comp
         <div className="grid md:grid-cols-[16.5rem_minmax(0,1fr)]">
           <div className="relative min-h-[22rem] bg-surface-800 md:min-h-full">
             <Portrait className="absolute inset-0 h-full w-full object-cover object-[center_12%]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/10 to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-ink-950" />
+            <div className="absolute inset-0 bg-gradient-to-t from-surface-900 via-surface-900/10 to-transparent md:bg-gradient-to-r md:from-transparent md:via-transparent md:to-surface-900" />
           </div>
           <div className="relative flex flex-col justify-center px-6 py-8 sm:px-10 sm:py-12">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-400">CEO & Founder</p>
