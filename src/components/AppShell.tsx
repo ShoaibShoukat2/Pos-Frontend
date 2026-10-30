@@ -85,7 +85,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (loading && !user) {
     return (
-      <div className="grid min-h-dvh place-items-center text-sm text-ink-700/70">
+      <div className="grid min-h-dvh place-items-center text-sm text-surface-400">
         Loading workspace…
       </div>
     );
@@ -208,7 +208,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* ── Main content ── */}
       <div className="flex min-h-0 min-w-0 flex-col lg:overflow-hidden">
-        <header className="safe-top sticky top-0 z-20 flex shrink-0 items-center gap-3 border-b border-paper-200 bg-white/90 px-3 py-2.5 backdrop-blur sm:px-6 sm:py-3">
+        <header className="safe-top sticky top-0 z-20 flex shrink-0 items-center gap-3 border-b border-surface-200 bg-white/90 px-3 py-2.5 backdrop-blur sm:px-6 sm:py-3">
           <MenuButton onClick={() => setMenuOpen(true)} />
           <div className="min-w-0 flex-1 flex items-center gap-3">
             {/* Mobile logo */}
@@ -224,11 +224,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   />
                 </div>
               ) : null}
-              <p className="truncate text-sm font-medium text-ink-950">
+              <p className="truncate text-sm font-medium text-surface-900">
                 {user.business_name || "Workspace"}
               </p>
             </div>
-            <p className="hidden min-w-0 truncate text-sm text-ink-700/60 md:block">
+            <p className="hidden min-w-0 truncate text-sm text-surface-400 md:block">
               {pathname === "/dashboard"
                 ? "Business overview — sales, people and live activity"
                 : "Sales, cash and reports"}

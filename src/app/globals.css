@@ -38,8 +38,8 @@ html, body {
 }
 
 body {
-  background-color: var(--surface-50);
-  color: var(--text-body);
+  background-color: #f8fafc;   /* slate-50 */
+  color: #334155;               /* slate-700 */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -157,11 +157,12 @@ input, select, textarea {
 th, td { overflow-wrap: break-word; }
 
 /* ── Receipt / Print ────────────────────────────────────────────────────────── */
+/* Receipt uses hardcoded near-black so it prints correctly regardless of theme */
 .receipt-slip {
   border-radius: 2px;
   background: #ffffff;
   padding: 1rem 0.75rem;
-  color: #14110e;
+  color: #14110e;   /* original ink — dark for print */
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
