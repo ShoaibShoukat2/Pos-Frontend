@@ -602,7 +602,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   if (loading || !user) {
     return (
       <div className="grid min-h-[40vh] place-items-center">
-        <p className="text-sm text-ink-700/70">Loading register…</p>
+        <p className="text-sm text-surface-400">Loading register…</p>
       </div>
     );
   }
@@ -610,7 +610,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   if (!can("pos.access") && !can("sale.create")) {
     return (
       <div className="grid min-h-[40vh] place-items-center">
-        <p className="text-sm text-ink-700/70">You do not have POS access.</p>
+        <p className="text-sm text-surface-400">You do not have POS access.</p>
       </div>
     );
   }
@@ -624,9 +624,9 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         {mode === "standalone" ? <HardwareSetup hardware={hardware} compact /> : null}
 
         {deskHelp && HELP_COPY[deskHelp] ? (
-          <div className="mb-3 rounded-2xl border border-copper-300 bg-white px-4 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper-600">Manual sale</p>
-            <p className="mt-1 text-sm text-ink-800">{HELP_COPY[deskHelp]}</p>
+          <div className="mb-3 rounded-2xl border border-brand-300 bg-white px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-600">Manual sale</p>
+            <p className="mt-1 text-sm text-surface-700">{HELP_COPY[deskHelp]}</p>
           </div>
         ) : null}
 
@@ -673,7 +673,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
 
         <div className="mb-3 flex gap-2">
           <div className="relative min-w-0 flex-1">
-            <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-700/40" />
+            <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-surface-500/40" />
             <input
               ref={searchRef}
               value={query}
@@ -704,10 +704,10 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           </Button>
         </div>
         <div className="mb-3 flex flex-wrap gap-2">
-          <span className="self-center text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-700/45">Can&apos;t scan?</span>
+          <span className="self-center text-[11px] font-semibold uppercase tracking-[0.14em] text-surface-400">Can&apos;t scan?</span>
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-full border border-paper-200 bg-white px-3 py-1.5 text-xs text-ink-700 hover:border-copper-400"
+            className="inline-flex items-center gap-1.5 rounded-full border border-surface-200 bg-white px-3 py-1.5 text-xs text-surface-500 hover:border-brand-400"
             onClick={() => {
               setDeskHelp("type");
               searchRef.current?.focus();
@@ -718,7 +718,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-full border border-paper-200 bg-white px-3 py-1.5 text-xs text-ink-700 hover:border-copper-400"
+            className="inline-flex items-center gap-1.5 rounded-full border border-surface-200 bg-white px-3 py-1.5 text-xs text-surface-500 hover:border-brand-400"
             onClick={() => {
               setDeskHelp("camera");
               setCameraOpen(true);
@@ -729,7 +729,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-full border border-paper-200 bg-white px-3 py-1.5 text-xs text-ink-700 hover:border-copper-400"
+            className="inline-flex items-center gap-1.5 rounded-full border border-surface-200 bg-white px-3 py-1.5 text-xs text-surface-500 hover:border-brand-400"
             onClick={() => {
               setDeskHelp("phone");
               openConnect().catch(() => setError("Could not start scanner link."));
@@ -740,7 +740,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-full border border-copper-300 bg-white px-3 py-1.5 text-xs text-copper-800 hover:border-copper-500"
+            className="inline-flex items-center gap-1.5 rounded-full border border-brand-300 bg-white px-3 py-1.5 text-xs text-copper-800 hover:border-brand-500"
             onClick={() => openReturn()}
           >
             <RotateCcw size={12} />
@@ -748,14 +748,14 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-full border border-paper-200 bg-white px-3 py-1.5 text-xs text-ink-700 hover:border-copper-400"
+            className="inline-flex items-center gap-1.5 rounded-full border border-surface-200 bg-white px-3 py-1.5 text-xs text-surface-500 hover:border-brand-400"
             onClick={() => setDeskHelp("pay")}
           >
             <CreditCard size={12} />
             Card / bank
           </button>
           {isCashier(user) ? (
-            <Link href="/cashier" className="inline-flex items-center rounded-full bg-white px-3 py-1.5 text-xs text-copper-700">
+            <Link href="/cashier" className="inline-flex items-center rounded-full bg-white px-3 py-1.5 text-xs text-brand-700">
               More fallbacks
             </Link>
           ) : null}
@@ -775,7 +775,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                 setCategory("");
               }}
               className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${
-                kindFilter === row.id ? "bg-copper-500 text-ink-950" : "bg-white text-ink-700"
+                kindFilter === row.id ? "bg-brand-500 text-surface-900" : "bg-white text-surface-500"
               }`}
             >
               {row.id === "service" ? <Wrench size={12} /> : row.id === "product" ? <Package size={12} /> : null}
@@ -789,7 +789,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             type="button"
             onClick={() => setCategory("")}
             className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium ${
-              category === "" ? "bg-ink-950 text-paper-50" : "bg-white text-ink-700"
+              category === "" ? "bg-surface-900 text-white" : "bg-white text-surface-500"
             }`}
           >
             All · {catalogTotal}
@@ -800,7 +800,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               type="button"
               onClick={() => setCategory(name === category ? "" : name)}
               className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium ${
-                category === name ? "bg-ink-950 text-paper-50" : "bg-white text-ink-700"
+                category === name ? "bg-surface-900 text-white" : "bg-white text-surface-500"
               }`}
             >
               {name}
@@ -809,12 +809,12 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         </div>
 
         {snapshot?.catalog_truncated && !query.trim() ? (
-          <p className="mb-3 text-xs text-ink-700/60">
+          <p className="mb-3 text-xs text-surface-400">
             Showing first {snapshot.catalog.length} of {snapshot.catalog_total?.toLocaleString()} items. Search to find the rest.
             Use Add 1, then + / − to change quantity.
           </p>
         ) : (
-          <p className="mb-3 text-xs text-ink-700/55">
+          <p className="mb-3 text-xs text-surface-400">
             {items.length} {kindFilter === "service" ? "service" : kindFilter === "product" ? "product" : "item"}
             {items.length === 1 ? "" : "s"}
             {query.trim() ? ` matching “${query.trim()}”` : ""}
@@ -833,9 +833,9 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               return (
                 <article
                   key={item.id}
-                  className={`card flex flex-col overflow-hidden p-0 transition hover:border-copper-400 ${
-                    inCart ? "border-copper-400 bg-copper-500/[0.04]" : ""
-                  } ${active ? "border-copper-500 ring-2 ring-copper-500/30" : ""} ${
+                  className={`card flex flex-col overflow-hidden p-0 transition hover:border-brand-400 ${
+                    inCart ? "border-brand-400 bg-brand-500/[0.04]" : ""
+                  } ${active ? "border-brand-500 ring-2 ring-copper-500/30" : ""} ${
                     out ? "opacity-80" : ""
                   }`}
                 >
@@ -847,14 +847,14 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                     <div className="mb-3 flex items-start gap-3">
                       <span
                         className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl font-display text-lg ${
-                          inCart ? "bg-copper-500 text-ink-950" : "bg-paper-100 text-ink-800"
+                          inCart ? "bg-brand-500 text-surface-900" : "bg-surface-100 text-surface-700"
                         }`}
                       >
                         {inCart ? inCart.qty : (item.product || "?").slice(0, 1).toUpperCase()}
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-copper-600">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-600">
                             {isService(item) ? "Service" : item.category || "Uncategorized"}
                             {isService(item) && item.category ? ` · ${item.category}` : ""}
                           </p>
@@ -862,8 +862,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                             {stock.label}
                           </span>
                         </div>
-                        <p className="mt-0.5 break-words font-medium leading-snug text-ink-950">{item.product}</p>
-                        <p className="mt-0.5 text-xs text-ink-700/55">
+                        <p className="mt-0.5 break-words font-medium leading-snug text-surface-900">{item.product}</p>
+                        <p className="mt-0.5 text-xs text-surface-400">
                           {item.variant && item.variant !== item.product ? `${item.variant} · ` : ""}
                           {item.sku || "No SKU"}
                         </p>
@@ -872,14 +872,14 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                     <div className="mt-auto flex items-end justify-between gap-2">
                       <div>
                         <p className="font-display text-xl leading-none">{rs(item.selling_price)}</p>
-                        {can("report.sales") ? <p className="mt-0.5 text-[11px] text-ink-700/45">Cost {rs(item.cost_price)}</p> : null}
+                        {can("report.sales") ? <p className="mt-0.5 text-[11px] text-surface-400">Cost {rs(item.cost_price)}</p> : null}
                       </div>
-                      <p className="text-right text-xs text-ink-700/55">
+                      <p className="text-right text-xs text-surface-400">
                         {isService(item) ? serviceMeta(item) : `${fmtQty(item.qty)} on hand`}
                       </p>
                     </div>
                   </button>
-                  <div className="border-t border-paper-100 bg-paper-50/90 px-3 py-2.5">
+                  <div className="border-t border-surface-100 bg-surface-50/90 px-3 py-2.5">
                     {out ? (
                       <p className="py-1.5 text-center text-xs font-medium text-red-700">Out of stock</p>
                     ) : inCart ? (
@@ -902,7 +902,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                     ) : (
                       <button
                         type="button"
-                        className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-ink-950 text-sm font-medium text-paper-50 hover:bg-ink-800"
+                        className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-surface-900 text-sm font-medium text-white hover:bg-surface-700"
                         onClick={() => addItem(item)}
                       >
                         <Plus size={15} />
@@ -915,7 +915,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             })}
           </div>
           {snapshot && items.length === 0 ? (
-            <p className="py-10 text-center text-sm text-ink-700/60">
+            <p className="py-10 text-center text-sm text-surface-400">
               {kindFilter === "service" ? "No services match this search." : "No products match this search."}
             </p>
           ) : null}
@@ -923,18 +923,18 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       </section>
 
       <aside
-        className={`flex min-h-0 min-w-0 flex-col overflow-hidden bg-white shadow-card max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-40 max-lg:max-h-[90dvh] max-lg:rounded-t-2xl max-lg:border max-lg:border-paper-200 max-lg:transition-transform max-lg:duration-200 lg:relative lg:rounded-2xl lg:border lg:border-paper-200 ${
+        className={`flex min-h-0 min-w-0 flex-col overflow-hidden bg-white shadow-card max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-40 max-lg:max-h-[90dvh] max-lg:rounded-t-2xl max-lg:border max-lg:border-surface-200 max-lg:transition-transform max-lg:duration-200 lg:relative lg:rounded-2xl lg:border lg:border-surface-200 ${
           ticketOpen ? "max-lg:translate-y-0" : "max-lg:translate-y-full"
         }`}
       >
-        <div className="border-b border-paper-200 bg-ink-950 px-4 py-3 text-paper-50">
+        <div className="border-b border-surface-200 bg-surface-900 px-4 py-3 text-white">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper-400">Current ticket</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-400">Current ticket</p>
               <p className="font-display text-xl">{user?.business_name || "Ticket"}</p>
             </div>
             <div className="flex items-start gap-3">
-              <div className="text-right text-xs text-paper-50/70">
+              <div className="text-right text-xs text-white/70">
                 <p>{cartQty} item{cartQty === 1 ? "" : "s"}</p>
                 <p>{cart.length} line{cart.length === 1 ? "" : "s"}</p>
               </div>
@@ -951,15 +951,15 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         </div>
 
         <div className="min-h-0 min-w-0 flex-1 space-y-4 overflow-y-auto p-4">
-          <div className="rounded-xl border border-paper-200 bg-paper-50/70">
+          <div className="rounded-xl border border-surface-200 bg-surface-50/70">
             <div className="receipt-no-print flex items-start justify-between gap-3 px-3 py-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper-600">Slip</p>
-                <p className="text-xs text-ink-700/65">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-600">Slip</p>
+                <p className="text-xs text-surface-400">
                   {slip ? slip.number : "Stays on this side. It does not pop up after each sale."}
                 </p>
               </div>
-              <label className="flex max-w-[11rem] cursor-pointer items-start gap-2 text-xs text-ink-800">
+              <label className="flex max-w-[11rem] cursor-pointer items-start gap-2 text-xs text-surface-700">
                 <input
                   type="checkbox"
                   className="mt-0.5"
@@ -975,7 +975,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               </p>
             ) : null}
             {slip ? (
-              <div id="receipt-print-root" className="border-t border-paper-200 bg-white px-2 py-3">
+              <div id="receipt-print-root" className="border-t border-surface-200 bg-white px-2 py-3">
                 <div className="receipt-no-print mb-2 flex flex-wrap gap-1 px-1">
                   {INVOICE_DESIGNS.map((item) => (
                     <button
@@ -984,8 +984,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                       onClick={() => setSlipDesign(item.id)}
                       className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
                         (slipDesign || snapshot?.invoice?.design || "classic") === item.id
-                          ? "bg-ink-950 text-paper-50"
-                          : "bg-paper-100 text-ink-800"
+                          ? "bg-surface-900 text-white"
+                          : "bg-surface-100 text-surface-700"
                       }`}
                     >
                       {item.label}
@@ -1031,17 +1031,17 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           </Field>
 
           {customer ? (
-            <div className="grid grid-cols-2 gap-2 rounded-xl bg-paper-50 p-3 text-xs">
+            <div className="grid grid-cols-2 gap-2 rounded-xl bg-surface-50 p-3 text-xs">
               <DetailRow label="Phone" value={customer.phone || "—"} />
               <DetailRow label="Credit" value={rs(customer.receivable_balance)} />
             </div>
           ) : null}
 
           {selected ? (
-            <div className="rounded-xl border border-paper-200 bg-paper-50 p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper-600">Selected item</p>
-              <p className="mt-1 font-medium text-ink-950">{selected.product}</p>
-              <dl className="mt-2 space-y-1 text-xs text-ink-700/75">
+            <div className="rounded-xl border border-surface-200 bg-surface-50 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand-600">Selected item</p>
+              <p className="mt-1 font-medium text-surface-900">{selected.product}</p>
+              <dl className="mt-2 space-y-1 text-xs text-surface-500/75">
                 {selected.variant && selected.variant !== selected.product ? (
                   <DetailRow label="Variant" value={selected.variant} />
                 ) : null}
@@ -1060,8 +1060,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                   <DetailRow label="Stock" value={`${fmtQty(selected.qty)} on hand`} />
                 )}
               </dl>
-              <div className="mt-3 border-t border-paper-200 pt-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-700/55">Quantity</p>
+              <div className="mt-3 border-t border-surface-200 pt-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400">Quantity</p>
                 <div className="mt-2 flex items-center gap-2">
                   <QtyControl
                     value={draftQty}
@@ -1085,7 +1085,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                       type="button"
                       disabled={maxSellable(selected) !== null && n > (maxSellable(selected) || 0)}
                       className={`rounded-lg border px-2.5 py-1 text-xs disabled:opacity-40 ${
-                        draftQty === n ? "border-ink-950 bg-ink-950 text-paper-50" : "border-paper-200 bg-white text-ink-700"
+                        draftQty === n ? "border-surface-900 bg-surface-900 text-white" : "border-surface-200 bg-white text-surface-500"
                       }`}
                       onClick={() => setItemQty(selected, n)}
                     >
@@ -1093,7 +1093,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                     </button>
                   ))}
                 </div>
-                <p className="mt-2 text-xs text-ink-700/55">
+                <p className="mt-2 text-xs text-surface-400">
                   {selectedLine
                     ? `${selectedLine.qty} on this ticket. Change the number and tap Update.`
                     : "Add 1, or pick a quantity then tap Add."}
@@ -1101,14 +1101,14 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               </div>
             </div>
           ) : (
-            <p className="rounded-xl bg-paper-50 px-3 py-3 text-sm text-ink-700/60">
+            <p className="rounded-xl bg-surface-50 px-3 py-3 text-sm text-surface-400">
               Tap a product to see details. Use Add 1, or + / − to change quantity.
             </p>
           )}
 
           <div>
             <div className="flex items-center justify-between">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-700/55">Lines</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400">Lines</p>
               {cart.length ? (
                 <button type="button" className="text-xs text-red-700" onClick={() => setCart([])}>
                   Clear ticket
@@ -1117,12 +1117,12 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             </div>
             <ul className="mt-2 space-y-2">
               {cart.length === 0 ? (
-                <li className="rounded-xl border border-dashed border-paper-200 px-3 py-6 text-center text-sm text-ink-700/60">
+                <li className="rounded-xl border border-dashed border-surface-200 px-3 py-6 text-center text-sm text-surface-400">
                   No items yet. Tap Add 1, then use + / − if the customer wants more.
                 </li>
               ) : null}
               {priced.map((row) => (
-                <li key={row.item.id} className="rounded-xl border border-paper-200 bg-paper-50/60 p-3">
+                <li key={row.item.id} className="rounded-xl border border-surface-200 bg-surface-50/60 p-3">
                   <div className="flex items-start justify-between gap-2">
                     <button type="button" className="min-w-0 text-left" onClick={() => setSelectedId(row.item.id)}>
                       <p className="truncate font-medium">
@@ -1131,17 +1131,17 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                           <span className="ml-1 text-[10px] font-normal uppercase tracking-wide text-sky-800">Service</span>
                         ) : null}
                       </p>
-                      <p className="text-[11px] text-ink-700/50">
+                      <p className="text-[11px] text-surface-400">
                         {row.item.sku}
                         {row.item.variant && row.item.variant !== row.item.product ? ` · ${row.item.variant}` : ""}
                       </p>
-                      {row.promoName ? <p className="mt-0.5 text-[11px] text-copper-700">{row.promoName}</p> : null}
+                      {row.promoName ? <p className="mt-0.5 text-[11px] text-brand-700">{row.promoName}</p> : null}
                       {row.free ? <p className="text-[11px] text-emerald-700">{row.free} free</p> : null}
                     </button>
                     <p className="shrink-0 tabular-nums font-medium">{rs(row.lineTotal)}</p>
                   </div>
                   <div className="mt-2 flex items-center justify-between gap-2">
-                    <p className="text-xs text-ink-700/55">
+                    <p className="text-xs text-surface-400">
                       {rs(row.unit)}
                       {row.unit < row.list ? <span className="ml-1 line-through">{rs(row.list)}</span> : null}
                       {" "}each
@@ -1185,35 +1185,35 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           {recentSales.length ? (
             <div>
               <div className="flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-700/55">Latest sales</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400">Latest sales</p>
                 {overview ? (
-                  <Link href="/reports" className="text-xs text-copper-700 underline">
+                  <Link href="/reports" className="text-xs text-brand-700 underline">
                     Reports
                   </Link>
                 ) : null}
               </div>
               <ul className="mt-2 space-y-2 text-sm">
                 {recentSales.slice(0, 4).map((row) => (
-                  <li key={row.id} className="border-b border-paper-100 pb-2">
+                  <li key={row.id} className="border-b border-surface-100 pb-2">
                     <div className="flex justify-between gap-2">
                       <span className="min-w-0">
                         <span className="block truncate font-medium">{row.number}</span>
-                        <span className="block truncate text-xs text-ink-700/55">
+                        <span className="block truncate text-xs text-surface-400">
                           {row.customer_name || "Walk-in"}
                         </span>
                       </span>
                       <span className="shrink-0 text-right">
                         <span className="block font-medium">{rs(row.total)}</span>
                         {"cashier_name" in row && row.cashier_name ? (
-                          <span className="block text-[11px] text-ink-700/45">{row.cashier_name}</span>
+                          <span className="block text-[11px] text-surface-400">{row.cashier_name}</span>
                         ) : null}
                       </span>
                     </div>
                     <div className="mt-1 flex gap-3 text-xs">
-                      <button type="button" className="text-copper-700 underline" onClick={() => reviewSlip(row.id, row.number)}>
+                      <button type="button" className="text-brand-700 underline" onClick={() => reviewSlip(row.id, row.number)}>
                         View slip
                       </button>
-                      <button type="button" className="text-ink-700/70 underline" onClick={() => openReturn(row.number)}>
+                      <button type="button" className="text-surface-400 underline" onClick={() => openReturn(row.number)}>
                         Return
                       </button>
                     </div>
@@ -1226,33 +1226,33 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           {overview?.alerts.length ? (
             <div className="space-y-2">
               {overview.alerts.slice(0, 2).map((alert) => (
-                <Link key={alert.title} href={alert.href} className="block rounded-xl bg-paper-50 px-3 py-2">
+                <Link key={alert.title} href={alert.href} className="block rounded-xl bg-surface-50 px-3 py-2">
                   <Badge tone={alert.tone === "good" ? "good" : alert.tone === "warn" ? "warn" : "copper"}>
                     {alert.tone === "warn" ? "Action" : "Watch"}
                   </Badge>
                   <p className="mt-1 text-sm font-medium">{alert.title}</p>
-                  <p className="text-xs text-ink-700/60">{alert.detail}</p>
+                  <p className="text-xs text-surface-400">{alert.detail}</p>
                 </Link>
               ))}
             </div>
           ) : null}
         </div>
 
-        <div className="safe-bottom shrink-0 border-t border-paper-200 bg-white p-4">
+        <div className="safe-bottom shrink-0 border-t border-surface-200 bg-white p-4">
           {quote ? (
             <dl className="space-y-1.5 text-sm">
-              <div className="flex items-baseline justify-between gap-3 text-ink-700/70">
+              <div className="flex items-baseline justify-between gap-3 text-surface-400">
                 <dt className="shrink-0">Subtotal</dt>
                 <dd className="tabular-nums">{rs(quote.subtotal)}</dd>
               </div>
               {quote.manualDisc > 0 ? (
-                <div className="flex items-baseline justify-between gap-3 text-copper-700">
+                <div className="flex items-baseline justify-between gap-3 text-brand-700">
                   <dt className="shrink-0">Manual discount</dt>
                   <dd className="tabular-nums">- {rs(quote.manualDisc)}</dd>
                 </div>
               ) : null}
-              <div className="flex items-baseline justify-between gap-3 border-t border-paper-200 pt-2">
-                <dt className="shrink-0 text-sm text-ink-700/70">Total due</dt>
+              <div className="flex items-baseline justify-between gap-3 border-t border-surface-200 pt-2">
+                <dt className="shrink-0 text-sm text-surface-400">Total due</dt>
                 <dd className="text-right font-display text-xl leading-none tabular-nums">{rs(quote.total)}</dd>
               </div>
             </dl>
@@ -1265,7 +1265,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                 type="button"
                 onClick={() => setPayMethod(method)}
                 className={`rounded-xl border px-2 py-2 text-xs font-medium ${
-                  payMethod === method ? "border-ink-950 bg-ink-950 text-paper-50" : "border-paper-200 bg-white text-ink-700"
+                  payMethod === method ? "border-surface-900 bg-surface-900 text-white" : "border-surface-200 bg-white text-surface-500"
                 }`}
               >
                 {PAY_LABEL[method]}
@@ -1277,8 +1277,8 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             <Field label="Amount tendered">
               <Input value={payAmount} onChange={(e) => setPayAmount(e.target.value)} />
             </Field>
-            <div className="rounded-xl bg-paper-50 px-3 py-2">
-              <p className="text-[11px] uppercase tracking-wide text-ink-700/55">{change >= 0 ? "Change" : "Balance due"}</p>
+            <div className="rounded-xl bg-surface-50 px-3 py-2">
+              <p className="text-[11px] uppercase tracking-wide text-surface-400">{change >= 0 ? "Change" : "Balance due"}</p>
               <p className={`font-display text-lg ${change >= 0 ? "text-emerald-800" : "text-red-700"}`}>
                 {rs(Math.abs(change))}
               </p>
@@ -1288,7 +1288,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           <div className="mt-2 flex flex-wrap gap-1.5">
             <button
               type="button"
-              className="rounded-lg border border-paper-200 bg-white px-2.5 py-1 text-xs"
+              className="rounded-lg border border-surface-200 bg-white px-2.5 py-1 text-xs"
               onClick={() => quote && setPayAmount(money(quote.total).toFixed(2))}
             >
               Exact
@@ -1297,7 +1297,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
               <button
                 key={amount}
                 type="button"
-                className="rounded-lg border border-paper-200 bg-white px-2.5 py-1 text-xs"
+                className="rounded-lg border border-surface-200 bg-white px-2.5 py-1 text-xs"
                 onClick={() => setPayAmount(String(amount))}
               >
                 {rs(amount)}
@@ -1323,14 +1323,14 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       {ticketOpen ? (
         <button
           type="button"
-          className="fixed inset-0 z-30 bg-ink-950/40 lg:hidden"
+          className="fixed inset-0 z-30 bg-surface-900/40 lg:hidden"
           aria-label="Close ticket"
           onClick={() => setTicketOpen(false)}
         />
       ) : (
         <button
           type="button"
-          className="fixed z-30 inline-flex min-h-12 items-center gap-2 rounded-full bg-ink-950 px-4 py-3 text-sm font-medium text-paper-50 shadow-lg lg:hidden"
+          className="fixed z-30 inline-flex min-h-12 items-center gap-2 rounded-full bg-surface-900 px-4 py-3 text-sm font-medium text-white shadow-lg lg:hidden"
           style={{ bottom: "max(1rem, env(safe-area-inset-bottom))", right: "1rem" }}
           onClick={() => setTicketOpen(true)}
         >
@@ -1351,10 +1351,10 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       <Modal open={connectOpen} title="Connect phone scanner" onClose={() => setConnectOpen(false)}>
         <div className="space-y-3 text-center">
           {scanToken ? <QrImage value={`${typeof window !== "undefined" ? window.location.origin : ""}/scan/${scanToken}`} /> : null}
-          <p className="text-sm text-ink-700/70">
+          <p className="text-sm text-surface-400">
             Scan this QR with your phone. The camera will open and barcodes will go to the ticket.
           </p>
-          <p className={`text-sm ${phoneLinked ? "text-emerald-700" : "text-ink-700/60"}`}>
+          <p className={`text-sm ${phoneLinked ? "text-emerald-700" : "text-surface-400"}`}>
             {phoneLinked ? "Phone connected — start scanning." : "Waiting for phone…"}
           </p>
         </div>
@@ -1375,12 +1375,12 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   }
 
   return (
-    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-paper-50">
+    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-surface-50">
       <HardwareToasts hardware={hardware} />
-      <header className="safe-top shrink-0 border-b border-paper-200 bg-ink-950 px-3 py-2.5 text-paper-50 sm:px-4 sm:py-3">
+      <header className="safe-top shrink-0 border-b border-surface-200 bg-surface-900 px-3 py-2.5 text-white sm:px-4 sm:py-3">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-copper-400">Register</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-400">Register</p>
             <p className="truncate font-display text-xl leading-tight sm:text-2xl">{user?.business_name || "POS"}</p>
             <p className="mt-0.5 hidden flex-wrap items-center gap-x-3 gap-y-1 text-xs text-paper-50/65 sm:flex">
               <span className="inline-flex items-center gap-1">
@@ -1419,16 +1419,16 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             <button
               type="button"
               onClick={() => openReturn()}
-              className="btn-ghost min-h-11 border-white/15 bg-transparent px-3 text-paper-50"
+              className="btn-ghost min-h-11 border-white/15 bg-transparent px-3 text-white"
             >
               <RotateCcw size={16} />
               <span className="hidden sm:inline">Return</span>
             </button>
-            <Link href={officeHref} className="btn-ghost min-h-11 border-white/15 bg-transparent px-3 text-paper-50">
+            <Link href={officeHref} className="btn-ghost min-h-11 border-white/15 bg-transparent px-3 text-white">
               <LayoutDashboard size={16} />
               <span className="hidden sm:inline">Back office</span>
             </Link>
-            <button type="button" onClick={logout} className="min-h-11 px-1 text-sm text-paper-50/60 hover:text-white">
+            <button type="button" onClick={logout} className="min-h-11 px-1 text-sm text-white/60 hover:text-white">
               Sign out
             </button>
           </div>
@@ -1471,13 +1471,13 @@ function QtyControl({
   const btn = size === "sm" ? "h-8 w-8" : "h-10 w-10";
   return (
     <div
-      className={`inline-flex items-center overflow-hidden rounded-xl border border-paper-200 bg-white ${
+      className={`inline-flex items-center overflow-hidden rounded-xl border border-surface-200 bg-white ${
         size === "sm" ? "w-[7.25rem] shrink-0" : "min-w-0 flex-1"
       }`}
     >
       <button
         type="button"
-        className={`grid ${btn} shrink-0 place-items-center text-ink-800 hover:bg-paper-100 disabled:opacity-35`}
+        className={`grid ${btn} shrink-0 place-items-center text-surface-700 hover:bg-surface-100 disabled:opacity-35`}
         disabled={value <= min}
         onClick={() => onChange(value - 1)}
         aria-label="Decrease quantity"
@@ -1494,11 +1494,11 @@ function QtyControl({
           if (!Number.isFinite(n)) return;
           onChange(n);
         }}
-        className="min-w-0 flex-1 border-x border-paper-200 bg-transparent py-1 text-center text-sm tabular-nums outline-none"
+        className="min-w-0 flex-1 border-x border-surface-200 bg-transparent py-1 text-center text-sm tabular-nums outline-none"
       />
       <button
         type="button"
-        className={`grid ${btn} shrink-0 place-items-center text-ink-800 hover:bg-paper-100 disabled:opacity-35`}
+        className={`grid ${btn} shrink-0 place-items-center text-surface-700 hover:bg-surface-100 disabled:opacity-35`}
         disabled={max !== undefined && value >= max}
         onClick={() => onChange(value + 1)}
         aria-label="Increase quantity"
@@ -1523,7 +1523,7 @@ function fmtQty(value: string | number) {
 
 function stockTone(item: PosCatalogItem) {
   if (isService(item)) return { kind: "ok" as const, label: "Service", className: "bg-sky-50 text-sky-800" };
-  if (!item.track_stock) return { kind: "ok" as const, label: "No track", className: "bg-paper-100 text-ink-700" };
+  if (!item.track_stock) return { kind: "ok" as const, label: "No track", className: "bg-surface-100 text-surface-500" };
   const qty = num(item.qty);
   if (qty <= 0) return { kind: "out" as const, label: "Out of stock", className: "bg-red-50 text-red-800" };
   if (qty <= 5) return { kind: "low" as const, label: "Low stock", className: "bg-amber-50 text-amber-800" };
@@ -1546,13 +1546,13 @@ function Kpi({
   return (
     <div className={`card p-3 ${warn ? "border-amber-300" : ""}`}>
       <div className="flex items-start gap-2">
-        <span className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg ${warn ? "bg-amber-100 text-amber-900" : "bg-ink-950 text-paper-50"}`}>
+        <span className={`mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg ${warn ? "bg-amber-100 text-amber-900" : "bg-surface-900 text-white"}`}>
           <Icon size={15} />
         </span>
         <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-ink-700/55">{label}</p>
-          <p className="truncate font-display text-lg leading-tight text-ink-950">{value}</p>
-          <p className="truncate text-[11px] text-ink-700/55">{hint}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-surface-400">{label}</p>
+          <p className="truncate font-display text-lg leading-tight text-surface-900">{value}</p>
+          <p className="truncate text-[11px] text-surface-400">{hint}</p>
         </div>
       </div>
     </div>
@@ -1562,8 +1562,8 @@ function Kpi({
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-2">
-      <dt className="shrink-0 text-ink-700/60">{label}</dt>
-      <dd className="min-w-0 truncate text-right text-ink-950">{value}</dd>
+      <dt className="shrink-0 text-surface-400">{label}</dt>
+      <dd className="min-w-0 truncate text-right text-surface-900">{value}</dd>
     </div>
   );
 }

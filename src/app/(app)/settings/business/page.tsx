@@ -133,14 +133,14 @@ export default function BusinessPage() {
 
         {/* ── Logo + Colors ── */}
         <div className="card p-6">
-          <h2 className="mb-5 font-medium text-ink-950">Brand</h2>
+          <h2 className="mb-5 font-medium text-surface-900">Brand</h2>
 
           {/* Logo */}
           <div className="mb-6 flex items-center gap-5">
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-paper-200 bg-paper-50 transition hover:border-copper-400"
+              className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-surface-200 bg-surface-50 transition hover:border-brand-400"
             >
               {logoPreview ? (
                 <Image
@@ -170,14 +170,14 @@ export default function BusinessPage() {
               onChange={onLogoChange}
             />
             <div>
-              <p className="text-sm font-medium text-ink-950">Business logo</p>
-              <p className="mt-0.5 text-xs text-ink-700/55">
+              <p className="text-sm font-medium text-surface-900">Business logo</p>
+              <p className="mt-0.5 text-xs text-surface-400">
                 PNG or JPG. Shows in sidebar and on receipts.
               </p>
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="mt-2 text-xs font-medium text-copper-600 hover:text-copper-500"
+                className="mt-2 text-xs font-medium text-brand-600 hover:text-brand-500"
               >
                 {logoPreview ? "Replace logo" : "Upload logo"}
               </button>
@@ -186,7 +186,7 @@ export default function BusinessPage() {
 
           {/* Color presets */}
           <div className="mb-4">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-ink-700/50">
+            <p className="mb-3 text-xs font-medium uppercase tracking-wide text-surface-400">
               Theme preset
             </p>
             <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
@@ -208,7 +208,7 @@ export default function BusinessPage() {
                     {/* Color swatch — split diagonal */}
                     <div
                       className={`relative h-10 w-10 overflow-hidden rounded-xl border-2 transition ${
-                        active ? "border-ink-950 scale-110" : "border-transparent hover:border-paper-200"
+                        active ? "border-surface-900 scale-110" : "border-transparent hover:border-surface-200"
                       }`}
                     >
                       <div
@@ -223,7 +223,7 @@ export default function BusinessPage() {
                         }}
                       />
                     </div>
-                    <span className="text-[10px] text-ink-700/50 group-hover:text-ink-700">
+                    <span className="text-[10px] text-surface-400 group-hover:text-surface-500">
                       {preset.label}
                     </span>
                   </button>
@@ -240,9 +240,9 @@ export default function BusinessPage() {
                   type="color"
                   value={form.primary_color || "#1c1814"}
                   onChange={(e) => set("primary_color", e.target.value)}
-                  className="h-10 w-14 cursor-pointer rounded-lg border border-paper-200 p-1"
+                  className="h-10 w-14 cursor-pointer rounded-lg border border-surface-200 p-1"
                 />
-                <code className="text-sm text-ink-700/70">
+                <code className="text-sm text-surface-400">
                   {form.primary_color || "#1c1814"}
                 </code>
               </div>
@@ -253,9 +253,9 @@ export default function BusinessPage() {
                   type="color"
                   value={form.accent_color || "#d4892a"}
                   onChange={(e) => set("accent_color", e.target.value)}
-                  className="h-10 w-14 cursor-pointer rounded-lg border border-paper-200 p-1"
+                  className="h-10 w-14 cursor-pointer rounded-lg border border-surface-200 p-1"
                 />
-                <code className="text-sm text-ink-700/70">
+                <code className="text-sm text-surface-400">
                   {form.accent_color || "#d4892a"}
                 </code>
               </div>
@@ -290,7 +290,7 @@ export default function BusinessPage() {
 
         {/* ── Business info ── */}
         <div className="card grid gap-4 p-6 md:grid-cols-2">
-          <h2 className="font-medium text-ink-950 md:col-span-2">Business info</h2>
+          <h2 className="font-medium text-surface-900 md:col-span-2">Business info</h2>
 
           <Field label="Business name" error={errors.name}>
             <Input value={form.name || ""} onChange={(e) => set("name", e.target.value)} required />

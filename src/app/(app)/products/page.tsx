@@ -218,7 +218,7 @@ export default function ProductsPage() {
             key={item}
             type="button"
             onClick={() => setTab(item)}
-            className={`rounded-full px-3 py-1.5 text-sm capitalize ${tab === item ? "bg-ink-950 text-paper-50" : "bg-white border border-paper-200"}`}
+            className={`rounded-full px-3 py-1.5 text-sm capitalize ${tab === item ? "bg-surface-900 text-white" : "bg-white border border-surface-200"}`}
           >
             {item}
           </button>
@@ -243,7 +243,7 @@ export default function ProductsPage() {
           >
             <div className="card overflow-x-auto">
               <table className="min-w-[64rem] w-full text-left text-sm">
-                <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
+                <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
                   <tr>
                     <th className="px-4 py-3">Product</th>
                     <th className="px-4 py-3">SKU</th>
@@ -259,13 +259,13 @@ export default function ProductsPage() {
                 </thead>
                 <tbody>
                   {products.rows.map((row) => (
-                    <tr key={row.id} className="border-t border-paper-100 align-top">
+                    <tr key={row.id} className="border-t border-surface-100 align-top">
                       <td className="px-4 py-3">
-                        <Link href={`/products/${row.id}`} className="font-medium hover:text-copper-600">
+                        <Link href={`/products/${row.id}`} className="font-medium hover:text-brand-600">
                           {row.name}
                         </Link>
                         {row.description ? (
-                          <p className="mt-0.5 max-w-xs text-xs text-ink-700/55">{row.description}</p>
+                          <p className="mt-0.5 max-w-xs text-xs text-surface-400">{row.description}</p>
                         ) : null}
                       </td>
                       <td className="px-4 py-3 font-mono text-xs">{row.sku || "—"}</td>
@@ -279,7 +279,7 @@ export default function ProductsPage() {
                       {can("product.manage") ? (
                         <td className="px-4 py-3 text-right">
                           <div className="flex justify-end gap-2">
-                            <button type="button" className="text-xs text-copper-700" onClick={() => startEdit(row)}>
+                            <button type="button" className="text-xs text-brand-700" onClick={() => startEdit(row)}>
                               Edit
                             </button>
                             <button type="button" className="text-xs text-red-700" onClick={() => remove(row)}>
@@ -379,7 +379,7 @@ export default function ProductsPage() {
             ) : (
             <div className="space-y-3">
               {variantRows.map((row, index) => (
-                <div key={index} className="grid gap-2 rounded-xl border border-paper-200 p-3 sm:grid-cols-3">
+                <div key={index} className="grid gap-2 rounded-xl border border-surface-200 p-3 sm:grid-cols-3">
                   <Input placeholder="Size" value={row.size} onChange={(e) => updateVariant(index, { size: e.target.value })} />
                   <Input placeholder="Color" value={row.color} onChange={(e) => updateVariant(index, { color: e.target.value })} />
                   <Input placeholder="SKU" value={row.sku} onChange={(e) => updateVariant(index, { sku: e.target.value })} />
@@ -432,14 +432,14 @@ function NamedList({
         <table className="w-full text-left text-sm">
           <tbody>
             {rows.map((row) => (
-              <tr key={row.id} className="border-t border-paper-100 first:border-0">
+              <tr key={row.id} className="border-t border-surface-100 first:border-0">
                 <td className="px-4 py-3">
                   {row.name}
                   {"kind" in row && row.kind === "service" ? (
                     <span className="ml-2 text-[10px] uppercase tracking-wide text-sky-800">Service</span>
                   ) : null}
                 </td>
-                <td className="px-4 py-3 text-right text-ink-700/60">{row.product_count ?? ""}</td>
+                <td className="px-4 py-3 text-right text-surface-400">{row.product_count ?? ""}</td>
                 {onDelete ? (
                   <td className="px-4 py-3 text-right">
                     <button type="button" className="text-xs text-red-700" onClick={() => onDelete(row)}>

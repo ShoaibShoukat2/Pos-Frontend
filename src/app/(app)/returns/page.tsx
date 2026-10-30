@@ -40,10 +40,10 @@ export default function ReturnsPage() {
       <div className="card mb-6 p-5">
         <SaleReturnPanel onDone={() => load()} />
       </div>
-      <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-700/55">Recent returns</p>
+      <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400">Recent returns</p>
       {loading ? <TableSkeleton rows={3} cols={3} /> : null}
       {!loading && rows.length === 0 ? (
-        <p className="text-sm text-ink-700/65">No returns yet. Process one from the form above or from the POS register.</p>
+        <p className="text-sm text-surface-400">No returns yet. Process one from the form above or from the POS register.</p>
       ) : null}
       <ul className="space-y-3">
         {rows.map((row) => (
@@ -51,14 +51,14 @@ export default function ReturnsPage() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-medium">{row.number}</p>
-                <p className="text-xs text-ink-700/55">
+                <p className="text-xs text-surface-400">
                   Ticket {row.sale_number} · {row.customer_name || "Walk-in"} · {row.refund_method}
                 </p>
               </div>
               <p className="font-display text-xl">{rs(row.refund_amount)}</p>
             </div>
             {row.lines?.length ? (
-              <ul className="mt-3 space-y-1 border-t border-paper-100 pt-3 text-sm">
+              <ul className="mt-3 space-y-1 border-t border-surface-100 pt-3 text-sm">
                 {row.lines.map((line) => (
                   <li key={line.id} className="flex justify-between gap-3">
                     <span className="truncate">{line.product_name}</span>

@@ -104,7 +104,7 @@ export default function InvoicePage() {
             </Select>
           </Field>
           <div className="md:col-span-2">
-            <p className="text-sm font-medium text-ink-950">Invoice design</p>
+            <p className="text-sm font-medium text-surface-900">Invoice design</p>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               {INVOICE_DESIGNS.map((item) => {
                 const active = (form.design || "classic") === item.id;
@@ -114,11 +114,11 @@ export default function InvoicePage() {
                     type="button"
                     onClick={() => setForm({ ...form, design: item.id })}
                     className={`rounded-xl border px-3 py-3 text-left ${
-                      active ? "border-copper-500 bg-copper-400/10 ring-2 ring-copper-500/20" : "border-paper-200 bg-white"
+                      active ? "border-brand-500 bg-brand-400/10 ring-2 ring-brand-500/20" : "border-surface-200 bg-white"
                     }`}
                   >
-                    <span className="block text-sm font-medium text-ink-950">{item.label}</span>
-                    <span className="mt-1 block text-xs text-ink-700/70">{item.hint}</span>
+                    <span className="block text-sm font-medium text-surface-900">{item.label}</span>
+                    <span className="mt-1 block text-xs text-surface-400">{item.hint}</span>
                   </button>
                 );
               })}
@@ -147,9 +147,9 @@ export default function InvoicePage() {
             {saved ? <span className="text-sm text-emerald-700">Saved</span> : null}
           </div>
         </div>
-        <div className="card bg-paper-50 p-4">
-          <p className="text-xs uppercase tracking-[0.16em] text-copper-600">Slip preview</p>
-          <p className="mt-1 text-sm text-ink-700/70">This is the invoice the owner and cashier print.</p>
+        <div className="card bg-surface-50 p-4">
+          <p className="text-xs uppercase tracking-[0.16em] text-brand-600">Slip preview</p>
+          <p className="mt-1 text-sm text-surface-400">This is the invoice the owner and cashier print.</p>
           <div className="mt-4 overflow-x-auto">
             <ReceiptSlip
               sale={{ ...SAMPLE_SALE, number: form.preview_number || SAMPLE_SALE.number }}

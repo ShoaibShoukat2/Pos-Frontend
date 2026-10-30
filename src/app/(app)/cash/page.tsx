@@ -110,7 +110,7 @@ export default function CashPage() {
               </form>
             </div>
           ) : (
-            <p className="mt-4 text-sm text-ink-700/70">No open shift. Open the drawer before taking cash.</p>
+            <p className="mt-4 text-sm text-surface-400">No open shift. Open the drawer before taking cash.</p>
           )}
         </div>
       </div>
@@ -119,7 +119,7 @@ export default function CashPage() {
         <ListState loading={sessions.loading} count={sessions.count} emptyTitle="No shifts yet">
         <div className="card overflow-hidden">
         <table className="w-full text-left text-sm">
-          <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
+          <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
             <tr>
               <th className="px-4 py-3">Shift</th>
               <th className="px-4 py-3">Expected</th>
@@ -129,7 +129,7 @@ export default function CashPage() {
           </thead>
           <tbody>
             {sessions.rows.map((row) => (
-              <tr key={row.id} className="border-t border-paper-100">
+              <tr key={row.id} className="border-t border-surface-100">
                 <td className="px-4 py-3">{row.number}</td>
                 <td className="px-4 py-3">Rs {row.expected_cash}</td>
                 <td className="px-4 py-3">{row.actual_cash == null ? "—" : `Rs ${row.actual_cash}`}</td>
@@ -155,7 +155,7 @@ export default function CashPage() {
 function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <div className={`flex justify-between gap-3 ${strong ? "font-medium" : ""}`}>
-      <span className="text-ink-700/70">{label}</span>
+      <span className="text-surface-400">{label}</span>
       <span>Rs {value}</span>
     </div>
   );

@@ -74,23 +74,23 @@ export default function CashiersPage() {
       />
 
       {created ? (
-        <div className="card mb-6 border-copper-400 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-copper-600">Give this to your cashier</p>
-          <p className="mt-2 text-sm text-ink-700/75">
+        <div className="card mb-6 border-brand-400 p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-600">Give this to your cashier</p>
+          <p className="mt-2 text-sm text-surface-500/75">
             They open Sign in, choose <span className="font-medium">Cashier</span>, then use these details. Save the
             password now — it will not be shown again.
           </p>
           <dl className="mt-3 space-y-1 text-sm">
             <div className="flex justify-between gap-3">
-              <dt className="text-ink-700/65">Email</dt>
+              <dt className="text-surface-400">Email</dt>
               <dd className="font-medium">{created.email}</dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-ink-700/65">Password</dt>
+              <dt className="text-surface-400">Password</dt>
               <dd className="font-medium">{created.password}</dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-ink-700/65">Login page</dt>
+              <dt className="text-surface-400">Login page</dt>
               <dd className="font-medium">/login · role: Cashier</dd>
             </div>
           </dl>
@@ -105,7 +105,7 @@ export default function CashiersPage() {
       ) : (
         <div className="card overflow-hidden">
           <table className="w-full text-left text-sm">
-            <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
+            <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
               <tr>
                 <th className="px-4 py-3">Cashier</th>
                 <th className="px-4 py-3">Status</th>
@@ -113,10 +113,10 @@ export default function CashiersPage() {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="border-t border-paper-100">
+                <tr key={row.id} className="border-t border-surface-100">
                   <td className="px-4 py-3">
                     <p className="font-medium">{row.full_name}</p>
-                    <p className="text-xs text-ink-700/55">{row.email}</p>
+                    <p className="text-xs text-surface-400">{row.email}</p>
                   </td>
                   <td className="px-4 py-3">
                     <Badge tone={row.is_active ? "good" : "warn"}>{row.is_active ? "Active" : "Disabled"}</Badge>
@@ -153,7 +153,7 @@ export default function CashiersPage() {
               minLength={8}
             />
           </Field>
-          <p className="text-xs text-ink-700/60">
+          <p className="text-xs text-surface-400">
             After you save, tell the cashier to open Sign in, choose Cashier, and use this email and password.
           </p>
           <Button type="submit" disabled={pending}>

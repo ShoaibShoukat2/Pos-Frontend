@@ -63,7 +63,7 @@ export default function ExpensesPage() {
       <ListState loading={list.loading} count={list.count} emptyTitle="No expenses yet" cols={5}>
         <div className="card overflow-hidden">
           <table className="w-full text-left text-sm">
-            <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
+            <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
               <tr>
                 <th className="px-4 py-3">#</th>
                 <th className="px-4 py-3">Category</th>
@@ -73,7 +73,7 @@ export default function ExpensesPage() {
             </thead>
             <tbody>
               {list.rows.map((row) => (
-                <tr key={row.id} className="border-t border-paper-100">
+                <tr key={row.id} className="border-t border-surface-100">
                   <td className="px-4 py-3 font-medium">{row.number}</td>
                   <td className="px-4 py-3">{row.category_name}</td>
                   <td className="px-4 py-3">Rs {row.amount}</td>

@@ -56,7 +56,7 @@ function BusinessInitials({ name }: { name: string }) {
   return (
     <div
       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white"
-      style={{ background: "var(--brand-accent, #d4892a)" }}
+      style={{ background: "var(--brand-accent, #6366f1)" }}
     >
       {letters || "B"}
     </div>
@@ -94,7 +94,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (!user || user.is_platform_admin) return null;
 
   const accentStyle = {
-    "--nav-active-bg": "var(--brand-accent, #d4892a)",
+    "--nav-active-bg": "var(--brand-accent, #6366f1)",
   } as React.CSSProperties;
 
   return (
@@ -127,7 +127,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             ) : (
               <BusinessInitials name={user.business_name || "B"} />
             )}
-            <span className="truncate font-display text-lg leading-tight text-paper-50">
+            <span className="truncate font-display text-lg leading-tight text-white">
               {user.business_name || "Universal POS"}
             </span>
           </Link>
@@ -139,10 +139,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             className="rounded-xl px-3 py-3"
             style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
-            <p className="truncate text-sm font-medium text-paper-50">{user.full_name}</p>
+            <p className="truncate text-sm font-medium text-white">{user.full_name}</p>
             <p
               className="mt-0.5 text-[11px] uppercase tracking-wider"
-              style={{ color: "var(--brand-accent, #d4892a)" }}
+              style={{ color: "var(--brand-accent, #6366f1)" }}
             >
               {user.is_owner ? "Owner" : user.role_name || "Staff"}
             </p>
@@ -167,12 +167,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 style={
                   active
                     ? {
-                        background: "var(--brand-accent, #d4892a)",
-                        color: "#1c1814",
+                        background: "var(--brand-accent, #6366f1)",
+                        color: "#fff",
                         fontWeight: 500,
                       }
                     : {
-                        color: "rgba(251,247,240,0.65)",
+                        color: "rgba(248,250,252,0.65)",
                       }
                 }
                 onMouseOver={(e) => {

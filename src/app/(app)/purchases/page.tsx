@@ -81,7 +81,7 @@ export default function PurchasesPage() {
             key={item}
             type="button"
             onClick={() => setTab(item)}
-            className={`rounded-full px-3 py-1.5 text-sm capitalize ${tab === item ? "bg-ink-950 text-paper-50" : "bg-white border border-paper-200"}`}
+            className={`rounded-full px-3 py-1.5 text-sm capitalize ${tab === item ? "bg-surface-900 text-white" : "bg-white border border-surface-200"}`}
           >
             {item}
           </button>
@@ -96,7 +96,7 @@ export default function PurchasesPage() {
           <ListState loading={orders.loading} count={orders.count} emptyTitle="No purchase orders" cols={5}>
             <div className="card overflow-hidden">
               <table className="w-full text-left text-sm">
-                <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
+                <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
                   <tr>
                     <th className="px-4 py-3">PO</th>
                     <th className="px-4 py-3">Supplier</th>
@@ -106,9 +106,9 @@ export default function PurchasesPage() {
                 </thead>
                 <tbody>
                   {orders.rows.map((row) => (
-                    <tr key={row.id} className="border-t border-paper-100">
+                    <tr key={row.id} className="border-t border-surface-100">
                       <td className="px-4 py-3">
-                        <Link href={`/purchases/${row.id}`} className="font-medium hover:text-copper-600">
+                        <Link href={`/purchases/${row.id}`} className="font-medium hover:text-brand-600">
                           {row.number}
                         </Link>
                       </td>
@@ -133,7 +133,7 @@ export default function PurchasesPage() {
             <table className="w-full text-left text-sm">
               <tbody>
                 {receipts.rows.map((row) => (
-                  <tr key={row.id} className="border-t border-paper-100 first:border-0">
+                  <tr key={row.id} className="border-t border-surface-100 first:border-0">
                     <td className="px-4 py-3 font-medium">{row.number}</td>
                     <td className="px-4 py-3">{row.supplier_name}</td>
                     <td className="px-4 py-3">{row.purchase_order_number || "Direct"}</td>
@@ -153,7 +153,7 @@ export default function PurchasesPage() {
             <table className="w-full text-left text-sm">
               <tbody>
                 {payables.rows.map((row) => (
-                  <tr key={row.id} className="border-t border-paper-100 first:border-0">
+                  <tr key={row.id} className="border-t border-surface-100 first:border-0">
                     <td className="px-4 py-3">{row.supplier_name}</td>
                     <td className="px-4 py-3">{row.receipt_number}</td>
                     <td className="px-4 py-3">Rs {row.balance}</td>

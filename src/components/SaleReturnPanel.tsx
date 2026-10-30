@@ -166,7 +166,7 @@ export function SaleReturnPanel({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-ink-700/70">
+      <p className="text-sm text-surface-400">
         Find the original ticket, remove the items the customer does not want, then refund them. Stock comes back.
       </p>
       <div className="flex gap-2">
@@ -187,18 +187,18 @@ export function SaleReturnPanel({
 
       {!sale && recent.length ? (
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-700/55">Latest tickets</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400">Latest tickets</p>
           <ul className="mt-2 space-y-1.5">
             {recent.map((row) => (
               <li key={row.id}>
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-paper-200 bg-white px-3 py-2 text-left text-sm hover:border-copper-300"
+                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-surface-200 bg-white px-3 py-2 text-left text-sm hover:border-brand-300"
                   onClick={() => applySale(row)}
                 >
                   <span className="min-w-0">
                     <span className="block truncate font-medium">{row.number}</span>
-                    <span className="block truncate text-xs text-ink-700/55">
+                    <span className="block truncate text-xs text-surface-400">
                       {row.customer_name || "Walk-in"}
                       {row.status && row.status !== "completed" ? ` · ${row.status}` : ""}
                     </span>
@@ -213,11 +213,11 @@ export function SaleReturnPanel({
 
       {sale ? (
         <div className="space-y-3">
-          <div className="rounded-xl bg-paper-50 px-3 py-3">
+          <div className="rounded-xl bg-surface-50 px-3 py-3">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-medium">{sale.number}</p>
-                <p className="text-xs text-ink-700/55">
+                <p className="text-xs text-surface-400">
                   {sale.customer_name || "Walk-in"}
                   {sale.payment_method ? ` · ${PAY_LABEL[sale.payment_method] || sale.payment_method}` : ""}
                 </p>
@@ -225,19 +225,19 @@ export function SaleReturnPanel({
               <div className="text-right">
                 <p className="font-display text-xl">{rs(sale.net_total || sale.total)}</p>
                 {num(sale.returned_total) > 0 ? (
-                  <p className="text-xs text-copper-700">Returned {rs(sale.returned_total)}</p>
+                  <p className="text-xs text-brand-700">Returned {rs(sale.returned_total)}</p>
                 ) : null}
               </div>
             </div>
           </div>
 
           {fullyReturned ? (
-            <p className="text-sm text-ink-700/70">This ticket is fully returned. Nothing left to take back.</p>
+            <p className="text-sm text-surface-400">This ticket is fully returned. Nothing left to take back.</p>
           ) : (
             <>
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-700/55">Items to return</p>
-                <button type="button" className="text-xs text-copper-700 underline" onClick={returnAll}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400">Items to return</p>
+                <button type="button" className="text-xs text-brand-700 underline" onClick={returnAll}>
                   Return all
                 </button>
               </div>
@@ -247,11 +247,11 @@ export function SaleReturnPanel({
                   const current = qty[line.id] || 0;
                   const done = max <= 0;
                   return (
-                    <li key={line.id} className="rounded-xl border border-paper-200 px-3 py-2.5">
+                    <li key={line.id} className="rounded-xl border border-surface-200 px-3 py-2.5">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <p className="truncate font-medium">{line.product_name}</p>
-                          <p className="text-xs text-ink-700/55">
+                          <p className="text-xs text-surface-400">
                             Sold {fmtQty(line.quantity)}
                             {line.sku ? ` · ${line.sku}` : ""}
                             {done ? " · already returned" : ` · ${fmtQty(max)} left`}
@@ -263,7 +263,7 @@ export function SaleReturnPanel({
                         <div className="mt-2 flex items-center gap-2">
                           <button
                             type="button"
-                            className="grid h-9 w-9 place-items-center rounded-lg border border-paper-200"
+                            className="grid h-9 w-9 place-items-center rounded-lg border border-surface-200"
                             onClick={() => setLineQty(line.id, current - 1, max)}
                           >
                             <Minus size={14} />
@@ -276,14 +276,14 @@ export function SaleReturnPanel({
                           />
                           <button
                             type="button"
-                            className="grid h-9 w-9 place-items-center rounded-lg border border-paper-200"
+                            className="grid h-9 w-9 place-items-center rounded-lg border border-surface-200"
                             onClick={() => setLineQty(line.id, current + 1, max)}
                           >
                             <Plus size={14} />
                           </button>
                           <button
                             type="button"
-                            className="ml-auto text-xs text-ink-700/60 underline"
+                            className="ml-auto text-xs text-surface-400 underline"
                             onClick={() => setLineQty(line.id, max, max)}
                           >
                             All {fmtQty(max)}
@@ -302,7 +302,7 @@ export function SaleReturnPanel({
                     type="button"
                     onClick={() => setMethod(row)}
                     className={`rounded-xl border px-2 py-2 text-xs font-medium ${
-                      method === row ? "border-ink-950 bg-ink-950 text-paper-50" : "border-paper-200 bg-white text-ink-700"
+                      method === row ? "border-surface-900 bg-surface-900 text-white" : "border-surface-200 bg-white text-surface-500"
                     }`}
                   >
                     Refund {PAY_LABEL[row]}
@@ -316,11 +316,11 @@ export function SaleReturnPanel({
                 {pending ? "Returning…" : `Return items · ${rs(refundPreview)}`}
               </Button>
               {method === "cash" && refundPreview > 0 ? (
-                <p className="text-xs text-ink-700/60">Cash refunds need an open drawer. Credit on the ticket is reduced first.</p>
+                <p className="text-xs text-surface-400">Cash refunds need an open drawer. Credit on the ticket is reduced first.</p>
               ) : null}
             </>
           )}
-          <button type="button" className="inline-flex items-center gap-1 text-xs text-ink-700/60" onClick={() => setSale(null)}>
+          <button type="button" className="inline-flex items-center gap-1 text-xs text-surface-400" onClick={() => setSale(null)}>
             <Trash2 size={12} />
             Find another ticket
           </button>
@@ -338,7 +338,7 @@ export function ReturnButton({ onClick, className = "" }: { onClick: () => void;
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-transparent px-3 text-sm text-paper-50 hover:bg-white/10 ${className}`}
+      className={`inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/15 bg-transparent px-3 text-sm text-white hover:bg-white/10 ${className}`}
     >
       <RotateCcw size={16} />
       Return

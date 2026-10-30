@@ -55,7 +55,7 @@ export default function CustomersPage() {
       >
         <div className="card overflow-hidden">
           <table className="w-full text-left text-sm">
-            <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
+            <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
               <tr>
                 <th className="px-4 py-3">Customer</th>
                 <th className="px-4 py-3">Purchases</th>
@@ -64,12 +64,12 @@ export default function CustomersPage() {
             </thead>
             <tbody>
               {list.rows.map((row) => (
-                <tr key={row.id} className="border-t border-paper-100">
+                <tr key={row.id} className="border-t border-surface-100">
                   <td className="px-4 py-3">
-                    <Link href={`/customers/${row.id}`} className="font-medium hover:text-copper-600">
+                    <Link href={`/customers/${row.id}`} className="font-medium hover:text-brand-600">
                       {row.name}
                     </Link>
-                    <p className="text-xs text-ink-700/55">{row.phone || row.city || "—"}</p>
+                    <p className="text-xs text-surface-400">{row.phone || row.city || "—"}</p>
                   </td>
                   <td className="px-4 py-3">Rs {row.total_purchases}</td>
                   <td className="px-4 py-3">

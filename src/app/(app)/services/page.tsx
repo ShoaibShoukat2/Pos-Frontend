@@ -184,9 +184,9 @@ export default function ServicesPage() {
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div className="card p-4">
-          <p className="text-[11px] uppercase tracking-[0.16em] text-ink-700/55">Services</p>
+          <p className="text-[11px] uppercase tracking-[0.16em] text-surface-400">Services</p>
           <p className="stat-value mt-1">{services.count}</p>
-          <p className="mt-1 text-xs text-ink-700/60">Jobs you offer. Price is calculated on the ticket when sold.</p>
+          <p className="mt-1 text-xs text-surface-400">Jobs you offer. Price is calculated on the ticket when sold.</p>
         </div>
       </div>
 
@@ -207,7 +207,7 @@ export default function ServicesPage() {
       {serviceCategories.length ? (
         <div className="mb-4 flex flex-wrap gap-2">
           {serviceCategories.map((row) => (
-            <span key={row.id} className="rounded-full border border-paper-200 bg-white px-3 py-1 text-xs text-ink-700">
+            <span key={row.id} className="rounded-full border border-surface-200 bg-white px-3 py-1 text-xs text-surface-500">
               {row.name}
               {row.product_count != null ? ` · ${row.product_count}` : ""}
             </span>
@@ -224,7 +224,7 @@ export default function ServicesPage() {
       >
         <div className="card overflow-x-auto">
           <table className="min-w-[64rem] w-full text-left text-sm">
-            <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
+            <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
               <tr>
                 <th className="px-4 py-3">Service</th>
                 <th className="px-4 py-3">SKU</th>
@@ -239,10 +239,10 @@ export default function ServicesPage() {
             </thead>
             <tbody>
               {services.rows.map((row) => (
-                <tr key={row.id} className="border-t border-paper-100 align-top">
+                <tr key={row.id} className="border-t border-surface-100 align-top">
                   <td className="px-4 py-3">
                     <p className="font-medium">{row.name}</p>
-                    {row.description ? <p className="mt-0.5 max-w-xs text-xs text-ink-700/55">{row.description}</p> : null}
+                    {row.description ? <p className="mt-0.5 max-w-xs text-xs text-surface-400">{row.description}</p> : null}
                   </td>
                   <td className="px-4 py-3 font-mono text-xs">{row.sku || "—"}</td>
                   <td className="px-4 py-3">{row.category_name || "—"}</td>
@@ -256,12 +256,12 @@ export default function ServicesPage() {
                   {can("product.manage") ? (
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
-                        <button type="button" className="text-xs text-copper-700" onClick={() => startEdit(row)}>
+                        <button type="button" className="text-xs text-brand-700" onClick={() => startEdit(row)}>
                           Edit
                         </button>
                         <button
                           type="button"
-                          className="text-xs text-ink-700/60"
+                          className="text-xs text-surface-400"
                           onClick={() => toggleActive(row)}
                         >
                           {row.is_active ? "Hide" : "Show"}
@@ -318,7 +318,7 @@ export default function ServicesPage() {
                 onChange={(e) => setForm({ ...form, selling_price: e.target.value })}
                 required
               />
-              <p className="mt-1 text-xs text-ink-700/55">Added to the sale total when this job is sold on POS. Not stock.</p>
+              <p className="mt-1 text-xs text-surface-400">Added to the sale total when this job is sold on POS. Not stock.</p>
             </Field>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">

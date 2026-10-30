@@ -69,14 +69,14 @@ export default function ReportsPage() {
         title="Reports"
         description="Daily, weekly and monthly numbers — sales and the profit the owner actually cares about."
         action={
-          <div className="flex w-full rounded-xl border border-paper-200 bg-white p-1 sm:w-auto">
+          <div className="flex w-full rounded-xl border border-surface-200 bg-white p-1 sm:w-auto">
             {PERIODS.map((p) => (
               <button
                 key={p.id}
                 type="button"
                 onClick={() => setPeriod(p.id)}
                 className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium sm:flex-none ${
-                  period === p.id ? "bg-ink-950 text-paper-50" : "text-ink-700/70 hover:text-ink-950"
+                  period === p.id ? "bg-surface-900 text-white" : "text-surface-400 hover:text-surface-900"
                 }`}
               >
                 {p.label}
@@ -93,7 +93,7 @@ export default function ReportsPage() {
             type="button"
             onClick={() => setTab(item.id)}
             className={`rounded-xl px-4 py-2 text-sm ${
-              tab === item.id ? "bg-ink-950 text-paper-50" : "card px-4 py-2 hover:border-copper-400"
+              tab === item.id ? "bg-surface-900 text-white" : "card px-4 py-2 hover:border-brand-400"
             }`}
           >
             {item.label}
@@ -152,21 +152,21 @@ function FinancialPanel({ data }: { data: FinancialReport }) {
     <div className="space-y-6">
       <div className="card mx-auto max-w-xl p-8">
         <h2 className="font-display text-2xl">Profit & loss</h2>
-        <p className="mt-1 text-xs text-ink-700/55">
+        <p className="mt-1 text-xs text-surface-400">
           {data.from} → {data.to}
         </p>
         <dl className="mt-6 space-y-2 font-mono text-sm">
           <MoneyRow label="Revenue" value={rs(data.revenue)} />
           <MoneyRow label="Cost" value={rs(data.cost)} />
-          <div className="border-t border-ink-950/20 pt-2">
+          <div className="border-t border-surface-900/20 pt-2">
             <MoneyRow label="Gross Profit" value={rs(data.gross_profit)} strong />
           </div>
           <MoneyRow label="Expenses" value={rs(data.expenses)} />
-          <div className="border-t border-ink-950/20 pt-2">
+          <div className="border-t border-surface-900/20 pt-2">
             <MoneyRow label="Net Profit" value={rs(data.net_profit)} strong />
           </div>
         </dl>
-        <p className="mt-6 text-xs leading-relaxed text-ink-700/60">{data.cogs_note}</p>
+        <p className="mt-6 text-xs leading-relaxed text-surface-400">{data.cogs_note}</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Stat label="Receivables" value={rs(data.receivables)} />
@@ -185,7 +185,7 @@ function FinancialPanel({ data }: { data: FinancialReport }) {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="card p-5">
-      <p className="text-xs uppercase tracking-[0.16em] text-ink-700/55">{label}</p>
+      <p className="text-xs uppercase tracking-[0.16em] text-surface-400">{label}</p>
       <p className="stat-value mt-2">{value}</p>
     </div>
   );
@@ -212,7 +212,7 @@ function ChartCard({
     <div className="card p-5">
       <h3 className="font-display text-lg">{title}</h3>
       {rows.length === 0 ? (
-        <p className="mt-4 text-sm text-ink-700/70">No sales in this period.</p>
+        <p className="mt-4 text-sm text-surface-400">No sales in this period.</p>
       ) : (
         <ul className="mt-4 space-y-3">
           {rows.map((row) => (
@@ -221,11 +221,11 @@ function ChartCard({
                 <span>{row.label}</span>
                 <span>
                   {rs(row.value)}
-                  {row.hint ? <span className="ml-2 text-ink-700/45">{row.hint}</span> : null}
+                  {row.hint ? <span className="ml-2 text-surface-400">{row.hint}</span> : null}
                 </span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-paper-100">
-                <div className="h-2 rounded-full bg-copper-500" style={{ width: `${Math.max((row.value / max) * 100, 4)}%` }} />
+              <div className="h-2 overflow-hidden rounded-full bg-surface-100">
+                <div className="h-2 rounded-full bg-brand-500" style={{ width: `${Math.max((row.value / max) * 100, 4)}%` }} />
               </div>
             </li>
           ))}
@@ -253,11 +253,11 @@ function SimpleTable({
         {rows.length ? <Badge>{rows.length}</Badge> : null}
       </div>
       {rows.length === 0 ? (
-        <p className="px-5 py-8 text-sm text-ink-700/70">{empty}</p>
+        <p className="px-5 py-8 text-sm text-surface-400">{empty}</p>
       ) : (
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-paper-50 text-xs uppercase tracking-wide text-ink-700/60">
+            <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
               <tr>
                 {headers.map((h) => (
                   <th key={h} className="px-4 py-3">
@@ -268,7 +268,7 @@ function SimpleTable({
             </thead>
             <tbody>
               {rows.map((row, i) => (
-                <tr key={`${title}-${i}`} className="border-t border-paper-100">
+                <tr key={`${title}-${i}`} className="border-t border-surface-100">
                   {row.map((cell, j) => (
                     <td key={j} className="px-4 py-3">
                       {cell}
