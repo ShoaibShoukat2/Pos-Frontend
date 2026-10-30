@@ -4,17 +4,48 @@ import { useEffect, useState } from "react";
 import { Printer } from "lucide-react";
 
 import { Button } from "@/components/ui";
+import { useLang } from "@/lib/lang";
 import { num, rs } from "@/lib/money";
 import type { InvoiceSettings, PosSale, ReceiptShop } from "@/lib/types";
 
 export type { ReceiptShop };
 
-const PAY_LABEL: Record<string, string> = {
-  cash: "Cash",
-  card: "Card",
-  bank: "Bank",
-  wallet: "Wallet",
-};
+// ─── Urdu / English labels on the receipt ───────────────────────────────────
+function rcptLabel(key: string, urdu: boolean): string {
+  const labels: Record<string, [string, string]> = {
+    invoice:     ["Invoice",      "رسید"],
+    invoice_no:  ["Invoice no.",  "رسید نمبر"],
+    date:        ["Date",         "تاریخ"],
+    cashier:     ["Cashier",      "کیشیئر"],
+    customer:    ["Customer",     "گاہک"],
+    walkin:      ["Walk-in",      "نقد گاہک"],
+    branch:      ["Branch",       "شاخ"],
+    payment:     ["Payment",      "ادائیگی"],
+    item:        ["Item",         "اشیاء"],
+    qty:         ["Qty",          "مقدار"],
+    rate:        ["Rate",         "قیمت"],
+    amount:      ["Amount",       "رقم"],
+    subtotal:    ["Subtotal",     "ذیلی کل"],
+    discount:    ["Discount",     "رعایت"],
+    total:       ["Total",        "کل رقم"],
+    paid:        ["Paid",         "ادا شدہ"],
+    change:      ["Change",       "باقی رقم"],
+    balance_due: ["Balance due",  "واجب الادا"],
+    method_cash: ["Cash",         "نقد"],
+    method_card: ["Card",         "کارڈ"],
+    method_bank: ["Bank",         "بینک"],
+    method_wallet:["Wallet",      "والٹ"],
+    no_items:    ["No items on this slip.", "اس رسید پر کوئی اشیاء نہیں۔"],
+    print:       ["Print slip",   "رسید پرنٹ کریں"],
+    done:        ["Done",         "مکمل"],
+    slip:        ["Customer slip","گاہک کی رسید"],
+    ntn:         ["NTN",          "این ٹی این"],
+    tel:         ["Tel",          "فون"],
+  };
+  const pair = labels[key];
+  if (!pair) return key;
+  return urdu ? pair[1] : pair[0];
+}
 
 function fmtQty(value: string | number | undefined) {
   const n = num(value);
@@ -61,12 +92,16 @@ export function ReceiptSlip({
   shop,
   invoice,
   tendered,
+  urdu = false,
 }: {
   sale: PosSale;
   shop?: ReceiptShop | null;
   invoice?: InvoiceSettings | null;
   tendered?: number | null;
+  urdu?: boolean;
 }) {
+  const L = (key: string) => rcptLabel(key, urdu);
+  const dir = urdu ? "rtl" : "ltr";
   const shopName = shop?.legal_name || shop?.name || "Shop";
   const total = num(sale.net_total || sale.total);
   const paid = num(sale.paid_amount);
@@ -74,7 +109,8 @@ export function ReceiptSlip({
   const discount = num(sale.discount_total);
   const given = tendered != null && tendered > 0 ? tendered : paid;
   const change = Math.max(0, given - total);
-  const method = PAY_LABEL[sale.payment_method || "cash"] || sale.payment_method || "Cash";
+  const rawMethod = sale.payment_method || "cash";
+  const method = L(`method_${rawMethod}`) || rawMethod;
   const lines = sale.lines || [];
 
   const wide = invoice?.paper_size === "A4" || designOf(invoice) === "formal";
@@ -84,22 +120,22 @@ export function ReceiptSlip({
 
   if (design === "bold") {
     return (
-      <article className={`receipt-slip receipt-design-bold ${paperClass(invoice?.paper_size)}`}>
+      <article className={`receipt-slip receipt-design-bold ${paperClass(invoice?.paper_size)}`} dir={dir}>
         <header className="bg-ink-950 px-3 py-4 text-center text-paper-50">
           {logo ? <img src={logo} alt="" className="mx-auto mb-2 h-10 object-contain" /> : null}
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-copper-400">Invoice</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-copper-400">{L("invoice")}</p>
           <h1 className="mt-1 font-display text-2xl leading-tight">{shopName}</h1>
           {address ? <p className="mt-1 text-[11px] text-paper-50/70">{address}</p> : null}
           {shop?.phone ? <p className="text-[11px] text-paper-50/70">{shop.phone}</p> : null}
         </header>
         <div className="space-y-2 px-3 py-3">
-          <Meta sale={sale} invoice={invoice} method={method} />
-          <ItemList lines={lines} wide={wide} />
+          <Meta sale={sale} invoice={invoice} method={method} L={L} />
+          <ItemList lines={lines} wide={wide} L={L} />
           <div className="flex items-baseline justify-between bg-copper-500 px-3 py-2 text-ink-950">
-            <span className="text-xs font-semibold uppercase tracking-wide">Total</span>
+            <span className="text-xs font-semibold uppercase tracking-wide">{L("total")}</span>
             <span className="font-display text-xl">{rs(total)}</span>
           </div>
-          <Totals sale={sale} discount={discount} given={given} change={change} due={due} method={method} hideTotal />
+          <Totals sale={sale} discount={discount} given={given} change={change} due={due} method={method} hideTotal L={L} />
           <Footer invoice={invoice} />
         </div>
       </article>
@@ -108,29 +144,29 @@ export function ReceiptSlip({
 
   if (design === "formal") {
     return (
-      <article className={`receipt-slip receipt-design-formal ${paperClass(invoice?.paper_size)} ${wide ? "receipt-slip-a4" : ""}`}>
+      <article className={`receipt-slip receipt-design-formal ${paperClass(invoice?.paper_size)} ${wide ? "receipt-slip-a4" : ""}`} dir={dir}>
         <header className="flex items-start justify-between gap-4 border-b-2 border-ink-950 pb-3">
           <div>
             {logo ? <img src={logo} alt="" className="mb-2 h-12 object-contain" /> : null}
             <h1 className="font-display text-xl leading-tight text-ink-950">{shopName}</h1>
             {address ? <p className="mt-1 text-[11px] text-ink-700/75">{address}</p> : null}
-            {shop?.phone ? <p className="text-[11px] text-ink-700/75">{shop.phone}</p> : null}
-            {shop?.tax_number ? <p className="text-[11px] text-ink-700/75">NTN {shop.tax_number}</p> : null}
+            {shop?.phone ? <p className="text-[11px] text-ink-700/75">{L("tel")} {shop.phone}</p> : null}
+            {shop?.tax_number ? <p className="text-[11px] text-ink-700/75">{L("ntn")} {shop.tax_number}</p> : null}
           </div>
           <div className="text-right">
-            <p className="font-display text-3xl leading-none text-ink-950">Invoice</p>
+            <p className="font-display text-3xl leading-none text-ink-950">{L("invoice")}</p>
             <p className="mt-2 text-xs font-medium">{sale.number}</p>
             {when(sale) ? <p className="text-[11px] text-ink-700/70">{when(sale)}</p> : null}
           </div>
         </header>
         <div className="mt-3">
-          <Meta sale={sale} invoice={invoice} method={method} hideNumber />
+          <Meta sale={sale} invoice={invoice} method={method} hideNumber L={L} />
         </div>
         <div className="mt-3">
-          <ItemList lines={lines} wide />
+          <ItemList lines={lines} wide L={L} />
         </div>
         <div className="mt-3 ml-auto w-full max-w-xs border border-ink-950/20 p-3">
-          <Totals sale={sale} discount={discount} given={given} change={change} due={due} method={method} />
+          <Totals sale={sale} discount={discount} given={given} change={change} due={due} method={method} L={L} />
         </div>
         <Footer invoice={invoice} />
       </article>
@@ -139,7 +175,7 @@ export function ReceiptSlip({
 
   if (design === "compact") {
     return (
-      <article className={`receipt-slip receipt-design-compact ${paperClass(invoice?.paper_size)}`}>
+      <article className={`receipt-slip receipt-design-compact ${paperClass(invoice?.paper_size)}`} dir={dir}>
         <header className="text-center">
           <h1 className="text-sm font-semibold leading-tight">{shopName}</h1>
           {address ? <p className="text-[10px] leading-snug text-ink-700/70">{address}</p> : null}
@@ -149,55 +185,53 @@ export function ReceiptSlip({
           </p>
         </header>
         <div className="receipt-rule" />
-        <ItemList lines={lines} wide={false} compact />
+        <ItemList lines={lines} wide={false} compact L={L} />
         <div className="receipt-rule" />
-        <Totals sale={sale} discount={discount} given={given} change={change} due={due} method={method} />
+        <Totals sale={sale} discount={discount} given={given} change={change} due={due} method={method} L={L} />
         <Footer invoice={invoice} />
       </article>
     );
   }
 
+  // Classic design
   return (
-    <article className={`receipt-slip receipt-design-classic ${paperClass(invoice?.paper_size)} ${wide ? "receipt-slip-a4" : ""}`}>
+    <article className={`receipt-slip receipt-design-classic ${paperClass(invoice?.paper_size)} ${wide ? "receipt-slip-a4" : ""}`} dir={dir}>
       <header className="text-center">
         {invoice?.show_logo && shop?.logo ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={shop.logo} alt="" className="mx-auto mb-2 h-12 object-contain" />
         ) : null}
-        <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-ink-700/55">Invoice</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-ink-700/55">{L("invoice")}</p>
         <h1 className="mt-1 font-display text-xl leading-tight text-ink-950">{shopName}</h1>
         {shop?.address || shop?.city ? (
-          <p className="mt-1 text-[11px] leading-snug text-ink-700/75">
-            {[shop.address, shop.city].filter(Boolean).join(", ")}
-          </p>
+          <p className="mt-1 text-[11px] leading-snug text-ink-700/75">{address}</p>
         ) : null}
-        {shop?.phone ? <p className="text-[11px] text-ink-700/75">Tel {shop.phone}</p> : null}
-        {shop?.tax_number ? <p className="text-[11px] text-ink-700/75">NTN {shop.tax_number}</p> : null}
+        {shop?.phone ? <p className="text-[11px] text-ink-700/75">{L("tel")} {shop.phone}</p> : null}
+        {shop?.tax_number ? <p className="text-[11px] text-ink-700/75">{L("ntn")} {shop.tax_number}</p> : null}
       </header>
 
       <div className="receipt-rule" />
       <div className={wide ? "grid grid-cols-2 gap-x-8 gap-y-1" : "space-y-0.5"}>
-        <Row label="Invoice no." value={sale.number} />
-        {when(sale) ? <Row label="Date" value={when(sale)} /> : null}
+        <Row label={L("invoice_no")} value={sale.number} />
+        {when(sale) ? <Row label={L("date")} value={when(sale)} /> : null}
         {invoice?.show_cashier_name !== false && sale.cashier_name ? (
-          <Row label="Cashier" value={sale.cashier_name} />
+          <Row label={L("cashier")} value={sale.cashier_name} />
         ) : null}
-        <Row label="Customer" value={sale.customer_name || "Walk-in"} />
-        {sale.branch_name ? <Row label="Branch" value={sale.branch_name} /> : null}
-        <Row label="Payment" value={method} />
+        <Row label={L("customer")} value={sale.customer_name || L("walkin")} />
+        {sale.branch_name ? <Row label={L("branch")} value={sale.branch_name} /> : null}
+        <Row label={L("payment")} value={method} />
       </div>
 
       <div className="receipt-rule" />
       {lines.length === 0 ? (
-        <p className="py-3 text-center text-xs text-ink-700/70">No items on this slip.</p>
+        <p className="py-3 text-center text-xs text-ink-700/70">{L("no_items")}</p>
       ) : wide ? (
         <table className="w-full text-left text-xs">
           <thead>
             <tr className="border-b border-ink-950/20 text-[10px] uppercase tracking-wide text-ink-700/60">
-              <th className="pb-1.5 font-semibold">Item</th>
-              <th className="pb-1.5 text-right font-semibold">Qty</th>
-              <th className="pb-1.5 text-right font-semibold">Rate</th>
-              <th className="pb-1.5 text-right font-semibold">Amount</th>
+              <th className="pb-1.5 font-semibold">{L("item")}</th>
+              <th className="pb-1.5 text-right font-semibold">{L("qty")}</th>
+              <th className="pb-1.5 text-right font-semibold">{L("rate")}</th>
+              <th className="pb-1.5 text-right font-semibold">{L("amount")}</th>
             </tr>
           </thead>
           <tbody>
@@ -220,8 +254,8 @@ export function ReceiptSlip({
       ) : (
         <div>
           <div className="flex justify-between text-[10px] font-semibold uppercase tracking-wide text-ink-700/55">
-            <span>Item</span>
-            <span>Amount</span>
+            <span>{L("item")}</span>
+            <span>{L("amount")}</span>
           </div>
           {lines.map((line, i) => {
             const unit = num(line.promo_price || line.unit_price);
@@ -233,7 +267,7 @@ export function ReceiptSlip({
                 ) : null}
                 <div className="mt-0.5 flex items-baseline justify-between gap-3 text-[11px]">
                   <span className="text-ink-700/70">
-                    Qty {fmtQty(line.quantity)}
+                    {L("qty")} {fmtQty(line.quantity)}
                     {unit > 0 ? ` × ${rs(unit)}` : ""}
                     {line.sku ? ` · ${line.sku}` : ""}
                   </span>
@@ -247,15 +281,15 @@ export function ReceiptSlip({
 
       <div className="receipt-rule" />
       <div className={wide ? "ml-auto w-72" : ""}>
-        <Row label="Subtotal" value={rs(sale.subtotal || sale.total)} />
-        {discount > 0 ? <Row label="Discount" value={`− ${rs(discount)}`} /> : null}
+        <Row label={L("subtotal")} value={rs(sale.subtotal || sale.total)} />
+        {discount > 0 ? <Row label={L("discount")} value={`− ${rs(discount)}`} /> : null}
         <div className="my-1 border-t border-ink-950/20 pt-1">
-          <Row label="Total" value={rs(total)} strong />
+          <Row label={L("total")} value={rs(total)} strong />
         </div>
-        <Row label="Paid" value={rs(given)} />
-        <Row label="Method" value={method} />
-        {change > 0 ? <Row label="Change" value={rs(change)} /> : null}
-        {due > 0 ? <Row label="Balance due" value={rs(due)} /> : null}
+        <Row label={L("paid")} value={rs(given)} />
+        <Row label={L("payment")} value={method} />
+        {change > 0 ? <Row label={L("change")} value={rs(change)} /> : null}
+        {due > 0 ? <Row label={L("balance_due")} value={rs(due)} /> : null}
       </div>
 
       {invoice?.footer_note ? (
@@ -274,20 +308,22 @@ function Meta({
   invoice,
   method,
   hideNumber,
+  L,
 }: {
   sale: PosSale;
   invoice?: InvoiceSettings | null;
   method: string;
   hideNumber?: boolean;
+  L: (k: string) => string;
 }) {
   return (
     <div className="space-y-0.5">
-      {hideNumber ? null : <Row label="Invoice no." value={sale.number} />}
-      {when(sale) && hideNumber ? null : when(sale) ? <Row label="Date" value={when(sale)} /> : null}
-      {invoice?.show_cashier_name !== false && sale.cashier_name ? <Row label="Cashier" value={sale.cashier_name} /> : null}
-      <Row label="Customer" value={sale.customer_name || "Walk-in"} />
-      {sale.branch_name ? <Row label="Branch" value={sale.branch_name} /> : null}
-      <Row label="Payment" value={method} />
+      {hideNumber ? null : <Row label={L("invoice_no")} value={sale.number} />}
+      {when(sale) && !hideNumber ? <Row label={L("date")} value={when(sale)} /> : null}
+      {invoice?.show_cashier_name !== false && sale.cashier_name ? <Row label={L("cashier")} value={sale.cashier_name} /> : null}
+      <Row label={L("customer")} value={sale.customer_name || L("walkin")} />
+      {sale.branch_name ? <Row label={L("branch")} value={sale.branch_name} /> : null}
+      <Row label={L("payment")} value={method} />
     </div>
   );
 }
@@ -296,13 +332,15 @@ function ItemList({
   lines,
   wide,
   compact,
+  L,
 }: {
   lines: NonNullable<PosSale["lines"]>;
   wide: boolean;
   compact?: boolean;
+  L: (k: string) => string;
 }) {
   if (lines.length === 0) {
-    return <p className="py-3 text-center text-xs text-ink-700/70">No items on this slip.</p>;
+    return <p className="py-3 text-center text-xs text-ink-700/70">{L("no_items")}</p>;
   }
   if (!wide) {
     return (
@@ -329,10 +367,10 @@ function ItemList({
     <table className="w-full border-collapse text-left text-xs">
       <thead>
         <tr className="border-b border-ink-950 text-[10px] uppercase tracking-wide">
-          <th className="py-1 font-semibold">Item</th>
-          <th className="py-1 text-right font-semibold">Qty</th>
-          <th className="py-1 text-right font-semibold">Rate</th>
-          <th className="py-1 text-right font-semibold">Amount</th>
+          <th className="py-1 font-semibold">{L("item")}</th>
+          <th className="py-1 text-right font-semibold">{L("qty")}</th>
+          <th className="py-1 text-right font-semibold">{L("rate")}</th>
+          <th className="py-1 text-right font-semibold">{L("amount")}</th>
         </tr>
       </thead>
       <tbody>
@@ -362,6 +400,7 @@ function Totals({
   due,
   method,
   hideTotal,
+  L,
 }: {
   sale: PosSale;
   discount: number;
@@ -370,21 +409,22 @@ function Totals({
   due: number;
   method: string;
   hideTotal?: boolean;
+  L: (k: string) => string;
 }) {
   const total = num(sale.net_total || sale.total);
   return (
     <div>
-      <Row label="Subtotal" value={rs(sale.subtotal || sale.total)} />
-      {discount > 0 ? <Row label="Discount" value={`− ${rs(discount)}`} /> : null}
+      <Row label={L("subtotal")} value={rs(sale.subtotal || sale.total)} />
+      {discount > 0 ? <Row label={L("discount")} value={`− ${rs(discount)}`} /> : null}
       {hideTotal ? null : (
         <div className="my-1 border-t border-ink-950/20 pt-1">
-          <Row label="Total" value={rs(total)} strong />
+          <Row label={L("total")} value={rs(total)} strong />
         </div>
       )}
-      <Row label="Paid" value={rs(given)} />
-      <Row label="Method" value={method} />
-      {change > 0 ? <Row label="Change" value={rs(change)} /> : null}
-      {due > 0 ? <Row label="Balance due" value={rs(due)} /> : null}
+      <Row label={L("paid")} value={rs(given)} />
+      <Row label={L("payment")} value={method} />
+      {change > 0 ? <Row label={L("change")} value={rs(change)} /> : null}
+      {due > 0 ? <Row label={L("balance_due")} value={rs(due)} /> : null}
     </div>
   );
 }
@@ -432,13 +472,18 @@ export function ReceiptReview({
   autoPrint?: boolean;
   onClose: () => void;
 }) {
+  const { isUrdu } = useLang();
   const [design, setDesign] = useState<InvoiceDesign>(designOf(invoice));
+  const [urduSlip, setUrduSlip] = useState(isUrdu);
   const printed = { ...(invoice || {}), design } as InvoiceSettings;
   const wide = printed.paper_size === "A4" || design === "formal";
 
   useEffect(() => {
-    if (open) setDesign(designOf(invoice));
-  }, [open, invoice]);
+    if (open) {
+      setDesign(designOf(invoice));
+      setUrduSlip(isUrdu);
+    }
+  }, [open, invoice, isUrdu]);
 
   useEffect(() => {
     if (!open || !sale || !autoPrint) return;
@@ -447,6 +492,8 @@ export function ReceiptReview({
   }, [open, sale, autoPrint]);
 
   if (!open || !sale) return null;
+
+  const L = (k: string) => rcptLabel(k, urduSlip);
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center overflow-y-auto bg-ink-950/50 p-0 sm:items-start sm:p-4">
@@ -457,14 +504,16 @@ export function ReceiptReview({
       >
         <div className="receipt-no-print flex items-center justify-between gap-3 border-b border-paper-200 px-4 py-3">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper-600">Customer slip</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-copper-600">{L("slip")}</p>
             <p className="font-medium text-ink-950">{sale.number}</p>
           </div>
           <button type="button" onClick={onClose} className="min-h-11 px-1 text-sm text-ink-700/70 hover:text-ink-950">
-            Close
+            {L("done")}
           </button>
         </div>
-        <div className="receipt-no-print flex flex-wrap gap-2 border-b border-paper-200 px-4 py-3">
+
+        {/* Design + language toggles */}
+        <div className="receipt-no-print flex flex-wrap items-center gap-2 border-b border-paper-200 px-4 py-3">
           {INVOICE_DESIGNS.map((item) => (
             <button
               key={item.id}
@@ -477,19 +526,41 @@ export function ReceiptReview({
               {item.label}
             </button>
           ))}
+          {/* Language toggle on receipt */}
+          <div className="ml-auto flex items-center gap-1 rounded-full border border-paper-200 p-0.5">
+            <button
+              type="button"
+              onClick={() => setUrduSlip(false)}
+              className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                !urduSlip ? "bg-ink-950 text-paper-50" : "text-ink-700/60 hover:text-ink-950"
+              }`}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => setUrduSlip(true)}
+              className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                urduSlip ? "bg-ink-950 text-paper-50" : "text-ink-700/60 hover:text-ink-950"
+              }`}
+            >
+              اردو
+            </button>
+          </div>
         </div>
+
         <div className="min-h-0 flex-1 overflow-y-auto bg-paper-50 px-3 py-4">
           <div id="receipt-print-root" className="mx-auto">
-            <ReceiptSlip sale={sale} shop={shop} invoice={printed} tendered={tendered} />
+            <ReceiptSlip sale={sale} shop={shop} invoice={printed} tendered={tendered} urdu={urduSlip} />
           </div>
         </div>
         <div className="receipt-no-print grid grid-cols-2 gap-2 border-t border-paper-200 p-3">
           <Button type="button" variant="ghost" onClick={onClose}>
-            Done
+            {L("done")}
           </Button>
           <Button type="button" variant="copper" onClick={() => window.print()}>
             <Printer size={16} />
-            Print slip
+            {L("print")}
           </Button>
         </div>
       </div>

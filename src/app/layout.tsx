@@ -5,6 +5,7 @@ import { PwaRegister } from "@/components/PwaRegister";
 import { TitleBar } from "@/components/TitleBar";
 import { UpdateNotice } from "@/components/UpdateNotice";
 import { AuthProvider } from "@/lib/auth";
+import { LangProvider } from "@/lib/lang";
 
 import "./globals.css";
 
@@ -29,13 +30,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`${outfit.variable} ${fraunces.variable} font-sans flex flex-col h-screen overflow-hidden`}>
         <AuthProvider>
-          <PwaRegister />
-          <UpdateNotice />
-          {/* Custom titlebar — only visible inside Electron, invisible on web */}
-          <TitleBar />
-          <div className="flex-1 overflow-auto min-h-0">
-            {children}
-          </div>
+          <LangProvider>
+            <PwaRegister />
+            <UpdateNotice />
+            <TitleBar />
+            <div className="flex-1 overflow-auto min-h-0">
+              {children}
+            </div>
+          </LangProvider>
         </AuthProvider>
       </body>
     </html>
