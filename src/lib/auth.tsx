@@ -31,6 +31,17 @@ function cashierAllowed(pathname: string) {
   );
 }
 
+function applyBusinessTheme(user: User | null) {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  const primary = user?.business_primary_color || "#1c1814";
+  const accent = user?.business_accent_color || "#d4892a";
+  root.style.setProperty("--brand-primary", primary);
+  root.style.setProperty("--brand-accent", accent);
+  // derive hover shade (slightly lighter) for accent
+  root.style.setProperty("--brand-accent-hover", accent + "dd");
+}
+
 function cacheUser(user: User | null) {
   if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
   else localStorage.removeItem(USER_KEY);
@@ -58,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const me = await api<User>("/api/auth/me/");
     setUser(me);
     cacheUser(me);
+    applyBusinessTheme(me);
   }
 
   useEffect(() => {
@@ -65,7 +77,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const cached = typeof window !== "undefined" ? localStorage.getItem(USER_KEY) : null;
     if (cached) {
       try {
-        setUser(JSON.parse(cached));
+        const parsed = JSON.parse(cached);
+        setUser(parsed);
+        applyBusinessTheme(parsed);
         setLoading(false);
       } catch {
         /* ignore */
@@ -137,6 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         saveTokens(data);
         setUser(data.user);
         cacheUser(data.user);
+        applyBusinessTheme(data.user);
         router.push(homeFor(data.user));
       },
       async register(payload) {
@@ -147,12 +162,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         saveTokens(data);
         setUser(data.user);
         cacheUser(data.user);
+        applyBusinessTheme(data.user);
         router.push("/dashboard");
       },
       logout() {
         const dest = user?.is_platform_admin ? "/platform/login" : isCashier(user) ? "/cashier/login" : "/login";
         clearTokens();
         cacheUser(null);
+        applyBusinessTheme(null);
         setUser(null);
         router.push(dest);
       },

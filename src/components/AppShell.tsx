@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -44,14 +45,34 @@ const NAV = [
   { href: "/settings/invoice", label: "Invoices", icon: FileText, perm: "invoice_settings.manage" },
 ];
 
+/** Initials fallback when no logo */
+function BusinessInitials({ name }: { name: string }) {
+  const letters = name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  return (
+    <div
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white"
+      style={{ background: "var(--brand-accent, #d4892a)" }}
+    >
+      {letters || "B"}
+    </div>
+  );
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, loading, logout, can } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+
   const links = NAV.filter((item) => !item.perm || can(item.perm))
     .map((item) => (item.href === "/dashboard" && isCashier(user) ? { ...item, href: "/cashier" } : item))
     .filter((item) => !isCashier(user) || CASHIER_LINKS.has(item.href));
+
   const bottomItems = [
     links.find((item) => item.href === "/dashboard" || item.href === "/cashier"),
     links.find((item) => item.href === "/pos"),
@@ -69,32 +90,60 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (!user || user.is_platform_admin) return null;
 
+  const accentStyle = {
+    "--nav-active-bg": "var(--brand-accent, #d4892a)",
+  } as React.CSSProperties;
+
   return (
-    <div className="min-h-dvh lg:grid lg:h-dvh lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] lg:overflow-hidden">
-      <aside className="hidden flex-col border-ink-800 bg-ink-950 text-paper-50 lg:flex lg:h-dvh lg:overflow-hidden lg:border-r">
-        <div className="shrink-0 px-5 py-5">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-copper-500/15">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#d4892a" />
-                <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.55" />
-                <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.55" />
-                <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.25" />
-              </svg>
-            </div>
-            <p className="truncate font-display text-xl tracking-tight text-paper-50">Universal POS</p>
-          </div>
+    <div
+      className="min-h-dvh lg:grid lg:h-dvh lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] lg:overflow-hidden"
+      style={accentStyle}
+    >
+      {/* ── Sidebar ── */}
+      <aside
+        className="hidden flex-col text-paper-50 lg:flex lg:h-dvh lg:overflow-hidden lg:border-r"
+        style={{ background: "var(--brand-primary, #1c1814)", borderColor: "rgba(255,255,255,0.07)" }}
+      >
+        {/* Brand / Logo */}
+        <div className="shrink-0 px-4 py-4">
+          <Link href="/dashboard" className="flex items-center gap-3">
+            {user.business_logo ? (
+              <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-xl">
+                <Image
+                  src={user.business_logo}
+                  alt={user.business_name || "Logo"}
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <BusinessInitials name={user.business_name || "B"} />
+            )}
+            <span className="truncate font-display text-lg leading-tight text-paper-50">
+              {user.business_name || "Universal POS"}
+            </span>
+          </Link>
         </div>
-        <div className="shrink-0 px-5 pb-3">
-          <div className="rounded-xl border border-white/10 bg-ink-900 px-3 py-3">
-            <p className="truncate text-sm font-medium">{user.business_name || "Your business"}</p>
-            <p className="truncate text-xs text-paper-50/55">{user.full_name}</p>
-            <p className="mt-1 text-[11px] uppercase tracking-wider text-copper-400">
+
+        {/* User card */}
+        <div className="shrink-0 px-4 pb-3">
+          <div
+            className="rounded-xl px-3 py-3"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <p className="truncate text-sm font-medium text-paper-50">{user.full_name}</p>
+            <p
+              className="mt-0.5 text-[11px] uppercase tracking-wider"
+              style={{ color: "var(--brand-accent, #d4892a)" }}
+            >
               {user.is_owner ? "Owner" : user.role_name || "Staff"}
             </p>
           </div>
         </div>
-        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 pb-3">
+
+        {/* Nav links */}
+        <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-3 pb-3">
           {links.map((item) => {
             const active =
               item.href === "/dashboard"
@@ -107,42 +156,84 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 prefetch={false}
                 onMouseEnter={() => router.prefetch(item.href)}
-                className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm ${
-                  active ? "bg-copper-500 text-ink-950" : "text-paper-50/75 hover:bg-white/5 hover:text-white"
-                }`}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors"
+                style={
+                  active
+                    ? {
+                        background: "var(--brand-accent, #d4892a)",
+                        color: "#1c1814",
+                        fontWeight: 500,
+                      }
+                    : {
+                        color: "rgba(251,247,240,0.65)",
+                      }
+                }
+                onMouseOver={(e) => {
+                  if (!active) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+                }}
+                onMouseOut={(e) => {
+                  if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
+                }}
               >
-                <Icon size={16} className="shrink-0" />
+                <Icon size={15} className="shrink-0" />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="shrink-0 border-t border-white/10 px-5 py-4">
+
+        {/* Footer */}
+        <div
+          className="shrink-0 px-4 py-4"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
+        >
           <FounderCredit variant="sidebar" />
           <button
             type="button"
             onClick={logout}
-            className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-paper-50/60 hover:bg-white/5 hover:text-white"
+            className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-paper-50/50 transition-colors hover:bg-white/5 hover:text-paper-50"
           >
-            <LogOut size={16} />
+            <LogOut size={15} />
             Sign out
           </button>
         </div>
       </aside>
+
+      {/* ── Main content ── */}
       <div className="flex min-h-0 min-w-0 flex-col lg:overflow-hidden">
         <header className="safe-top sticky top-0 z-20 flex shrink-0 items-center gap-3 border-b border-paper-200 bg-white/90 px-3 py-2.5 backdrop-blur sm:px-6 sm:py-3">
           <MenuButton onClick={() => setMenuOpen(true)} />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-ink-950 lg:hidden">{user.business_name || "Workspace"}</p>
-            <p className="hidden min-w-0 truncate text-sm text-ink-700/70 md:block">
+          <div className="min-w-0 flex-1 flex items-center gap-3">
+            {/* Mobile logo */}
+            <div className="flex items-center gap-2 lg:hidden">
+              {user.business_logo ? (
+                <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-lg">
+                  <Image
+                    src={user.business_logo}
+                    alt={user.business_name || "Logo"}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+              ) : null}
+              <p className="truncate text-sm font-medium text-ink-950">
+                {user.business_name || "Workspace"}
+              </p>
+            </div>
+            <p className="hidden min-w-0 truncate text-sm text-ink-700/60 md:block">
               {pathname === "/dashboard"
-                ? "Full business overview — sales, people and live product activity"
-                : "Sales, cash and reports for your shop"}
+                ? "Business overview — sales, people and live activity"
+                : "Sales, cash and reports"}
             </p>
           </div>
         </header>
-        <main className="page-pad min-h-0 min-w-0 flex-1 overflow-y-auto px-3 sm:px-6">{children}</main>
+        <main className="page-pad min-h-0 min-w-0 flex-1 overflow-y-auto px-3 sm:px-6">
+          {children}
+        </main>
       </div>
+
+      {/* Mobile drawer + bottom nav */}
       <NavDrawer
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
@@ -154,7 +245,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         onLogout={logout}
       />
       {bottomItems.length ? (
-        <BottomNav items={bottomItems} pathname={pathname} moreOpen={menuOpen} onMore={() => setMenuOpen((v) => !v)} />
+        <BottomNav
+          items={bottomItems}
+          pathname={pathname}
+          moreOpen={menuOpen}
+          onMore={() => setMenuOpen((v) => !v)}
+        />
       ) : null}
     </div>
   );

@@ -4,6 +4,9 @@
 
 :root {
   color-scheme: light;
+  --brand-primary: #1c1814;
+  --brand-accent: #d4892a;
+  --brand-accent-hover: #e8a04a;
 }
 
 html,

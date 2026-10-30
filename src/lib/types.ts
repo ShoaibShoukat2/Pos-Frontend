@@ -26,6 +26,9 @@ export type User = {
   business_id?: string;
   business_name?: string;
   business_type?: string;
+  business_logo?: string | null;
+  business_primary_color?: string | null;
+  business_accent_color?: string | null;
   date_joined?: string;
 };
 
@@ -144,6 +147,8 @@ export type Business = {
   postal_code: string;
   tax_number: string;
   logo: string | null;
+  primary_color: string;
+  accent_color: string;
   timezone: string;
   date_format: string;
   fiscal_year_start_month: number;
