@@ -16,74 +16,135 @@ declare global {
       getVersion: () => Promise<string>;
       onMaximizeChange: (cb: (maximized: boolean) => void) => void;
       removeAllListeners: (channel: string) => void;
-      onUpdateAvailable: (cb: (info: unknown) => void) => void;
-      onUpdateDownloaded: (cb: (info: unknown) => void) => void;
+      checkForUpdates: () => void;
       installUpdate: () => void;
+      onUpdateAvailable:  (cb: (info: { version: string }) => void) => void;
+      onUpdateProgress:   (cb: (data: { percent: number }) => void) => void;
+      onUpdateDownloaded: (cb: (info: { version: string }) => void) => void;
+      onUpdateError:      (cb: (data: { message: string }) => void) => void;
     };
   }
 }
 
+type UpdateState =
+  | { stage: "idle" }
+  | { stage: "available"; version: string }
+  | { stage: "downloading"; percent: number; version: string }
+  | { stage: "downloaded"; version: string }
+  | { stage: "error"; message: string };
+
 export function TitleBar({ title = "Universal POS" }: { title?: string }) {
-  const [maximized, setMaximized] = useState(false);
-  const [version, setVersion] = useState("");
-  const [updateDownloaded, setUpdateDownloaded] = useState(false);
-  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [maximized, setMaximized]   = useState(false);
+  const [version, setVersion]       = useState("");
+  const [update, setUpdate]         = useState<UpdateState>({ stage: "idle" });
+  const [toastDismissed, setToastDismissed] = useState(false);
 
   useEffect(() => {
     if (!isElectron()) return;
+    const api = window.electronAPI!;
 
-    window.electronAPI!.isMaximized().then(setMaximized);
-    window.electronAPI!.getVersion().then(setVersion);
-    window.electronAPI!.onMaximizeChange(setMaximized);
-    window.electronAPI!.onUpdateAvailable(() => setUpdateAvailable(true));
-    window.electronAPI!.onUpdateDownloaded(() => {
-      setUpdateAvailable(false);
-      setUpdateDownloaded(true);
+    api.isMaximized().then(setMaximized);
+    api.getVersion().then(setVersion);
+    api.onMaximizeChange(setMaximized);
+
+    api.onUpdateAvailable((info) => {
+      setUpdate({ stage: "available", version: info.version });
+      setToastDismissed(false);
+    });
+
+    api.onUpdateProgress((data) => {
+      setUpdate((prev) => ({
+        stage: "downloading",
+        percent: data.percent,
+        version: prev.stage === "available" || prev.stage === "downloading"
+          ? (prev as { version: string }).version
+          : "",
+      }));
+    });
+
+    api.onUpdateDownloaded((info) => {
+      setUpdate({ stage: "downloaded", version: info.version });
+      setToastDismissed(false);
+    });
+
+    api.onUpdateError((data) => {
+      setUpdate({ stage: "error", message: data.message });
     });
 
     return () => {
-      window.electronAPI!.removeAllListeners("window:maximized");
-      window.electronAPI!.removeAllListeners("window:unmaximized");
-      window.electronAPI!.removeAllListeners("update:available");
-      window.electronAPI!.removeAllListeners("update:downloaded");
+      api.removeAllListeners("window:maximized");
+      api.removeAllListeners("window:unmaximized");
+      api.removeAllListeners("update:available");
+      api.removeAllListeners("update:progress");
+      api.removeAllListeners("update:downloaded");
+      api.removeAllListeners("update:error");
     };
   }, []);
 
   if (!isElectron()) return null;
 
+  const showToast = !toastDismissed && (
+    update.stage === "available" ||
+    update.stage === "downloading" ||
+    update.stage === "downloaded"
+  );
+
   return (
     <>
-      {/* Window chrome bar */}
+      {/* ── Titlebar ── */}
       <div
-        className="flex items-center h-8 bg-ink-950 border-b border-white/[0.06] select-none shrink-0"
+        className="flex h-8 shrink-0 select-none items-center bg-ink-950 border-b border-white/[0.06]"
         style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
       >
         {/* Left — identity */}
         <div className="flex items-center gap-2 pl-3">
-          {/* POS grid icon */}
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" className="shrink-0">
             <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#d4892a" />
             <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.55" />
             <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.55" />
             <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.25" />
           </svg>
-          <span className="text-[11px] font-medium text-white/50 tracking-wide">{title}</span>
+          <span className="text-[11px] font-medium tracking-wide text-white/40">{title}</span>
           {version ? (
-            <span className="text-[10px] text-white/20 font-mono tabular-nums">v{version}</span>
+            <span className="font-mono text-[10px] tabular-nums text-white/20">v{version}</span>
           ) : null}
         </div>
 
         {/* Drag zone */}
-        <div className="flex-1 h-full" />
+        <div className="h-full flex-1" />
 
-        {/* Update available pill */}
-        {updateAvailable && !updateDownloaded ? (
+        {/* Download progress bar in titlebar */}
+        {update.stage === "downloading" ? (
           <div
-            className="mr-2 flex items-center gap-1 rounded px-2 py-0.5 text-[10px] text-white/40"
+            className="mr-3 flex items-center gap-2"
             style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-copper-400 animate-pulse" />
-            Downloading update…
+            <div className="h-1 w-20 overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-full rounded-full bg-copper-400 transition-all duration-300"
+                style={{ width: `${update.percent}%` }}
+              />
+            </div>
+            <span className="text-[10px] tabular-nums text-white/30">
+              {update.percent}%
+            </span>
+          </div>
+        ) : null}
+
+        {/* Update dot indicator */}
+        {(update.stage === "available" || update.stage === "downloaded") ? (
+          <div
+            className="mr-3 flex items-center gap-1.5"
+            style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                update.stage === "downloaded" ? "bg-emerald-400" : "animate-pulse bg-copper-400"
+              }`}
+            />
+            <span className="text-[10px] text-white/30">
+              {update.stage === "downloaded" ? "Ready" : "Update"}
+            </span>
           </div>
         ) : null}
 
@@ -94,7 +155,7 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
         >
           <button
             onClick={() => window.electronAPI!.minimizeWindow()}
-            className="w-10 h-full flex items-center justify-center text-white/30 hover:text-white/70 hover:bg-white/5 transition-colors"
+            className="flex h-full w-10 items-center justify-center text-white/25 transition-colors hover:bg-white/5 hover:text-white/60"
             aria-label="Minimize"
           >
             <svg width="10" height="1" viewBox="0 0 10 1" fill="currentColor">
@@ -103,13 +164,12 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
           </button>
           <button
             onClick={() => window.electronAPI!.maximizeWindow()}
-            className="w-10 h-full flex items-center justify-center text-white/30 hover:text-white/70 hover:bg-white/5 transition-colors"
+            className="flex h-full w-10 items-center justify-center text-white/25 transition-colors hover:bg-white/5 hover:text-white/60"
             aria-label={maximized ? "Restore" : "Maximize"}
           >
             {maximized ? (
               <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1">
-                <rect x="0" y="2" width="8" height="8" />
-                <path d="M2 2V0h8v8h-2" />
+                <rect x="0" y="2" width="8" height="8" /><path d="M2 2V0h8v8h-2" />
               </svg>
             ) : (
               <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1">
@@ -119,7 +179,7 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
           </button>
           <button
             onClick={() => window.electronAPI!.closeWindow()}
-            className="w-10 h-full flex items-center justify-center text-white/30 hover:text-white hover:bg-red-600 transition-colors"
+            className="flex h-full w-10 items-center justify-center text-white/25 transition-colors hover:bg-red-600 hover:text-white"
             aria-label="Close"
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.25">
@@ -129,25 +189,89 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
         </div>
       </div>
 
-      {/* Update toast — bottom right, outside the titlebar */}
-      {updateDownloaded ? (
-        <div
-          className="fixed bottom-5 right-5 z-[999] flex items-start gap-3 rounded-xl border border-white/10 bg-ink-900 p-4 shadow-2xl"
-          style={{ maxWidth: 320 }}
-        >
-          <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-copper-400" />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-paper-50">Update ready to install</p>
-            <p className="mt-0.5 text-xs text-paper-100/55">
-              Restart the app to apply the latest version.
-            </p>
+      {/* ── Update toast — bottom right ── */}
+      {showToast ? (
+        <div className="fixed bottom-5 right-5 z-[999] w-[300px] overflow-hidden rounded-xl border border-white/10 bg-ink-950 shadow-2xl">
+          {/* Progress bar at top */}
+          {update.stage === "downloading" ? (
+            <div className="h-0.5 bg-white/10">
+              <div
+                className="h-full bg-copper-400 transition-all duration-300"
+                style={{ width: `${update.percent}%` }}
+              />
+            </div>
+          ) : null}
+
+          <div className="flex items-start gap-3 p-4">
+            {/* Status icon */}
+            <div className="mt-0.5 shrink-0">
+              {update.stage === "downloaded" ? (
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/15">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6l3 3 5-5" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+              ) : (
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-copper-500/15">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 2v5M6 9v1" stroke="#d4892a" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              {update.stage === "available" && (
+                <>
+                  <p className="text-sm font-medium text-paper-50">
+                    v{update.version} available
+                  </p>
+                  <p className="mt-0.5 text-xs text-paper-100/45">
+                    Downloading in the background…
+                  </p>
+                </>
+              )}
+              {update.stage === "downloading" && (
+                <>
+                  <p className="text-sm font-medium text-paper-50">
+                    Downloading v{update.version}
+                  </p>
+                  <p className="mt-0.5 text-xs text-paper-100/45">
+                    {update.percent}% complete
+                  </p>
+                </>
+              )}
+              {update.stage === "downloaded" && (
+                <>
+                  <p className="text-sm font-medium text-paper-50">
+                    v{update.version} ready
+                  </p>
+                  <p className="mt-0.5 text-xs text-paper-100/45">
+                    Restart to apply the update.
+                  </p>
+                  <button
+                    onClick={() => window.electronAPI!.installUpdate()}
+                    className="mt-3 w-full rounded-lg bg-copper-500 py-1.5 text-xs font-medium text-ink-950 transition-colors hover:bg-copper-400"
+                  >
+                    Restart and install
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Dismiss */}
+            {update.stage !== "downloaded" ? (
+              <button
+                onClick={() => setToastDismissed(true)}
+                className="shrink-0 text-white/20 transition-colors hover:text-white/50"
+                aria-label="Dismiss"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M2 2l8 8M10 2l-8 8" />
+                </svg>
+              </button>
+            ) : null}
           </div>
-          <button
-            onClick={() => window.electronAPI!.installUpdate()}
-            className="shrink-0 rounded-lg bg-copper-500 px-3 py-1.5 text-xs font-medium text-ink-950 hover:bg-copper-400 transition-colors"
-          >
-            Restart
-          </button>
         </div>
       ) : null}
     </>
