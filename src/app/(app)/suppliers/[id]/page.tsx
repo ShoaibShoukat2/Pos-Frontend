@@ -51,7 +51,7 @@ export default function SupplierDetailPage() {
     }
   }
 
-  if (!supplier) return <p className="text-sm text-ink-700/70">Loading supplier…</p>;
+  if (!supplier) return <p className="text-sm text-surface-400">Loading supplier…</p>;
 
   return (
     <div>

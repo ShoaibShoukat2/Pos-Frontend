@@ -41,11 +41,11 @@ export default function PhoneScannerPage() {
   );
 
   return (
-    <div className="mx-auto min-h-screen max-w-md bg-paper-50 px-4 py-6">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-copper-600">Universal POS</p>
+    <div className="mx-auto min-h-screen max-w-md bg-surface-50 px-4 py-6">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-600">Universal POS</p>
       <h1 className="mt-1 font-display text-2xl sm:text-3xl">Phone scanner</h1>
       {info ? (
-        <p className="mt-1 text-sm text-ink-700/70">
+        <p className="mt-1 text-sm text-surface-400">
           Connected to {info.business} · {info.branch}
         </p>
       ) : null}
