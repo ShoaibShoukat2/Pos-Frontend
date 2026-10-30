@@ -198,7 +198,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={logout}
-            className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-paper-50/50 transition-colors hover:bg-white/5 hover:text-paper-50"
+            className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/40 transition-colors hover:bg-white/5 hover:text-white"
           >
             <LogOut size={15} />
             Sign out

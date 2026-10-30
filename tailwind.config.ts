@@ -1,65 +1,66 @@
 import type { Config } from "tailwindcss";
 
-// ─── Design token mapping ────────────────────────────────────────────────────
-//
-// Old warm palette (ink/paper/copper) is REMAPPED to the new
-// White + Indigo + Slate scheme. Every page that uses e.g.
-// "text-ink-950" or "bg-paper-50" will now render in slate/white/indigo
-// without touching individual files.
-//
-// Receipt slip still works because its ink/paper values are used for
-// black-text-on-white-paper which maps correctly to slate-900 on white.
-// ─────────────────────────────────────────────────────────────────────────────
-
+/**
+ * Color palette — White + Indigo + Slate
+ *
+ * All old `copper` classes are remapped to indigo so existing pages
+ * automatically use the new scheme without editing every file.
+ * The `ink` family maps to slate (dark text/bg).
+ * The `paper` family maps to slate-light (page bg, borders).
+ */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        // ── ink → slate (dark text / dark bg) ──────────────────────────────
+        // ── ink → slate-dark ─────────────────────────────────────────
         ink: {
-          950: "#0f172a",   // was #14110e → slate-900
-          900: "#1e293b",   // was #1c1814 → slate-800
-          800: "#334155",   // was #2a241e → slate-700
-          700: "#475569",   // was #3d342c → slate-600
+          950: "#0f172a",   // slate-900
+          900: "#1e293b",   // slate-800
+          800: "#334155",   // slate-700
+          700: "#475569",   // slate-600
         },
 
-        // ── paper → white / light-slate (page bg / card borders) ───────────
+        // ── paper → slate-light (bg / border) ────────────────────────
         paper: {
-          50:  "#f8fafc",   // was #fbf7f0 → slate-50
-          100: "#f1f5f9",   // was #f4eee4 → slate-100
-          200: "#e2e8f0",   // was #e8dfd0 → slate-200
+          50:  "#f8fafc",   // slate-50
+          100: "#f1f5f9",   // slate-100
+          200: "#e2e8f0",   // slate-200
         },
 
-        // ── copper → indigo (accent / active states) ────────────────────────
+        // ── copper → indigo (ALL accent / active states) ─────────────
+        // Any page using bg-copper-500, text-copper-600 etc. now renders indigo.
         copper: {
-          400: "#818cf8",   // was #e8a04a → indigo-400
-          500: "#6366f1",   // was #d4892a → indigo-500  (primary accent)
-          600: "#4f46e5",   // was #b56e16 → indigo-600
+          300: "#a5b4fc",   // indigo-300
+          400: "#818cf8",   // indigo-400
+          500: "#6366f1",   // indigo-500
+          600: "#4f46e5",   // indigo-600
+          700: "#4338ca",   // indigo-700
         },
 
-        // ── New semantic aliases (for new code) ─────────────────────────────
+        // ── New semantic tokens (for new code) ────────────────────────
         brand: {
-          50:  "#eef2ff",
-          100: "#e0e7ff",
-          200: "#c7d2fe",
-          400: "#818cf8",
-          500: "#6366f1",
-          600: "#4f46e5",
-          700: "#4338ca",
-          900: "#312e81",
+          50:  "#eef2ff",   // indigo-50
+          100: "#e0e7ff",   // indigo-100
+          200: "#c7d2fe",   // indigo-200
+          300: "#a5b4fc",   // indigo-300
+          400: "#818cf8",   // indigo-400
+          500: "#6366f1",   // indigo-500
+          600: "#4f46e5",   // indigo-600
+          700: "#4338ca",   // indigo-700
+          900: "#312e81",   // indigo-900
         },
         surface: {
           0:   "#ffffff",
-          50:  "#f8fafc",
-          100: "#f1f5f9",
-          200: "#e2e8f0",
-          300: "#cbd5e1",
-          400: "#94a3b8",
-          500: "#64748b",
-          700: "#334155",
-          800: "#1e293b",
-          900: "#0f172a",
+          50:  "#f8fafc",   // slate-50
+          100: "#f1f5f9",   // slate-100
+          200: "#e2e8f0",   // slate-200
+          300: "#cbd5e1",   // slate-300
+          400: "#94a3b8",   // slate-400
+          500: "#64748b",   // slate-500
+          700: "#334155",   // slate-700
+          800: "#1e293b",   // slate-800
+          900: "#0f172a",   // slate-900
         },
       },
 

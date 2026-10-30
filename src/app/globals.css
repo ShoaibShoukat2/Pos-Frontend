@@ -112,12 +112,12 @@ input, select, textarea {
 }
 .btn-primary:hover { background: var(--indigo-700); }
 
-/* Accent / action — kept for POS etc */
+/* Accent — Indigo variant (used in POS charge button etc) */
 .btn-copper {
-  background: #d4892a;
-  color: #1c1814;
+  background: #4f46e5;
+  color: #ffffff;
 }
-.btn-copper:hover { background: #e8a04a; }
+.btn-copper:hover { background: #4338ca; }
 
 /* Ghost */
 .btn-ghost {
@@ -201,4 +201,4 @@ th, td { overflow-wrap: break-word; }
 .bg-white\/8  { background-color: rgb(255 255 255 / 0.08); }
 .bg-white\/12 { background-color: rgb(255 255 255 / 0.12); }
 .border-white\/8 { border-color: rgb(255 255 255 / 0.08); }
-.bg-copper-500\/8 { background-color: rgb(212 137 42 / 0.08); }
+/* removed brown copper utility */
