@@ -63,7 +63,10 @@ export function Button({
   variant = "primary",
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "copper" | "ghost" }) {
-  const cls = variant === "copper" ? "btn-copper" : variant === "ghost" ? "btn-ghost" : "btn-primary";
+  const cls =
+    variant === "copper" ? "btn-copper" :
+    variant === "ghost"  ? "btn-ghost"  :
+    "btn-primary";
   return <button {...props} className={`${cls} ${props.className || ""}`} />;
 }
 

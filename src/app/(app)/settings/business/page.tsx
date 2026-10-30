@@ -9,15 +9,13 @@ import { useAuth } from "@/lib/auth";
 import type { Business } from "@/lib/types";
 
 const PRESET_COLORS = [
-  // Darks
-  { label: "Midnight", primary: "#0f0f11", accent: "#6366f1" },
-  { label: "Ink (default)", primary: "#1c1814", accent: "#d4892a" },
-  { label: "Forest", primary: "#0d1f13", accent: "#22c55e" },
-  { label: "Navy", primary: "#0f172a", accent: "#3b82f6" },
-  { label: "Wine", primary: "#1a0a0f", accent: "#f43f5e" },
-  { label: "Slate", primary: "#1e293b", accent: "#94a3b8" },
-  // Warm
-  { label: "Walnut", primary: "#2d1b0e", accent: "#f97316" },
+  { label: "Indigo",   primary: "#1e293b", accent: "#6366f1" },  // default
+  { label: "Violet",   primary: "#1e1b4b", accent: "#8b5cf6" },
+  { label: "Sky",      primary: "#0c1a2e", accent: "#0ea5e9" },
+  { label: "Emerald",  primary: "#052e16", accent: "#10b981" },
+  { label: "Rose",     primary: "#1c0a0f", accent: "#f43f5e" },
+  { label: "Amber",    primary: "#1c1814", accent: "#d4892a" },  // legacy copper
+  { label: "Slate",    primary: "#0f172a", accent: "#64748b" },
   { label: "Charcoal", primary: "#18181b", accent: "#a78bfa" },
 ];
 
@@ -33,8 +31,8 @@ const empty: Partial<Business> = {
   country: "Pakistan",
   postal_code: "",
   tax_number: "",
-  primary_color: "#1c1814",
-  accent_color: "#d4892a",
+  primary_color: "#1e293b",
+  accent_color: "#6366f1",
   timezone: "Asia/Karachi",
   date_format: "DD/MM/YYYY",
   fiscal_year_start_month: 7,
