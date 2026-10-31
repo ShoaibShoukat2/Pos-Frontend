@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading) return;
     const publicRoutes = ["/", "/login", "/register", "/platform/login", "/cashier/login"];
-    const isPublic = publicRoutes.includes(pathname) || pathname.startsWith("/scan");
+    const isPublic = publicRoutes.includes(pathname) || pathname.startsWith("/scan") || pathname.startsWith("/check");
     const isPlatformRoute = pathname === "/platform" || pathname.startsWith("/platform/");
     const isCashierLogin = pathname === "/cashier/login";
     if (!user && !isPublic) {
