@@ -26,8 +26,12 @@ type SearchResult = {
   item_kind: string;
 };
 
-export default function PriceCheckerPage({ params }: { params: { slug: string } }) {
-  const slug = params.slug;
+export default function PriceCheckerPage({ params }: { params: Promise<{ slug: string }> }) {
+  const [slug, setSlug] = useState("");
+
+  useEffect(() => {
+    params.then((p) => setSlug(p.slug));
+  }, [params]);
   const [shop, setShop]     = useState<ShopInfo | null>(null);
   const [error, setError]   = useState("");
   const [query, setQuery]   = useState("");
@@ -39,6 +43,7 @@ export default function PriceCheckerPage({ params }: { params: { slug: string } 
 
   // Load shop info
   useEffect(() => {
+    if (!slug) return;
     const base = apiBase();
     fetch(`${base}/api/public/price-check/${slug}/`)
       .then((r) => (r.ok ? r.json() : null))
@@ -91,7 +96,7 @@ export default function PriceCheckerPage({ params }: { params: { slug: string } 
   }
 
   // ── Loading state ──
-  if (loading && !shop) {
+  if (!shop && !error) {
     return (
       <div className="grid min-h-screen place-items-center bg-slate-50">
         <p className="text-surface-400">Loading…</p>
