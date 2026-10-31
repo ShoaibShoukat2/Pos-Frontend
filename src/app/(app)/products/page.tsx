@@ -60,6 +60,9 @@ export default function ProductsPage() {
     min_stock: "0",
     has_variants: false,
     opening: "0",
+    pack_quantity: "",
+    pack_price: "",
+    pack_barcode: "",
   });
   const [variantRows, setVariantRows] = useState<VariantRow[]>([emptyVariant()]);
   const [simpleName, setSimpleName] = useState("");
@@ -124,6 +127,9 @@ export default function ProductsPage() {
       min_stock: row.min_stock || "0",
       has_variants: row.has_variants,
       opening: "0",
+      pack_quantity: (row as any).pack_quantity || "",
+      pack_price: (row as any).pack_price || "",
+      pack_barcode: (row as any).pack_barcode || "",
     });
     setVariantRows([emptyVariant()]);
     setOpen(true);
@@ -144,6 +150,9 @@ export default function ProductsPage() {
       selling_price: form.selling_price,
       min_stock: form.min_stock,
       item_kind: "product",
+      pack_quantity: form.pack_quantity || "0",
+      pack_price: form.pack_price || "0",
+      pack_barcode: form.pack_barcode || "",
     };
     if (!editing) {
       payload.has_variants = form.has_variants;
@@ -357,12 +366,54 @@ export default function ProductsPage() {
             <Field label="Cost">
               <Input value={form.cost_price} onChange={(e) => setForm({ ...form, cost_price: e.target.value })} />
             </Field>
-            <Field label="Selling">
+            <Field label="Selling price (per unit)">
               <Input value={form.selling_price} onChange={(e) => setForm({ ...form, selling_price: e.target.value })} />
             </Field>
             <Field label="Min stock">
               <Input value={form.min_stock} onChange={(e) => setForm({ ...form, min_stock: e.target.value })} />
             </Field>
+          </div>
+
+          {/* ── Box / Pack pricing ─────────────────────────────────────────── */}
+          <div className="rounded-xl border border-surface-200 bg-surface-50 p-4">
+            <p className="mb-1 text-sm font-medium text-surface-900">Box / Pack pricing</p>
+            <p className="mb-3 text-xs text-surface-400">
+              For medical strips, electronics boxes etc. — set how many units are in a pack and the pack price.
+              Leave blank if not applicable.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Field label="Units per pack">
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="e.g. 10 strips"
+                  value={form.pack_quantity || ""}
+                  onChange={(e) => setForm({ ...form, pack_quantity: e.target.value })}
+                />
+              </Field>
+              <Field label="Pack selling price">
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="e.g. 450"
+                  value={form.pack_price || ""}
+                  onChange={(e) => setForm({ ...form, pack_price: e.target.value })}
+                />
+              </Field>
+              <Field label="Pack barcode (optional)">
+                <Input
+                  placeholder="Box barcode"
+                  value={form.pack_barcode || ""}
+                  onChange={(e) => setForm({ ...form, pack_barcode: e.target.value })}
+                />
+              </Field>
+            </div>
+            {form.pack_quantity && form.pack_price ? (
+              <p className="mt-2 text-xs text-brand-600">
+                Unit price: Rs {form.selling_price} &nbsp;·&nbsp; Pack of {form.pack_quantity}: Rs {form.pack_price}
+                &nbsp;(Rs {(Number(form.pack_price) / Number(form.pack_quantity)).toFixed(2)} per unit in pack)
+              </p>
+            ) : null}
           </div>
           {!editing ? (
             <Toggle

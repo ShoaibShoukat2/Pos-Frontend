@@ -831,6 +831,11 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                             {stock.label}
                           </span>
                         </div>
+                        {Number(item.pack_quantity) > 0 && Number(item.pack_price) > 0 ? (
+                          <p className="mt-1 text-[10px] text-brand-600">
+                            Box of {item.pack_quantity}: {rs(item.pack_price)}
+                          </p>
+                        ) : null}
                       </div>
                     </button>
 
@@ -852,6 +857,38 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                             onClick={() => removeLine(item.id)}
                           >
                             <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ) : Number(item.pack_quantity) > 0 && Number(item.pack_price) > 0 ? (
+                        /* Pack pricing available — two buttons */
+                        <div className="flex gap-1.5">
+                          <button
+                            type="button"
+                            className="flex h-9 flex-1 items-center justify-center gap-1 rounded-lg bg-surface-900 text-xs font-medium text-white hover:bg-surface-700 transition-colors"
+                            onClick={() => addItem(item)}
+                          >
+                            <Plus size={12} /> Unit
+                          </button>
+                          <button
+                            type="button"
+                            className="flex h-9 flex-1 items-center justify-center gap-1 rounded-lg bg-brand-600 text-xs font-medium text-white hover:bg-brand-700 transition-colors"
+                            onClick={() => {
+                              /* Add pack_quantity units at pack_price each */
+                              const packQty = Number(item.pack_quantity);
+                              const packUnit = Number(item.pack_price) / packQty;
+                              setCart((prev) => {
+                                const found = prev.find((r) => r.item.id === item.id);
+                                if (found) {
+                                  return prev.map((r) =>
+                                    r.item.id === item.id ? { ...r, qty: r.qty + packQty } : r
+                                  );
+                                }
+                                return [...prev, { item: { ...item, selling_price: packUnit.toFixed(2) }, qty: packQty }];
+                              });
+                              setSelectedId(item.id);
+                            }}
+                          >
+                            Box ×{item.pack_quantity}
                           </button>
                         </div>
                       ) : (

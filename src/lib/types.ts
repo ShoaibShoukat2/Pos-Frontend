@@ -247,6 +247,9 @@ export type ProductVariant = {
   cost_price: string;
   selling_price: string;
   min_stock: string;
+  pack_quantity: string;
+  pack_price: string;
+  pack_barcode: string;
   is_default: boolean;
   is_active: boolean;
   total_stock?: string | null;
@@ -693,6 +696,9 @@ export type PosCatalogItem = {
   duration_minutes?: number;
   warranty_days?: number;
   qty: string;
+  pack_quantity: string;
+  pack_price: string;
+  pack_barcode: string;
 };
 
 export type PosCustomer = Customer;
