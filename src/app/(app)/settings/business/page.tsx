@@ -83,6 +83,7 @@ export default function BusinessPage() {
         "city", "state", "country", "postal_code", "tax_number",
         "primary_color", "accent_color", "timezone", "date_format",
         "fiscal_year_start_month", "business_type",
+        "price_checker_enabled", "price_checker_slug",
       ];
       for (const key of fields) {
         const val = form[key];
@@ -352,6 +353,81 @@ export default function BusinessPage() {
               onChange={(e) => set("fiscal_year_start_month", Number(e.target.value))}
             />
           </Field>
+        </div>
+
+        {/* ── Price Checker ────────────────────────────────────────────────── */}
+        <div className="card p-6">
+          <h2 className="mb-1 font-medium text-surface-900">Public price checker</h2>
+          <p className="mb-5 text-sm text-surface-400">
+            Let customers check prices on a separate device. No login needed — just a URL.
+          </p>
+
+          {/* Toggle */}
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-surface-200 bg-surface-50 px-4 py-3.5">
+            <div>
+              <p className="text-sm font-medium text-surface-900">Enable price checker</p>
+              <p className="text-xs text-surface-400">When on, anyone with the link can check prices.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => set("price_checker_enabled", !form.price_checker_enabled)}
+              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+                form.price_checker_enabled ? "bg-brand-600" : "bg-surface-300"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                  form.price_checker_enabled ? "translate-x-[1.375rem]" : "translate-x-0.5"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* URL display + copy */}
+          {form.price_checker_enabled ? (
+            <div className="mt-4 space-y-3">
+              <div className="rounded-xl border border-surface-200 bg-surface-50 px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-surface-400">
+                  Public URL
+                </p>
+                <div className="mt-1.5 flex items-center gap-2">
+                  <code className="min-w-0 flex-1 truncate text-sm font-mono text-surface-900">
+                    {typeof window !== "undefined" ? window.location.origin : ""}/check/{form.price_checker_slug || ""}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = `${typeof window !== "undefined" ? window.location.origin : ""}/check/${form.price_checker_slug || ""}`;
+                      navigator.clipboard.writeText(url);
+                    }}
+                    className="shrink-0 rounded-lg border border-surface-200 bg-white px-3 py-1.5 text-xs font-medium text-surface-600 hover:border-brand-400 hover:text-brand-600 transition-colors"
+                  >
+                    Copy link
+                  </button>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <a
+                  href={`/check/${form.price_checker_slug || ""}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 transition-colors"
+                >
+                  Open price checker
+                </a>
+                <a
+                  href={`/check/${form.price_checker_slug || ""}`}
+                  className="rounded-lg border border-surface-200 bg-white px-4 py-2 text-sm font-medium text-surface-600 hover:border-surface-300 transition-colors"
+                >
+                  Preview
+                </a>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-surface-400">
+              Turn it on to get a shareable link for your customers.
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-3">

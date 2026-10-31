@@ -154,6 +154,8 @@ export type Business = {
   fiscal_year_start_month: number;
   business_type: string;
   is_active: boolean;
+  price_checker_enabled: boolean;
+  price_checker_slug: string;
 };
 
 export type Branch = {
