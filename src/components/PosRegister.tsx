@@ -1297,12 +1297,12 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             <button
               type="button"
               onClick={() => openReturn()}
-              className="btn-ghost min-h-11 border-white/15 bg-transparent px-3 text-white"
+              className="btn btn-ghost min-h-11 border-white/15 bg-transparent px-3 text-white"
             >
               <RotateCcw size={16} />
               <span className="hidden sm:inline">Return</span>
             </button>
-            <Link href={officeHref} className="btn-ghost min-h-11 border-white/15 bg-transparent px-3 text-white">
+            <Link href={officeHref} className="btn btn-ghost min-h-11 border-white/15 bg-transparent px-3 text-white">
               <LayoutDashboard size={16} />
               <span className="hidden sm:inline">Back office</span>
             </Link>

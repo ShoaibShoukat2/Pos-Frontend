@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type {
   ButtonHTMLAttributes,
@@ -78,10 +78,15 @@ export function Button({
   variant?: "primary" | "copper" | "ghost";
 }) {
   const cls =
-    variant === "copper" ? "btn-copper" :
-    variant === "ghost"  ? "btn-ghost"  :
-    "btn-primary";
-  return <button {...props} className={`${cls} ${props.className || ""}`} />;
+    variant === "copper" ? "btn btn-copper" :
+    variant === "ghost"  ? "btn btn-ghost"  :
+    "btn btn-primary";
+  return (
+    <button
+      {...props}
+      className={`btn ${cls} ${props.className || ""}`}
+    />
+  );
 }
 
 export function Badge({

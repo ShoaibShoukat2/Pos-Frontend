@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 
@@ -73,7 +73,7 @@ export function CameraScan({
     <div className="space-y-3">
       <video ref={videoRef} className="aspect-video w-full rounded-xl bg-surface-900 object-cover" muted playsInline />
       <p className="text-sm text-surface-400">{hint}</p>
-      <button type="button" className="btn-ghost w-full" onClick={onClose}>
+      <button type="button" className="btn btn-ghost w-full" onClick={onClose}>
         Close camera
       </button>
     </div>

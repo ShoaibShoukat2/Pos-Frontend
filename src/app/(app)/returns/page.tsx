@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -32,7 +32,7 @@ export default function ReturnsPage() {
         title="Customer returns"
         description="If a customer comes back and does not want an item, find the ticket, remove it here, and refund them. Stock is put back on the shelf."
         action={
-          <Link href="/pos" className="btn-copper text-center">
+          <Link href="/pos" className="btn btn-copper text-center">
             Open POS
           </Link>
         }

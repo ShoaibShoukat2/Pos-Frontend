@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -40,7 +40,7 @@ export default function CashierLookupPage() {
         title="Find to sell"
         description="Look up selling price, SKU and stock for the ticket. Services show duration instead of stock. You cannot add or edit catalog items."
         action={
-          <Link href="/pos" className="btn-copper text-center">
+          <Link href="/pos" className="btn btn-copper text-center">
             Open POS
           </Link>
         }
@@ -86,7 +86,7 @@ export default function CashierLookupPage() {
               </div>
               <Link
                 href={`/pos?sku=${encodeURIComponent(item.sku || item.barcode || item.product)}`}
-                className="btn-primary mt-4 w-full text-center"
+                className="btn btn-primary mt-4 w-full text-center"
               >
                 Sell on POS
               </Link>

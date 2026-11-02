@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -181,7 +181,7 @@ export default function CashierDashboardPage() {
         title={`Hello, ${data?.cashier_name || user?.first_name || "cashier"}`}
         description={`${data?.business_name || user?.business_name || "Your shop"}. This desk shows only your counter sales and the products on those tickets.`}
         action={
-          <Link href="/pos" className="btn-copper text-center">
+          <Link href="/pos" className="btn btn-copper text-center">
             Open POS
           </Link>
         }
@@ -247,7 +247,7 @@ export default function CashierDashboardPage() {
                       {syncing ? "Syncing…" : "Sync now"}
                     </Button>
                   ) : null}
-                  <Link href={item.href} className="btn-primary text-center">
+                  <Link href={item.href} className="btn btn-primary text-center">
                     {item.action}
                   </Link>
                 </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -52,7 +52,7 @@ export default function CashierSalesPage() {
               <RotateCcw size={16} />
               Return item
             </Button>
-            <Link href="/pos" className="btn-copper text-center">
+            <Link href="/pos" className="btn btn-copper text-center">
               Open POS
             </Link>
           </div>

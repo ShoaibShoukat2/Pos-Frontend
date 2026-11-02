@@ -141,10 +141,10 @@ export default function DashboardPage() {
               ))}
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-              <Link href="/settings/cashiers" className="btn-primary text-center">
+              <Link href="/settings/cashiers" className="btn btn-primary text-center">
                 Add cashier
               </Link>
-              <Link href="/pos" className="btn-copper text-center">
+              <Link href="/pos" className="btn btn-copper text-center">
                 Open POS
               </Link>
             </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -93,10 +93,10 @@ export default function HomePage() {
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
-            <Link href="/login" className="btn-ghost px-3 py-2 text-sm">
+            <Link href="/login" className="btn btn-ghost px-3 py-2 text-sm">
               Sign in
             </Link>
-            <Link href={startHref} className="btn-copper gap-1.5 text-sm">
+            <Link href={startHref} className="btn btn-copper gap-1.5 text-sm">
               {startLabel} <ArrowRight size={14} />
             </Link>
           </div>
@@ -120,8 +120,8 @@ export default function HomePage() {
               ))}
             </nav>
             <div className="mt-4 grid gap-2">
-              <Link href="/login" className="btn-ghost w-full text-center text-sm" onClick={() => setOpen(false)}>Sign in</Link>
-              <Link href={startHref} className="btn-copper w-full text-center text-sm" onClick={() => setOpen(false)}>{startLabel}</Link>
+              <Link href="/login" className="btn btn-ghost w-full text-center text-sm" onClick={() => setOpen(false)}>Sign in</Link>
+              <Link href={startHref} className="btn btn-copper w-full text-center text-sm" onClick={() => setOpen(false)}>{startLabel}</Link>
             </div>
           </div>
         )}
@@ -151,10 +151,10 @@ export default function HomePage() {
               </p>
 
               <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                <Link href={startHref} className="btn-copper w-full gap-2 sm:w-auto">
+                <Link href={startHref} className="btn btn-copper w-full gap-2 sm:w-auto">
                   {startLabel} <ArrowRight size={15} />
                 </Link>
-                <a href="#features" className="btn-ghost w-full sm:w-auto">
+                <a href="#features" className="btn btn-ghost w-full sm:w-auto">
                   See what's included
                 </a>
               </div>
@@ -311,10 +311,10 @@ export default function HomePage() {
               Takes under five minutes.
             </p>
             <div className="relative mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href={startHref} className="btn-copper w-full gap-2 sm:w-auto">
+              <Link href={startHref} className="btn btn-copper w-full gap-2 sm:w-auto">
                 {startLabel} <ArrowRight size={15} />
               </Link>
-              <Link href="/login" className="btn w-full border border-white/15 bg-white/8 text-paper-50 hover:bg-white/12 sm:w-auto">
+              <Link href="/login" className="btn btn-ghost w-full border border-white/15 bg-white/8 text-white hover:bg-white/12 sm:w-auto">
                 Sign in
               </Link>
             </div>
