@@ -1114,108 +1114,135 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
             </div>
           </div>
 
-          {/* ── Payment panel (always visible on desktop, tab on mobile) ── */}
-          <div
-            className={`safe-bottom shrink-0 border-t border-surface-200 bg-white px-4 py-4 ${
-              mobileTab === "pay" || true ? "block" : "hidden"
-            } lg:block`}
-          >
-            {/* Only show full payment on desktop or when on pay tab mobile */}
+          {/* ── Payment panel ── */}
+          <div className="safe-bottom shrink-0 border-t border-surface-200 bg-white">
             <div className={mobileTab !== "pay" ? "hidden lg:block" : "block"}>
-              {/* Total */}
-              <div className="mb-4 flex items-baseline justify-between gap-3">
-                <p className="text-sm text-surface-500">Amount due</p>
-                <p className="font-display text-3xl text-surface-900">{quote ? rs(quote.total) : rs(0)}</p>
+
+              {/* Amount due strip */}
+              <div className="flex items-center justify-between gap-3 border-b border-surface-100 px-5 py-4">
+                <p className="text-sm font-medium text-surface-500">Amount due</p>
+                <p className="font-display text-3xl font-semibold tabular-nums text-surface-900">
+                  {quote ? rs(quote.total) : rs(0)}
+                </p>
               </div>
 
-              {/* Payment method */}
-              <div className="mb-3 grid grid-cols-3 gap-2">
-                {(["cash", "card", "bank"] as const).map((method) => (
+              <div className="px-5 py-4 space-y-4">
+                {/* Payment method — equal width, clean */}
+                <div className="grid grid-cols-3 gap-2">
+                  {(["cash", "card", "bank"] as const).map((method) => (
+                    <button
+                      key={method}
+                      type="button"
+                      onClick={() => setPayMethod(method)}
+                      className={`rounded-xl border py-2.5 text-sm font-semibold transition-all ${
+                        payMethod === method
+                          ? "border-brand-600 bg-brand-600 text-white shadow-sm shadow-brand-600/20"
+                          : "border-surface-200 bg-surface-50 text-surface-600 hover:border-brand-300 hover:bg-white"
+                      }`}
+                    >
+                      {PAY_LABEL[method]}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Tendered + Change row */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-surface-400">
+                      Tendered
+                    </p>
+                    <input
+                      type="number"
+                      value={payAmount}
+                      onChange={(e) => setPayAmount(e.target.value)}
+                      className="w-full rounded-xl border border-surface-200 bg-white py-2.5 text-center font-display text-xl text-surface-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10"
+                    />
+                  </div>
+                  <div>
+                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-surface-400">
+                      {change >= 0 ? "Change" : "Balance due"}
+                    </p>
+                    <div
+                      className={`flex h-[2.875rem] items-center justify-center rounded-xl border font-display text-xl font-semibold tabular-nums ${
+                        change > 0
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : change < 0
+                          ? "border-red-200 bg-red-50 text-red-600"
+                          : "border-surface-200 bg-surface-50 text-surface-500"
+                      }`}
+                    >
+                      {rs(Math.abs(change))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick tender chips */}
+                <div className="flex flex-wrap gap-1.5">
                   <button
-                    key={method}
                     type="button"
-                    onClick={() => setPayMethod(method)}
-                    className={`rounded-xl border py-2.5 text-sm font-medium transition ${
-                      payMethod === method
-                        ? "border-brand-600 bg-brand-600 text-white shadow-sm"
-                        : "border-surface-200 bg-surface-50 text-surface-600 hover:border-brand-300"
-                    }`}
+                    className="rounded-lg border border-surface-200 bg-white px-3 py-1.5 text-xs font-medium text-surface-600 hover:border-brand-400 hover:text-brand-600 transition-colors"
+                    onClick={() => quote && setPayAmount(money(quote.total).toFixed(2))}
                   >
-                    {PAY_LABEL[method]}
+                    Exact
                   </button>
-                ))}
-              </div>
-
-              {/* Amount tendered + change */}
-              <div className="mb-3 grid grid-cols-2 gap-2">
-                <div>
-                  <label className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-surface-400">
-                    Tendered
-                  </label>
-                  <Input
-                    value={payAmount}
-                    onChange={(e) => setPayAmount(e.target.value)}
-                    className="text-center font-display text-lg"
-                  />
+                  {TENDER.map((amount) => (
+                    <button
+                      key={amount}
+                      type="button"
+                      className="rounded-lg border border-surface-200 bg-white px-3 py-1.5 text-xs font-medium text-surface-600 hover:border-brand-400 hover:text-brand-600 transition-colors"
+                      onClick={() => setPayAmount(String(amount))}
+                    >
+                      {rs(amount)}
+                    </button>
+                  ))}
                 </div>
-                <div className={`rounded-xl px-3 py-2.5 ${change >= 0 ? "bg-emerald-50" : "bg-red-50"}`}>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest text-surface-400">
-                    {change >= 0 ? "Change" : "Balance due"}
-                  </p>
-                  <p className={`font-display text-2xl ${change >= 0 ? "text-emerald-700" : "text-red-600"}`}>
-                    {rs(Math.abs(change))}
-                  </p>
-                </div>
-              </div>
 
-              {/* Quick tender */}
-              <div className="mb-3 flex flex-wrap gap-1.5">
+                {/* Warnings / feedback */}
+                {payMethod === "cash" && !shift ? (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-800">
+                    No open cash shift. Open one first, or pay by card/bank.
+                  </div>
+                ) : null}
+                {error ? (
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
+                    {error}
+                  </div>
+                ) : null}
+                {message ? (
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-800">
+                    {message}
+                  </div>
+                ) : null}
+
+                {/* Complete sale CTA */}
                 <button
                   type="button"
-                  className="rounded-lg border border-surface-200 bg-white px-2.5 py-1.5 text-xs font-medium text-surface-600 hover:border-brand-400"
-                  onClick={() => quote && setPayAmount(money(quote.total).toFixed(2))}
+                  disabled={pending || cart.length === 0}
+                  onClick={checkout}
+                  className={`flex h-13 w-full items-center justify-center gap-2 rounded-xl text-base font-semibold transition-all ${
+                    cart.length === 0
+                      ? "cursor-not-allowed border border-surface-200 bg-surface-100 text-surface-400"
+                      : "bg-brand-600 text-white shadow-md shadow-brand-600/25 hover:bg-brand-700 active:scale-[0.99] disabled:opacity-60"
+                  }`}
+                  style={{ height: "3.25rem" }}
                 >
-                  Exact
+                  {pending
+                    ? "Processing…"
+                    : cart.length === 0
+                    ? "Add items to sell"
+                    : `Charge · ${quote ? rs(quote.total) : rs(0)}`}
                 </button>
-                {TENDER.map((amount) => (
-                  <button
-                    key={amount}
-                    type="button"
-                    className="rounded-lg border border-surface-200 bg-white px-2.5 py-1.5 text-xs font-medium text-surface-600 hover:border-brand-400"
-                    onClick={() => setPayAmount(String(amount))}
-                  >
-                    {rs(amount)}
-                  </button>
-                ))}
+
+                {/* Return link */}
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-surface-200 py-2.5 text-sm font-medium text-surface-500 hover:border-surface-300 hover:text-surface-700 transition-colors"
+                  onClick={() => openReturn()}
+                >
+                  <RotateCcw size={14} />
+                  Process a return
+                </button>
               </div>
-
-              {/* Warnings */}
-              {payMethod === "cash" && !shift ? (
-                <p className="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
-                  No open cash shift. Open a shift first or pay by card/bank.
-                </p>
-              ) : null}
-              {error ? <p className="mb-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p> : null}
-              {message ? <p className="mb-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{message}</p> : null}
-
-              {/* Complete sale */}
-              <button
-                type="button"
-                disabled={pending || cart.length === 0}
-                onClick={checkout}
-                className="flex h-13 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 text-base font-semibold text-white shadow-md shadow-brand-500/20 transition hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ height: "3.25rem" }}
-              >
-                {pending ? "Processing…" : cart.length === 0 ? "Add items to sell" : `Complete sale · ${quote ? rs(quote.total) : rs(0)}`}
-              </button>
-              <button
-                type="button"
-                className="mt-2 flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-surface-200 text-sm text-surface-500 hover:border-surface-300 hover:text-surface-700"
-                onClick={() => openReturn()}
-              >
-                <RotateCcw size={14} />
-                Process a return
-              </button>
             </div>
           </div>
         </aside>
