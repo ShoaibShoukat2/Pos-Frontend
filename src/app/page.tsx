@@ -46,12 +46,60 @@ const FEATURES = [
 ];
 
 const INDUSTRIES = [
-  { emoji: "🛒", title: "Grocery", text: "Fast tickets, accurate stock on hand, daily sales picture." },
-  { emoji: "👕", title: "Clothing", text: "Variants, sizes, colors — the cashier searches, not scrolls." },
-  { emoji: "🍕", title: "Pizza / Restaurant", text: "Counter sales, printed slip, category sales on the owner view." },
-  { emoji: "💊", title: "Pharmacy", text: "Products, customers and a clean record of what left the shelf." },
-  { emoji: "📱", title: "Electronics", text: "Higher-value items, purchase invoices, full history." },
-  { emoji: "🏪", title: "General Retail", text: "One setup for a shop that sells a mixed counter." },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+    ),
+    title: "Grocery",
+    text: "Fast tickets, accurate stock on hand, daily sales picture.",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+        <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>
+      </svg>
+    ),
+    title: "Clothing",
+    text: "Variants, sizes, colors — the cashier searches, not scrolls.",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+        <path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/>
+      </svg>
+    ),
+    title: "Restaurant",
+    text: "Counter sales, printed slip, category sales on the owner view.",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+        <path d="m9 3-6 6 6 6"/><path d="m15 3 6 6-6 6"/><rect width="20" height="4" x="2" y="17" rx="1"/>
+      </svg>
+    ),
+    title: "Pharmacy",
+    text: "Products, customers and a clean record of what left the shelf.",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+        <rect width="14" height="20" x="5" y="2" rx="2"/><path d="M15 2v20"/><path d="M9 7h1"/><path d="M9 12h1"/><path d="M9 17h1"/>
+      </svg>
+    ),
+    title: "Electronics",
+    text: "Higher-value items, purchase invoices, full history.",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    ),
+    title: "General Retail",
+    text: "One setup for a shop that sells a mixed counter.",
+  },
 ];
 
 const STEPS = [
@@ -264,7 +312,9 @@ export default function HomePage() {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {INDUSTRIES.map((item) => (
                 <article key={item.title} className="rounded-2xl border border-white/8 bg-white/5 p-5 transition hover:bg-white/8">
-                  <span className="text-2xl">{item.emoji}</span>
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white/80">
+                    {item.icon}
+                  </div>
                   <h3 className="mt-3 font-medium text-paper-50">{item.title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-paper-50/55">{item.text}</p>
                 </article>
