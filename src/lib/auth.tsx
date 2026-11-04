@@ -104,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const publicRoutes = ["/", "/login", "/register", "/platform/login", "/cashier/login"];
     const isPublic = publicRoutes.includes(pathname) || pathname.startsWith("/scan") || pathname.startsWith("/check");
     const isPlatformRoute = pathname === "/platform" || pathname.startsWith("/platform/");
+    const isShowroomRoute = pathname === "/showroom" || pathname.startsWith("/showroom/");
     const isCashierLogin = pathname === "/cashier/login";
     if (!user && !isPublic) {
       router.replace(isPlatformRoute ? "/platform/login" : pathname.startsWith("/cashier") ? "/cashier/login" : "/login");
@@ -113,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (user.is_platform_admin) {
       if (pathname === "/login" || pathname === "/register" || pathname === "/platform/login" || isCashierLogin) {
         router.replace("/platform");
-      } else if (!isPlatformRoute && pathname !== "/") {
+      } else if (!isPlatformRoute && pathname !== "/" && !isShowroomRoute) {
         router.replace("/platform");
       }
       return;

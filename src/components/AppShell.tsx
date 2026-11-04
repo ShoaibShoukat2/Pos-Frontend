@@ -7,6 +7,7 @@ import { useState } from "react";
 import {
   Banknote,
   Building2,
+  Car,
   FileText,
   LayoutDashboard,
   LogOut,
@@ -43,6 +44,7 @@ const NAV = [
   { href: "/cash",              label: "Cash drawer",   icon: Banknote,        perm: "cash.drawer" },
   { href: "/settings/business", label: "Business",      icon: Building2,       perm: "business.view" },
   { href: "/settings/invoice",  label: "Invoices",      icon: FileText,        perm: "invoice_settings.manage" },
+  { href: "/showroom",          label: "Car Showroom",  icon: Car,             perm: null },
 ];
 
 /** Initials fallback when no logo */
