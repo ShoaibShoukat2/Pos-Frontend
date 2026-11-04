@@ -27,6 +27,7 @@ const NAV = [
   { href: "#features",   label: "Features" },
   { href: "#industries", label: "Industries" },
   { href: "#how",        label: "How it works" },
+  { href: "#pricing",    label: "Pricing" },
   { href: "#download",   label: "Download" },
 ];
 
@@ -436,23 +437,107 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── CTA ── */}
+        {/* ── Pricing ── */}
+        <section id="pricing" className="scroll-mt-20 border-y border-surface-200 bg-white">
+          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
+            <div className="mb-10 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">Pricing</p>
+              <h2 className="mt-2 font-display text-3xl text-surface-900 sm:text-4xl">
+                Simple, flat pricing.
+              </h2>
+              <p className="mx-auto mt-3 max-w-md text-sm text-surface-400">
+                One plan. Everything included. No hidden charges, no per-cashier fees.
+              </p>
+            </div>
+
+            <div className="mx-auto max-w-sm">
+              <div className="relative overflow-hidden rounded-2xl border-2 border-brand-600 bg-white shadow-lg shadow-brand-600/10">
+                {/* Free trial badge */}
+                <div className="absolute right-5 top-5">
+                  <span className="rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm">
+                    First month free
+                  </span>
+                </div>
+
+                <div className="px-8 pt-8 pb-6">
+                  <p className="text-sm font-semibold uppercase tracking-widest text-brand-600">
+                    Standard
+                  </p>
+                  <div className="mt-3 flex items-end gap-1">
+                    <span className="font-display text-5xl font-semibold text-surface-900">
+                      Rs 10,000
+                    </span>
+                    <span className="mb-1.5 text-sm text-surface-400">/ month</span>
+                  </div>
+                  <p className="mt-1 text-sm text-surface-400">
+                    Billed monthly. Cancel anytime.
+                  </p>
+                </div>
+
+                <div className="border-t border-surface-100 px-8 py-6">
+                  <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-surface-500">
+                    Everything included
+                  </p>
+                  <ul className="space-y-3">
+                    {[
+                      "Full POS counter — unlimited sales",
+                      "Owner dashboard + live reports",
+                      "Unlimited products, variants & barcodes",
+                      "Unlimited cashier accounts",
+                      "Purchase orders & supplier management",
+                      "Customer credit & ledger",
+                      "Cash drawer management",
+                      "Invoice printing — thermal & A4",
+                      "Offline mode — syncs when back online",
+                      "Windows desktop app included",
+                      "Public price checker page",
+                    ].map((feature) => (
+                      <li key={feature} className="flex items-start gap-2.5 text-sm text-surface-700">
+                        <svg viewBox="0 0 16 16" fill="none" className="mt-0.5 h-4 w-4 shrink-0 text-brand-600">
+                          <circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.12" />
+                          <path d="M5 8l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="border-t border-surface-100 px-8 py-6">
+                  <Link
+                    href="/register"
+                    className="btn btn-primary flex w-full justify-center gap-2 text-base"
+                  >
+                    Start free — first month on us
+                  </Link>
+                  <p className="mt-3 text-center text-xs text-surface-400">
+                    No credit card required to start. Rs 10,000/month after trial.
+                  </p>
+                </div>
+              </div>
+
+              {/* Trust note */}
+              <div className="mt-6 rounded-xl border border-surface-200 bg-surface-50 px-5 py-4 text-center text-sm text-surface-500">
+                <strong className="text-surface-700">Questions?</strong> Contact us before you pay — we will set it up for you.
+              </div>
+            </div>
+          </div>
+        </section>
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <div className="relative overflow-hidden rounded-3xl bg-ink-950 px-8 py-12 text-center sm:px-12">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_100%,rgba(212,137,42,0.15),transparent)]" />
-            <p className="relative text-xs font-semibold uppercase tracking-[0.2em] text-copper-400">Get started</p>
-            <h2 className="relative mt-3 font-display text-3xl text-paper-50 sm:text-4xl lg:text-5xl">
-              Open your business today.
+          <div className="relative overflow-hidden rounded-3xl bg-surface-900 px-8 py-12 text-center sm:px-12">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_100%,rgba(99,102,241,0.18),transparent)]" />
+            <p className="relative text-xs font-semibold uppercase tracking-[0.2em] text-brand-400">Get started today</p>
+            <h2 className="relative mt-3 font-display text-3xl text-white sm:text-4xl lg:text-5xl">
+              First month free.
             </h2>
-            <p className="relative mx-auto mt-4 max-w-md text-sm leading-relaxed text-paper-50/55">
-              Create the owner account, add your products and cashier, then sell.
-              Takes under five minutes.
+            <p className="relative mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/55">
+              Create your business, add products and a cashier, then sell. Rs 10,000/month after your free trial — cancel any time.
             </p>
             <div className="relative mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link href={startHref} className="btn btn-copper w-full gap-2 sm:w-auto">
                 {startLabel} <ArrowRight size={15} />
               </Link>
-              <Link href="/login" className="btn btn-ghost w-full border border-white/15 bg-white/8 text-white hover:bg-white/12 sm:w-auto">
+              <Link href="/login" className="btn w-full border border-white/15 bg-white/8 text-white hover:bg-white/12 sm:w-auto">
                 Sign in
               </Link>
             </div>
