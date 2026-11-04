@@ -24,9 +24,10 @@ import {
 import { homeFor, useAuth } from "@/lib/auth";
 
 const NAV = [
-  { href: "#features", label: "Features" },
+  { href: "#features",   label: "Features" },
   { href: "#industries", label: "Industries" },
-  { href: "#how", label: "How it works" },
+  { href: "#how",        label: "How it works" },
+  { href: "#download",   label: "Download" },
 ];
 
 const FEATURES = [
@@ -298,6 +299,93 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── Desktop Download ── */}
+        <section id="download" className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
+          <div className="overflow-hidden rounded-2xl border border-surface-200 bg-white shadow-card">
+            <div className="grid md:grid-cols-[minmax(0,1fr)_auto]">
+              <div className="px-8 py-8 sm:px-10">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5">
+                  <svg viewBox="0 0 14 14" fill="none" className="h-3.5 w-3.5 shrink-0">
+                    <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#6366f1" />
+                    <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#6366f1" opacity="0.6" />
+                    <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#6366f1" opacity="0.6" />
+                    <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#6366f1" opacity="0.3" />
+                  </svg>
+                  <span className="text-xs font-semibold text-indigo-700">Windows Desktop App</span>
+                </div>
+                <h2 className="font-display text-2xl text-slate-900 sm:text-3xl">
+                  Download Universal POS for Windows
+                </h2>
+                <p className="mt-3 max-w-lg text-sm leading-relaxed text-slate-500">
+                  Install the desktop app for a faster, offline-capable experience. Works without a browser — your sales sync automatically when you're back online.
+                </p>
+                <ul className="mt-4 grid gap-1.5 text-sm text-slate-600 sm:grid-cols-2">
+                  {[
+                    "Works offline — syncs when back online",
+                    "Custom titlebar, no browser needed",
+                    "Barcode scanner + receipt printer support",
+                    "Auto-updates silently in the background",
+                    "Windows 10 and 11 — 64-bit",
+                    "Free download",
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-2">
+                      <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 shrink-0 text-indigo-500">
+                        <circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.12" />
+                        <path d="M5 8l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <a
+                    href="https://github.com/ShoaibShoukat2/Pos-Desktop/releases/latest/download/Universal-POS-Setup-1.0.0.exe"
+                    className="btn btn-primary inline-flex items-center gap-2"
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                      <path d="M10 3a1 1 0 011 1v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 011-1z" />
+                      <path d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" />
+                    </svg>
+                    Download .exe
+                  </a>
+                  <a
+                    href="https://github.com/ShoaibShoukat2/Pos-Desktop/releases/latest"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost inline-flex items-center gap-2"
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                      <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
+                    </svg>
+                    All releases
+                  </a>
+                </div>
+                <p className="mt-3 text-xs text-slate-400">
+                  Windows may show a SmartScreen warning — click <strong>More info → Run anyway</strong> to install.
+                </p>
+              </div>
+              {/* Right — Windows visual */}
+              <div className="hidden items-center justify-center border-l border-surface-100 bg-slate-50 px-10 md:flex">
+                <div className="text-center">
+                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-900 shadow-xl">
+                    <svg viewBox="0 0 14 14" fill="none" className="h-9 w-9">
+                      <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#6366f1" />
+                      <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#6366f1" opacity="0.65" />
+                      <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#6366f1" opacity="0.65" />
+                      <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#6366f1" opacity="0.3" />
+                    </svg>
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-slate-700">Universal POS</p>
+                  <p className="mt-0.5 text-xs text-slate-400">Desktop Edition</p>
+                  <div className="mt-3 rounded-lg border border-surface-200 bg-white px-3 py-1.5 text-[11px] text-slate-500">
+                    v1.0.0 · Windows x64
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── CTA ── */}
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <div className="relative overflow-hidden rounded-3xl bg-ink-950 px-8 py-12 text-center sm:px-12">
@@ -352,7 +440,28 @@ export default function HomePage() {
             </ul>
           </div>
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-700/40">Sign in</p>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-700/40">Get the app</p>
+            <ul className="space-y-2 text-sm text-ink-700/70">
+              <li>
+                <a
+                  href="https://github.com/ShoaibShoukat2/Pos-Desktop/releases/latest/download/Universal-POS-Setup-1.0.0.exe"
+                  className="hover:text-copper-600 transition-colors font-medium"
+                >
+                  Download for Windows
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/ShoaibShoukat2/Pos-Desktop/releases/latest"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-copper-600 transition-colors"
+                >
+                  All releases ↗
+                </a>
+              </li>
+            </ul>
+            <p className="mb-3 mt-5 text-xs font-semibold uppercase tracking-wide text-ink-700/40">Sign in</p>
             <ul className="space-y-2 text-sm text-ink-700/70">
               <li><Link href="/login" className="hover:text-copper-600 transition-colors">Business owner</Link></li>
               <li><Link href="/login?role=cashier" className="hover:text-copper-600 transition-colors">Cashier</Link></li>
