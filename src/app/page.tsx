@@ -101,6 +101,15 @@ const INDUSTRIES = [
     title: "General Retail",
     text: "One setup for a shop that sells a mixed counter.",
   },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+        <path d="M19 17H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11l3 4v6a2 2 0 0 1-2 2z"/><path d="M12 17v-6"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="16.5" cy="17.5" r="2.5"/>
+      </svg>
+    ),
+    title: "Car Showroom",
+    text: "Full inventory, purchase & sale tracking, profit per car, customer dues.",
+  },
 ];
 
 const STEPS = [
