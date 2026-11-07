@@ -205,3 +205,21 @@ th, td { overflow-wrap: break-word; }
 .bg-white\/12 { background-color: rgb(255 255 255 / 0.12); }
 .border-white\/8 { border-color: rgb(255 255 255 / 0.08); }
 /* removed brown copper utility */
+
+/* ── Car Showroom Invoice Print ─────────────────────────────────────────────── */
+@media print {
+  body * { visibility: hidden !important; }
+  #car-invoice-print-root,
+  #car-invoice-print-root * { visibility: visible !important; }
+  #car-invoice-print-root {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+  .invoice-no-print { display: none !important; }
+}
