@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Printer } from "lucide-react";
+import { SignaturePad } from "@/components/showroom/SignaturePad";
 
 export type CarInvoiceData = {
   invoice_number: string;
@@ -55,6 +56,9 @@ function rs(v: number) {
 
 export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClose?: () => void }) {
   const printRef = useRef<HTMLDivElement>(null);
+  const [customerSig, setCustomerSig] = useState<string>("");
+  const [dealerSig, setDealerSig] = useState<string>("");
+  const [sigsDone, setSigsDone] = useState(false);
 
   function print() {
     window.print();
@@ -69,11 +73,15 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
             <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Sale Invoice</p>
             <p className="font-medium text-slate-900">{data.invoice_number}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            {!sigsDone ? (
+              <p className="text-xs text-amber-600">← Sign the invoice below first</p>
+            ) : null}
             <button
               type="button"
               onClick={print}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+              disabled={!sigsDone}
+              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Printer size={15} />
               Print Invoice
@@ -195,18 +203,62 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
 
           {/* Signature section */}
           <div className="border-t-2 border-dashed border-slate-300 px-8 py-6">
-            <div className="grid grid-cols-2 gap-8">
-              <div className="text-center">
-                <div className="mb-2 h-12 border-b border-slate-400" />
-                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Customer Signature</p>
-                <p className="mt-1 text-sm text-slate-600">{data.customer_name}</p>
+            {!sigsDone ? (
+              /* Signature pads — hidden on print, shown before printing */
+              <div className="invoice-no-print space-y-5">
+                <p className="text-center text-sm font-semibold text-slate-700">
+                  Please sign before printing
+                </p>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <SignaturePad
+                    label="Customer Signature"
+                    onSave={setCustomerSig}
+                  />
+                  <SignaturePad
+                    label="Dealer Signature"
+                    onSave={setDealerSig}
+                  />
+                </div>
+                <div className="flex justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSigsDone(true)}
+                    className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+                  >
+                    Confirm signatures
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setSigsDone(true); }}
+                    className="rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-sm text-slate-500 hover:bg-slate-50"
+                  >
+                    Skip & print without
+                  </button>
+                </div>
               </div>
-              <div className="text-center">
-                <div className="mb-2 h-12 border-b border-slate-400" />
-                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Dealer Signature</p>
-                <p className="mt-1 text-sm text-slate-600">{data.shop_name}</p>
+            ) : (
+              /* Signed view — shows on print */
+              <div className="grid grid-cols-2 gap-8">
+                <div className="text-center">
+                  {customerSig ? (
+                    <img src={customerSig} alt="Customer signature" className="mx-auto mb-1 h-16 object-contain" />
+                  ) : (
+                    <div className="mb-2 h-16 border-b border-slate-400" />
+                  )}
+                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Customer Signature</p>
+                  <p className="mt-0.5 text-sm text-slate-600">{data.customer_name}</p>
+                </div>
+                <div className="text-center">
+                  {dealerSig ? (
+                    <img src={dealerSig} alt="Dealer signature" className="mx-auto mb-1 h-16 object-contain" />
+                  ) : (
+                    <div className="mb-2 h-16 border-b border-slate-400" />
+                  )}
+                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Dealer Signature</p>
+                  <p className="mt-0.5 text-sm text-slate-600">{data.shop_name}</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Footer */}
