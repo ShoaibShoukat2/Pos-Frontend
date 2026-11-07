@@ -332,6 +332,7 @@ export default function BusinessPage() {
               <option value="pharmacy">Pharmacy</option>
               <option value="electronics">Electronics</option>
               <option value="pizza">Pizza shop</option>
+              <option value="car_showroom">Car Showroom</option>
             </Select>
           </Field>
           <Field label="Timezone">

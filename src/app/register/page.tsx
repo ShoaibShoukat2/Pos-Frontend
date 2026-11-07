@@ -8,13 +8,14 @@ import { ApiError, fieldErrors } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
 const TYPES = [
-  { value: "general",     label: "General retail" },
-  { value: "grocery",     label: "Grocery" },
-  { value: "clothing",    label: "Clothing" },
-  { value: "restaurant",  label: "Restaurant" },
-  { value: "pharmacy",    label: "Pharmacy" },
-  { value: "electronics", label: "Electronics" },
-  { value: "pizza",       label: "Pizza shop" },
+  { value: "general",      label: "General retail" },
+  { value: "grocery",      label: "Grocery" },
+  { value: "clothing",     label: "Clothing" },
+  { value: "restaurant",   label: "Restaurant" },
+  { value: "pharmacy",     label: "Pharmacy" },
+  { value: "electronics",  label: "Electronics" },
+  { value: "pizza",        label: "Pizza shop" },
+  { value: "car_showroom", label: "Car Showroom" },
 ];
 
 export default function RegisterPage() {
