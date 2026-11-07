@@ -15,9 +15,14 @@ export function isCashier(user: User | null | undefined) {
   return user.permissions.includes("pos.access") && !user.permissions.includes("report.sales");
 }
 
+export function isCarShowroom(user: User | null | undefined) {
+  return user?.business_type === "car_showroom";
+}
+
 export function homeFor(user: User) {
   if (user.is_platform_admin) return "/platform";
   if (isCashier(user)) return "/cashier";
+  if (isCarShowroom(user)) return "/showroom";
   return "/dashboard";
 }
 
