@@ -132,6 +132,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return;
     }
+    // Car showroom business — stay in /showroom, redirect away from general dashboard
+    if (isCarShowroom(user)) {
+      if (pathname === "/login" || pathname === "/register" || pathname === "/platform/login" || isCashierLogin) {
+        router.replace("/showroom");
+      } else if (!isShowroomRoute && pathname !== "/" && isPlatformRoute) {
+        router.replace("/showroom");
+      }
+      return;
+    }
     if (pathname === "/login" || pathname === "/register" || pathname === "/platform/login" || isCashierLogin) {
       router.replace(homeFor(user));
     } else if (isPlatformRoute || pathname === "/cashier" || pathname.startsWith("/cashier/")) {
