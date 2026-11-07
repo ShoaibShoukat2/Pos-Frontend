@@ -6,7 +6,6 @@ import {
   BarChart3,
   Car,
   CreditCard,
-  LayoutDashboard,
   LogOut,
   Package,
   Receipt,
@@ -14,6 +13,7 @@ import {
   ShoppingBag,
   Truck,
   Users,
+  LayoutDashboard,
 } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
@@ -88,13 +88,6 @@ export function ShowroomShell({ children }: { children: React.ReactNode }) {
 
         {/* Footer */}
         <div className="shrink-0 border-t border-white/8 px-4 py-4">
-          <Link
-            href="/dashboard"
-            className="mb-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/40 hover:bg-white/5 hover:text-white transition-colors"
-          >
-            <LayoutDashboard size={15} />
-            Main Dashboard
-          </Link>
           <button
             type="button"
             onClick={logout}
