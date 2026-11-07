@@ -94,6 +94,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   if (!user || user.is_platform_admin) return null;
+  if (user.business_type === "car_showroom") return null; // showroom has its own shell
 
   const accentStyle = {
     "--nav-active-bg": "var(--brand-accent, #6366f1)",

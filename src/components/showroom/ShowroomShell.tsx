@@ -33,7 +33,17 @@ const NAV = [
 
 export function ShowroomShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
+
+  if (loading && !user) {
+    return (
+      <div className="grid min-h-dvh place-items-center bg-slate-50">
+        <p className="text-sm text-slate-400">Loading…</p>
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <div className="min-h-dvh lg:grid lg:h-dvh lg:grid-cols-[260px_1fr] lg:overflow-hidden">
