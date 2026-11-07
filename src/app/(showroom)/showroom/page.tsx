@@ -71,8 +71,8 @@ export default function ShowroomDashboard() {
           <h1 className="font-display text-2xl font-semibold text-slate-900 sm:text-3xl">Dashboard</h1>
         </div>
         <div className="flex gap-2">
-          <Link href="/showroom/inventory/new" className="btn btn-primary text-sm">Add Car</Link>
-          <Link href="/showroom/sales/new" className="btn btn-ghost text-sm">New Sale</Link>
+          <Link href="/showroom/pos" className="btn btn-primary text-sm">Sale Counter</Link>
+          <Link href="/showroom/inventory/new" className="btn btn-ghost text-sm">Add Car</Link>
         </div>
       </div>
 

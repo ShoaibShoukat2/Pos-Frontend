@@ -7,6 +7,7 @@ import {
   Car,
   CreditCard,
   LogOut,
+  Monitor,
   Package,
   Receipt,
   Settings,
@@ -20,6 +21,7 @@ import { useAuth } from "@/lib/auth";
 
 const NAV = [
   { href: "/showroom",            label: "Dashboard",    icon: LayoutDashboard },
+  { href: "/showroom/pos",        label: "Sale Counter", icon: Monitor },
   { href: "/showroom/inventory",  label: "Car Inventory",icon: Car },
   { href: "/showroom/purchases",  label: "Purchases",    icon: ShoppingBag },
   { href: "/showroom/sales",      label: "Sales",        icon: Receipt },
