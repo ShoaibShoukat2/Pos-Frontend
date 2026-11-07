@@ -3,15 +3,19 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { ApiError, api, asList, fieldErrors } from "@/lib/api";
+import { CarSaleInvoice, type CarInvoiceData } from "@/components/showroom/CarSaleInvoice";
+import { useAuth } from "@/lib/auth";
 
 type Ref = { id: string; display_name?: string; name?: string };
 
 export default function NewSalePage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [cars, setCars] = useState<Ref[]>([]);
   const [customers, setCustomers] = useState<Ref[]>([]);
   const [pending, setPending] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [invoice, setInvoice] = useState<CarInvoiceData | null>(null);
   const [form, setForm] = useState({
     car: "", customer: "", sale_date: new Date().toISOString().slice(0, 10),
     selling_price: "0", discount: "0", received_amount: "0",
