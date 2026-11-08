@@ -2,48 +2,49 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Car, TrendingUp, TrendingDown, Users, Truck, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import {
+  Car,
+  CheckCircle,
+  Clock,
+  TrendingDown,
+  TrendingUp,
+  AlertCircle,
+  Truck,
+  Users,
+  Plus,
+} from "lucide-react";
 
 import { api } from "@/lib/api";
-import { rs } from "@/lib/money";
+import { useAuth } from "@/lib/auth";
 
-type Dashboard = {
-  total_cars: number; available: number; reserved: number; sold: number;
-  total_investment: string; total_sales_revenue: string;
-  total_expenses: string; total_profit: string;
-  customer_dues: string; seller_dues: string;
-  recent_sales: { id: string; car: string; customer: string; amount: string; date: string; profit: string }[];
-  available_cars: { id: string; name: string; color: string; year: number; price: string; mileage: number }[];
-};
-
-function KpiCard({ icon: Icon, label, value, sub, color = "indigo" }: {
-  icon: typeof Car; label: string; value: string; sub?: string;
-  color?: "indigo" | "emerald" | "red" | "amber" | "slate";
-}) {
-  const colors = {
-    indigo: "bg-indigo-50 text-indigo-600",
-    emerald: "bg-emerald-50 text-emerald-600",
-    red: "bg-red-50 text-red-600",
-    amber: "bg-amber-50 text-amber-600",
-    slate: "bg-slate-100 text-slate-600",
-  };
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">{label}</p>
-          <p className="mt-1.5 font-display text-2xl font-semibold text-slate-900">{value}</p>
-          {sub ? <p className="mt-0.5 text-xs text-slate-400">{sub}</p> : null}
-        </div>
-        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${colors[color]}`}>
-          <Icon size={18} />
-        </div>
-      </div>
-    </div>
-  );
+function rs(v: string | number) {
+  const n = typeof v === "string" ? parseFloat(v) : v;
+  return `Rs ${n.toLocaleString("en-PK", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
+type Dashboard = {
+  total_cars: number;
+  available: number;
+  reserved: number;
+  sold: number;
+  total_investment: string;
+  total_sales_revenue: string;
+  total_expenses: string;
+  total_profit: string;
+  customer_dues: string;
+  seller_dues: string;
+  recent_sales: {
+    id: string; car: string; customer: string;
+    amount: string; date: string; profit: string;
+  }[];
+  available_cars: {
+    id: string; name: string; color: string;
+    year: number; price: string; mileage: number;
+  }[];
+};
+
 export default function ShowroomDashboard() {
+  const { user } = useAuth();
   const [data, setData] = useState<Dashboard | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -54,89 +55,163 @@ export default function ShowroomDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-20">
-      <p className="text-slate-400">Loading dashboard…</p>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-sm text-slate-400">Loading dashboard…</p>
+      </div>
+    );
+  }
 
   const profit = parseFloat(data?.total_profit || "0");
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
-      {/* Header */}
+    <div className="space-y-5">
+
+      {/* ── Page header ── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Car Showroom</p>
-          <h1 className="font-display text-2xl font-semibold text-slate-900 sm:text-3xl">Dashboard</h1>
+          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">
+            Car Showroom
+          </p>
+          <h1 className="font-display text-xl font-semibold text-slate-900 sm:text-2xl">
+            {user?.business_name || "Dashboard"}
+          </h1>
         </div>
-        <div className="flex gap-2">
-          <Link href="/showroom/pos" className="btn btn-primary text-sm">Sale Counter</Link>
-          <Link href="/showroom/inventory/new" className="btn btn-ghost text-sm">Add Car</Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/showroom/pos"
+            className="btn btn-primary flex-1 text-center text-sm sm:flex-none"
+          >
+            Sale Counter
+          </Link>
+          <Link
+            href="/showroom/inventory/new"
+            className="btn btn-ghost flex-1 text-center text-sm sm:flex-none"
+          >
+            <Plus size={15} />
+            Add Car
+          </Link>
         </div>
       </div>
 
-      {/* Car status strip */}
+      {/* ── Car status — 2 cols mobile, 4 cols desktop ── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-center">
-          <CheckCircle size={20} className="mx-auto mb-1 text-emerald-500" />
-          <p className="font-display text-3xl font-semibold text-emerald-700">{data?.available ?? 0}</p>
-          <p className="mt-0.5 text-xs font-medium text-emerald-600">Available</p>
-        </div>
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-center">
-          <Clock size={20} className="mx-auto mb-1 text-amber-500" />
-          <p className="font-display text-3xl font-semibold text-amber-700">{data?.reserved ?? 0}</p>
-          <p className="mt-0.5 text-xs font-medium text-amber-600">Reserved</p>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-center">
-          <Car size={20} className="mx-auto mb-1 text-slate-500" />
-          <p className="font-display text-3xl font-semibold text-slate-700">{data?.sold ?? 0}</p>
-          <p className="mt-0.5 text-xs font-medium text-slate-500">Sold</p>
-        </div>
-        <div className="rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-4 text-center">
-          <Car size={20} className="mx-auto mb-1 text-indigo-500" />
-          <p className="font-display text-3xl font-semibold text-indigo-700">{data?.total_cars ?? 0}</p>
-          <p className="mt-0.5 text-xs font-medium text-indigo-600">Total Cars</p>
-        </div>
+        <StatusCard
+          icon={CheckCircle}
+          label="Available"
+          value={data?.available ?? 0}
+          color="emerald"
+        />
+        <StatusCard
+          icon={Clock}
+          label="Reserved"
+          value={data?.reserved ?? 0}
+          color="amber"
+        />
+        <StatusCard
+          icon={Car}
+          label="Sold"
+          value={data?.sold ?? 0}
+          color="slate"
+        />
+        <StatusCard
+          icon={Car}
+          label="Total Cars"
+          value={data?.total_cars ?? 0}
+          color="indigo"
+        />
       </div>
 
-      {/* Financial KPIs */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <KpiCard icon={TrendingUp}  label="Total Sales Revenue" value={rs(data?.total_sales_revenue ?? 0)} color="indigo" />
-        <KpiCard icon={Car}         label="Total Investment"     value={rs(data?.total_investment ?? 0)}   color="slate" />
-        <KpiCard icon={profit >= 0 ? TrendingUp : TrendingDown}
-                                    label="Net Profit / Loss"
-                                    value={rs(data?.total_profit ?? 0)}
-                                    color={profit >= 0 ? "emerald" : "red"} />
-        <KpiCard icon={AlertCircle} label="Total Expenses"      value={rs(data?.total_expenses ?? 0)}     color="amber" />
-        <KpiCard icon={Users}       label="Customer Dues"        value={rs(data?.customer_dues ?? 0)}      color="red" />
-        <KpiCard icon={Truck}       label="Seller Dues"          value={rs(data?.seller_dues ?? 0)}        color="amber" />
+      {/* ── Financial KPIs — 1 col mobile, 2 col sm, 3 col lg ── */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <KpiCard
+          icon={TrendingUp}
+          label="Total Sales"
+          value={rs(data?.total_sales_revenue ?? 0)}
+          color="indigo"
+        />
+        <KpiCard
+          icon={Car}
+          label="Total Investment"
+          value={rs(data?.total_investment ?? 0)}
+          color="slate"
+        />
+        <KpiCard
+          icon={profit >= 0 ? TrendingUp : TrendingDown}
+          label="Net Profit / Loss"
+          value={rs(data?.total_profit ?? 0)}
+          color={profit >= 0 ? "emerald" : "red"}
+        />
+        <KpiCard
+          icon={AlertCircle}
+          label="Total Expenses"
+          value={rs(data?.total_expenses ?? 0)}
+          color="amber"
+        />
+        <KpiCard
+          icon={Users}
+          label="Customer Dues"
+          value={rs(data?.customer_dues ?? 0)}
+          color="red"
+        />
+        <KpiCard
+          icon={Truck}
+          label="Seller Dues"
+          value={rs(data?.seller_dues ?? 0)}
+          color="amber"
+        />
       </div>
 
-      {/* Recent sales + Available cars */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      {/* ── Recent sales + Available cars — stack on mobile, side by side on lg ── */}
+      <div className="grid gap-4 lg:grid-cols-2">
+
         {/* Recent Sales */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-            <h2 className="font-display text-lg font-semibold text-slate-900">Recent Sales</h2>
-            <Link href="/showroom/sales" className="text-xs font-medium text-indigo-600 hover:underline">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3.5 sm:px-5">
+            <h2 className="font-semibold text-slate-900">Recent Sales</h2>
+            <Link
+              href="/showroom/sales"
+              className="text-xs font-medium text-indigo-600 hover:underline"
+            >
               View all
             </Link>
           </div>
           {!data?.recent_sales.length ? (
-            <p className="px-5 py-8 text-sm text-slate-400">No sales yet.</p>
+            <p className="px-4 py-8 text-center text-sm text-slate-400">
+              No sales yet.{" "}
+              <Link href="/showroom/pos" className="text-indigo-600 underline">
+                Make first sale
+              </Link>
+            </p>
           ) : (
             <ul className="divide-y divide-slate-100">
               {data.recent_sales.map((row) => (
-                <li key={row.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                <li
+                  key={row.id}
+                  className="flex items-start justify-between gap-3 px-4 py-3 sm:px-5"
+                >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-slate-900">{row.car}</p>
-                    <p className="text-xs text-slate-400">{row.customer} · {row.date}</p>
+                    <p className="truncate text-sm font-medium text-slate-900">
+                      {row.car}
+                    </p>
+                    <p className="truncate text-xs text-slate-400">
+                      {row.customer} · {row.date}
+                    </p>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="text-sm font-semibold text-slate-900">{rs(row.amount)}</p>
-                    <p className={`text-xs font-medium ${parseFloat(row.profit) >= 0 ? "text-emerald-600" : "text-red-600"}`}>
-                      {parseFloat(row.profit) >= 0 ? "+" : ""}{rs(row.profit)} profit
+                    <p className="text-sm font-semibold text-slate-900">
+                      {rs(row.amount)}
+                    </p>
+                    <p
+                      className={`text-xs font-medium ${
+                        parseFloat(row.profit) >= 0
+                          ? "text-emerald-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {parseFloat(row.profit) >= 0 ? "+" : ""}
+                      {rs(row.profit)}
                     </p>
                   </div>
                 </li>
@@ -146,31 +221,54 @@ export default function ShowroomDashboard() {
         </div>
 
         {/* Available Cars */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-            <h2 className="font-display text-lg font-semibold text-slate-900">Available Cars</h2>
-            <Link href="/showroom/inventory" className="text-xs font-medium text-indigo-600 hover:underline">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3.5 sm:px-5">
+            <h2 className="font-semibold text-slate-900">Available Cars</h2>
+            <Link
+              href="/showroom/inventory"
+              className="text-xs font-medium text-indigo-600 hover:underline"
+            >
               View all
             </Link>
           </div>
           {!data?.available_cars.length ? (
-            <p className="px-5 py-8 text-sm text-slate-400">No available cars. <Link href="/showroom/inventory/new" className="text-indigo-600 underline">Add one</Link></p>
+            <p className="px-4 py-8 text-center text-sm text-slate-400">
+              No available cars.{" "}
+              <Link
+                href="/showroom/inventory/new"
+                className="text-indigo-600 underline"
+              >
+                Add one
+              </Link>
+            </p>
           ) : (
             <ul className="divide-y divide-slate-100">
               {data.available_cars.map((car) => (
-                <li key={car.id} className="flex items-center justify-between gap-3 px-5 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
-                      <Car size={16} className="text-indigo-600" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-900">{car.name}</p>
-                      <p className="text-xs text-slate-400">
-                        {car.color} · {car.mileage.toLocaleString()} km
-                      </p>
-                    </div>
+                <li
+                  key={car.id}
+                  className="flex items-center gap-3 px-4 py-3 sm:px-5"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
+                    <Car size={16} className="text-indigo-600" />
                   </div>
-                  <p className="shrink-0 font-display text-sm font-semibold text-slate-900">{rs(car.price)}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-slate-900">
+                      {car.name}
+                    </p>
+                    <p className="truncate text-xs text-slate-400">
+                      {[
+                        car.color,
+                        car.mileage
+                          ? `${car.mileage.toLocaleString()} km`
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </div>
+                  <p className="shrink-0 font-display text-sm font-semibold text-slate-900">
+                    {rs(car.price)}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -178,28 +276,95 @@ export default function ShowroomDashboard() {
         </div>
       </div>
 
-      {/* Quick links */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-slate-400">Quick actions</p>
-        <div className="flex flex-wrap gap-2">
+      {/* ── Quick actions ── */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
+        <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          Quick Actions
+        </p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap">
           {[
             { href: "/showroom/inventory/new", label: "Add car" },
             { href: "/showroom/purchases/new", label: "Record purchase" },
-            { href: "/showroom/sales/new",     label: "New sale" },
+            { href: "/showroom/pos",           label: "Sale counter" },
             { href: "/showroom/expenses/new",  label: "Add expense" },
             { href: "/showroom/customers/new", label: "New customer" },
             { href: "/showroom/sellers/new",   label: "New seller" },
-            { href: "/showroom/reports",       label: "View reports" },
+            { href: "/showroom/reports",       label: "Reports" },
           ].map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-center text-sm font-medium text-slate-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 transition-colors lg:flex-none"
             >
               {item.label}
             </Link>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Helper components ─────────────────────────────────────────── */
+
+function StatusCard({
+  icon: Icon,
+  label,
+  value,
+  color,
+}: {
+  icon: typeof Car;
+  label: string;
+  value: number;
+  color: "emerald" | "amber" | "slate" | "indigo";
+}) {
+  const styles = {
+    emerald: { card: "border-emerald-200 bg-emerald-50", icon: "text-emerald-500", val: "text-emerald-700", lbl: "text-emerald-600" },
+    amber:   { card: "border-amber-200 bg-amber-50",     icon: "text-amber-500",   val: "text-amber-700",   lbl: "text-amber-600" },
+    slate:   { card: "border-slate-200 bg-white",        icon: "text-slate-400",   val: "text-slate-700",   lbl: "text-slate-500" },
+    indigo:  { card: "border-indigo-200 bg-indigo-50",   icon: "text-indigo-500",  val: "text-indigo-700",  lbl: "text-indigo-600" },
+  };
+  const s = styles[color];
+  return (
+    <div className={`rounded-2xl border p-4 text-center ${s.card}`}>
+      <Icon size={20} className={`mx-auto mb-1.5 ${s.icon}`} />
+      <p className={`font-display text-2xl font-bold sm:text-3xl ${s.val}`}>{value}</p>
+      <p className={`mt-0.5 text-xs font-medium ${s.lbl}`}>{label}</p>
+    </div>
+  );
+}
+
+function KpiCard({
+  icon: Icon,
+  label,
+  value,
+  color,
+}: {
+  icon: typeof Car;
+  label: string;
+  value: string;
+  color: "indigo" | "emerald" | "red" | "amber" | "slate";
+}) {
+  const styles = {
+    indigo:  { bg: "bg-indigo-50",  icon: "text-indigo-600",  val: "text-slate-900" },
+    emerald: { bg: "bg-emerald-50", icon: "text-emerald-600", val: "text-emerald-700" },
+    red:     { bg: "bg-red-50",     icon: "text-red-500",     val: "text-red-700" },
+    amber:   { bg: "bg-amber-50",   icon: "text-amber-600",   val: "text-amber-700" },
+    slate:   { bg: "bg-slate-100",  icon: "text-slate-500",   val: "text-slate-700" },
+  };
+  const s = styles[color];
+  return (
+    <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${s.bg}`}>
+        <Icon size={18} className={s.icon} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+          {label}
+        </p>
+        <p className={`mt-0.5 font-display text-lg font-bold leading-tight sm:text-xl ${s.val}`}>
+          {value}
+        </p>
       </div>
     </div>
   );
