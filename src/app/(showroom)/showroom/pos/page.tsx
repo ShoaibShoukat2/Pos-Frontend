@@ -59,6 +59,9 @@ export default function ShowroomPOS() {
   const [pending, setPending] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [invoice, setInvoice] = useState<CarInvoiceData | null>(null);
+  const [slipOpen, setSlipOpen] = useState(false);
+  const [printSlip, setPrintSlip] = useState(true);
+  const [savedNote, setSavedNote] = useState("");
 
   useEffect(() => {
     let alive = true;
@@ -142,13 +145,24 @@ export default function ShowroomPOS() {
         }),
       });
 
-      setInvoice(invoiceFromSale(sale, {
+      const nextInvoice = invoiceFromSale(sale, {
         name: user?.business_name || "Car Showroom",
         cashier: user?.full_name || "",
-      }));
-
-      // Remove sold car from list
+      });
       setCars((prev) => prev.filter((c) => c.id !== selectedCar.id));
+      setSlipOpen(false);
+      if (printSlip) {
+        setInvoice(nextInvoice);
+        setSavedNote("");
+      } else {
+        setSavedNote(`Sale ${nextInvoice.invoice_number} saved.`);
+        setSelectedCar(null);
+        setSelectedCustomer(null);
+        setSellingPrice("0");
+        setDiscount("0");
+        setReceived("0");
+        setNotes("");
+      }
 
     } catch (err) {
       if (err instanceof ApiError) setErrors(fieldErrors(err.body));
@@ -168,6 +182,42 @@ export default function ShowroomPOS() {
     setNotes("");
     setErrors({});
     setInvoice(null);
+    setSlipOpen(false);
+  }
+
+  function draftInvoice(): CarInvoiceData {
+    const selling = parseFloat(sellingPrice || "0");
+    const off = parseFloat(discount || "0");
+    const paid = parseFloat(received || "0");
+    return {
+      invoice_number: "Preview",
+      sale_date: saleDate,
+      shop_name: user?.business_name || "Car Showroom",
+      customer_name: selectedCustomer?.name || "Customer",
+      customer_phone: selectedCustomer?.phone || "",
+      customer_cnic: selectedCustomer?.cnic || "",
+      customer_address: selectedCustomer?.address || "",
+      car_brand: selectedCar?.brand_name || "",
+      car_model: selectedCar?.model || "",
+      car_variant: selectedCar?.variant || "",
+      car_year: selectedCar?.model_year || 0,
+      car_color: selectedCar?.color || "",
+      registration_number: selectedCar?.registration_number || "",
+      chassis_number: selectedCar?.chassis_number || "",
+      engine_number: selectedCar?.engine_number || "",
+      engine_cc: selectedCar?.engine_cc || 0,
+      fuel_type: selectedCar?.fuel_type_name || "",
+      transmission: selectedCar?.transmission_name || "",
+      mileage_km: selectedCar?.mileage_km || 0,
+      selling_price: selling,
+      discount: off,
+      final_amount: finalAmount,
+      received_amount: paid,
+      remaining_amount: remaining,
+      payment_method: payMethod,
+      notes,
+      cashier_name: user?.full_name || "",
+    };
   }
 
   return (
@@ -178,6 +228,13 @@ export default function ShowroomPOS() {
           data={invoice}
           onClose={resetForm}
         />
+      ) : null}
+      {slipOpen ? (
+        <div className="fixed inset-0 z-[70] overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm">
+          <div className="mx-auto w-full max-w-3xl">
+            <CarSaleInvoice layout="preview" data={draftInvoice()} onClose={() => setSlipOpen(false)} />
+          </div>
+        </div>
       ) : null}
       <HardwareToasts hardware={hardware} />
 
@@ -473,6 +530,26 @@ export default function ShowroomPOS() {
                 <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">{errors.detail}</div>
               ) : null}
 
+              <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={printSlip}
+                  onChange={(event) => setPrintSlip(event.target.checked)}
+                  className="h-4 w-4 accent-indigo-600"
+                />
+                Print slip after sale
+              </label>
+              <button
+                type="button"
+                onClick={() => setSlipOpen(true)}
+                disabled={!selectedCar}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-indigo-300 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <FileText size={16} />
+                Preview invoice
+              </button>
+              {savedNote ? <p className="text-center text-sm text-emerald-700">{savedNote}</p> : null}
+
               {/* Complete sale */}
               <button
                 type="button"
@@ -493,13 +570,10 @@ export default function ShowroomPOS() {
                 ) : (
                   <>
                     <FileText size={18} />
-                    Complete Sale & Print Invoice
+                    {printSlip ? "Complete Sale & Print Invoice" : "Complete Sale"}
                   </>
                 )}
               </button>
-              <p className="text-center text-[11px] leading-relaxed text-slate-400">
-                The invoice opens next for the customer photo, thumb impression and signatures, then prints on the connected printer.
-              </p>
             </div>
           </div>
         </div>
