@@ -182,7 +182,7 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
       setSaving(true);
       setSaveError("");
       try {
-        await api(`/api/showroom/car-sales/${data.sale_id}/`, {
+        const saved = await api<{ customer_photo?: string; customer_thumbprint?: string }>(`/api/showroom/car-sales/${data.sale_id}/`, {
           method: "PATCH",
           body: JSON.stringify({
             customer_signature: customerSig,
@@ -191,6 +191,11 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
             customer_thumbprint: thumb,
           }),
         });
+        if ((photo && !saved.customer_photo) || (thumb && !saved.customer_thumbprint)) {
+          setSaveError("The photo or thumb impression was not stored. Update the server, then save again.");
+          setSaving(false);
+          return;
+        }
       } catch {
         setSaveError("Photo, thumb impression, or signatures could not be saved. Check the connection and try again.");
         setSaving(false);
