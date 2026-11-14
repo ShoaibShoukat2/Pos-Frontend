@@ -85,10 +85,10 @@ export function ShowroomShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-dvh lg:grid lg:h-dvh lg:grid-cols-[260px_1fr] lg:overflow-hidden">
+    <div className="flex min-h-dvh flex-col lg:grid lg:h-full lg:min-h-0 lg:grid-cols-[260px_1fr] lg:overflow-hidden">
 
       {/* ── Desktop sidebar ─────────────────────────────────────────── */}
-      <aside className="hidden flex-col bg-slate-900 text-white lg:flex lg:h-dvh lg:overflow-hidden">
+      <aside className="hidden min-h-0 flex-col bg-slate-900 text-white lg:flex lg:h-full lg:overflow-hidden">
         {/* Brand */}
         <div className="shrink-0 border-b border-white/8 px-5 py-5">
           <div className="flex items-center gap-3">

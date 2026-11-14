@@ -14,6 +14,7 @@ import {
   Plus,
 } from "lucide-react";
 
+import { CarSaleInvoice, type CarInvoiceData } from "@/components/showroom/CarSaleInvoice";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
@@ -54,6 +55,39 @@ type Dashboard = {
   }[];
 };
 
+function sampleInvoice(shopName?: string, cashier?: string): CarInvoiceData {
+  const today = new Date().toISOString().slice(0, 10);
+  return {
+    invoice_number: "SR-SAMPLE",
+    sale_date: today,
+    shop_name: shopName || "Car Showroom",
+    customer_name: "Customer name",
+    customer_phone: "0300-0000000",
+    customer_cnic: "35202-0000000-1",
+    customer_address: "Customer address",
+    car_brand: "Toyota",
+    car_model: "Corolla",
+    car_variant: "Altis",
+    car_year: 2020,
+    car_color: "White",
+    registration_number: "LEA-0000",
+    chassis_number: "CHS-000000",
+    engine_number: "ENG-000000",
+    engine_cc: 1800,
+    fuel_type: "Petrol",
+    transmission: "Automatic",
+    mileage_km: 45000,
+    selling_price: 4500000,
+    discount: 0,
+    final_amount: 4500000,
+    received_amount: 1500000,
+    remaining_amount: 3000000,
+    payment_method: "cash",
+    cashier_name: cashier || "",
+    notes: "Sample invoice. A real sale uses the same design.",
+  };
+}
+
 export default function ShowroomDashboard() {
   const { user } = useAuth();
   const [data, setData] = useState<Dashboard | null>(null);
@@ -65,14 +99,6 @@ export default function ShowroomDashboard() {
       .catch(() => setData(null))
       .finally(() => setLoading(false));
   }, []);
-
-  if (loading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-slate-400">Loading dashboard…</p>
-      </div>
-    );
-  }
 
   const profit = parseFloat(data?.total_profit || "0");
   const monthBars = data?.monthly || [];
@@ -91,6 +117,7 @@ export default function ShowroomDashboard() {
           <h1 className="font-display text-xl font-semibold text-slate-900 sm:text-2xl">
             {user?.business_name || "Dashboard"}
           </h1>
+          {loading ? <p className="text-xs text-slate-400">Loading showroom numbers…</p> : null}
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
@@ -108,6 +135,17 @@ export default function ShowroomDashboard() {
           </Link>
         </div>
       </div>
+
+      <section className="space-y-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Printer</p>
+          <h2 className="font-display text-lg font-semibold text-slate-900">Invoice design</h2>
+          <p className="text-sm text-slate-500">
+            Customer photo, thumb impression and signatures print on this invoice. Connect the printer, then print.
+          </p>
+        </div>
+        <CarSaleInvoice embedded data={sampleInvoice(user?.business_name, user?.full_name)} />
+      </section>
 
       <section className="overflow-hidden rounded-2xl bg-slate-900 text-white shadow-sm">
         <div className="grid gap-6 p-5 sm:p-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">

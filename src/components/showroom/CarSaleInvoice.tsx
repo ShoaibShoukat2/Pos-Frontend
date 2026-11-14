@@ -64,7 +64,7 @@ function rs(v: number) {
   return `Rs ${v.toLocaleString("en-PK", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
-export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClose?: () => void }) {
+export function CarSaleInvoice({ data, onClose, embedded = false }: { data: CarInvoiceData; onClose?: () => void; embedded?: boolean }) {
   const hardware = useHardware();
   const [customerSig, setCustomerSig] = useState(data.customer_signature || "");
   const [dealerSig, setDealerSig] = useState(data.dealer_signature || "");
@@ -208,13 +208,13 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
   }
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-[48rem]">
+    <div className={embedded ? "w-full" : "fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm"}>
+      <div className={embedded ? "w-full" : "w-full max-w-[48rem]"}>
         {/* Toolbar — hidden on print */}
         <div className="invoice-no-print mb-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Sale Invoice</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">{embedded ? "Invoice design" : "Sale Invoice"}</p>
             <p className="font-medium text-slate-900">{data.invoice_number}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
