@@ -27,7 +27,7 @@ import {
 
 import { FounderCredit } from "@/components/FounderCredit";
 import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
-import { isCashier, useAuth } from "@/lib/auth";
+import { isCarShowroom, isCashier, useAuth } from "@/lib/auth";
 
 const CASHIER_LINKS = new Set(["/cashier", "/pos", "/customers", "/cash", "/returns"]);
 
@@ -98,7 +98,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   if (!user || user.is_platform_admin) return null;
-  if (user.business_type === "car_showroom") return null; // showroom has its own shell
+  if (isCarShowroom(user)) {
+    if (typeof window !== "undefined" && !window.location.pathname.startsWith("/showroom")) {
+      window.location.replace("/showroom");
+    }
+    return (
+      <div className="grid min-h-dvh place-items-center text-sm text-surface-400">
+        Opening car showroom…
+      </div>
+    );
+  }
 
   const accentStyle = {
     "--nav-active-bg": "var(--brand-accent, #6366f1)",

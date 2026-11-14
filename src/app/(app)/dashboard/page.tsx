@@ -7,7 +7,7 @@ import { UserPlus } from "lucide-react";
 import { TableSkeleton } from "@/components/DataTable";
 import { Badge, PageHeader } from "@/components/ui";
 import { api } from "@/lib/api";
-import { useAuth } from "@/lib/auth";
+import { isCarShowroom, useAuth } from "@/lib/auth";
 import { num, rs } from "@/lib/money";
 import type { LiveProduct, OwnerOverview, ReportSeries } from "@/lib/types";
 
@@ -53,7 +53,14 @@ function timeAgo(value: string) {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  if (authLoading || isCarShowroom(user)) {
+    return (
+      <div className="grid min-h-[50vh] place-items-center text-sm text-surface-400">
+        {isCarShowroom(user) ? "Opening car showroom…" : "Loading workspace…"}
+      </div>
+    );
+  }
   const [period, setPeriod] = useState<(typeof PERIODS)[number]["id"]>("today");
   const [data, setData] = useState<OwnerOverview | null>(null);
   const [loading, setLoading] = useState(true);

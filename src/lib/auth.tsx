@@ -16,7 +16,8 @@ export function isCashier(user: User | null | undefined) {
 }
 
 export function isCarShowroom(user: User | null | undefined) {
-  return user?.business_type === "car_showroom";
+  const type = (user?.business_type || "").toLowerCase().replace(/\s+/g, "_");
+  return type === "car_showroom";
 }
 
 export function homeFor(user: User) {
@@ -24,6 +25,29 @@ export function homeFor(user: User) {
   if (isCashier(user)) return "/cashier";
   if (isCarShowroom(user)) return "/showroom";
   return "/dashboard";
+}
+
+function goHome(user: User) {
+  const dest = homeFor(user);
+  if (typeof window === "undefined") return;
+  const path = window.location.pathname;
+  if (path === dest || path.startsWith(`${dest}/`)) return;
+  window.location.assign(dest);
+}
+
+async function withBusinessType(user: User): Promise<User> {
+  if (user.is_platform_admin) return user;
+  try {
+    const biz = await api<{ business_type?: string; name?: string }>("/api/business/");
+    if (!biz?.business_type && !biz?.name) return user;
+    return {
+      ...user,
+      business_type: biz.business_type || user.business_type,
+      business_name: user.business_name || biz.name,
+    };
+  } catch {
+    return user;
+  }
 }
 
 function cashierAllowed(pathname: string) {
@@ -71,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   async function refreshUser() {
-    const me = await api<User>("/api/auth/me/");
+    const me = await withBusinessType(await api<User>("/api/auth/me/"));
     setUser(me);
     cacheUser(me);
     applyBusinessTheme(me);
@@ -150,17 +174,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Car showroom accounts use the showroom shell. Retail routes render blank for them.
     if (isCarShowroom(user)) {
       const publicStay = pathname === "/" || pathname.startsWith("/scan") || pathname.startsWith("/check");
-      if (pathname === "/login" || pathname === "/register" || pathname === "/platform/login" || isCashierLogin) {
-        router.replace("/showroom");
-      } else if (!isShowroomRoute && !publicStay) {
-        router.replace("/showroom");
-      }
+      if (!isShowroomRoute && !publicStay) goHome(user);
       return;
     }
     if (pathname === "/login" || pathname === "/register" || pathname === "/platform/login" || isCashierLogin) {
-      router.replace(homeFor(user));
-    } else if (isPlatformRoute || pathname === "/cashier" || pathname.startsWith("/cashier/")) {
-      router.replace(homeFor(user));
+      goHome(user);
+    } else if (isPlatformRoute || pathname === "/cashier" || pathname.startsWith("/cashier/") || (isCarShowroom(user) && pathname === "/dashboard")) {
+      goHome(user);
     }
   }, [loading, user, pathname, router]);
 
@@ -180,10 +200,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({ email, password }),
         });
         saveTokens(data);
-        setUser(data.user);
-        cacheUser(data.user);
-        applyBusinessTheme(data.user);
-        router.push(homeFor(data.user));
+        const next = await withBusinessType(data.user);
+        setUser(next);
+        cacheUser(next);
+        applyBusinessTheme(next);
+        goHome(next);
       },
       async register(payload) {
         const data = await api<AuthPayload>("/api/auth/register/", {
@@ -191,10 +212,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify(payload),
         });
         saveTokens(data);
-        setUser(data.user);
-        cacheUser(data.user);
-        applyBusinessTheme(data.user);
-        router.push(homeFor(data.user));
+        const next = await withBusinessType({
+          ...data.user,
+          business_type: data.user.business_type || payload.business_type,
+        });
+        setUser(next);
+        cacheUser(next);
+        applyBusinessTheme(next);
+        goHome(next);
       },
       logout() {
         const dest = user?.is_platform_admin ? "/platform/login" : isCashier(user) ? "/cashier/login" : "/login";

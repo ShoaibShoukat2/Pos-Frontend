@@ -102,8 +102,15 @@ export default function BusinessPage() {
       if (data.logo) setLogoPreview(data.logo);
       setLogoFile(null);
       setSaved(true);
-      // refresh auth context so sidebar updates immediately
       await refreshUser();
+      if (data.business_type === "car_showroom") {
+        window.location.assign("/showroom");
+        return;
+      }
+      if (window.location.pathname.startsWith("/showroom")) {
+        window.location.assign("/dashboard");
+        return;
+      }
     } catch (err) {
       if (err instanceof ApiError) setErrors(fieldErrors(err.body));
       else setErrors({ detail: "Could not save. Try again." });
