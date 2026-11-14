@@ -17,9 +17,9 @@ export default function CustomersPage() {
         <h1 className="font-display text-2xl font-semibold text-slate-900">Customers</h1>
         <Link href="/showroom/customers/new" className="btn btn-primary inline-flex items-center gap-2"><Plus size={16}/>Add Customer</Link>
       </div>
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-x-auto shadow-sm">
         {loading ? <p className="p-6 text-slate-400">Loading…</p> : rows.length === 0 ? <p className="p-6 text-slate-400">No customers yet.</p> : (
-          <table className="w-full text-sm text-left">
+          <table className="w-full min-w-[640px] text-sm text-left">
             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-400">
               <tr><th className="px-5 py-3">Name</th><th className="px-5 py-3">Phone</th><th className="px-5 py-3">CNIC</th><th className="px-5 py-3">Address</th></tr>
             </thead>

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { setApiBase } from "@/lib/api";
+
 export function isElectron(): boolean {
   return typeof window !== "undefined" && typeof window.electronAPI !== "undefined";
 }
@@ -14,6 +16,8 @@ declare global {
       closeWindow: () => void;
       isMaximized: () => Promise<boolean>;
       getVersion: () => Promise<string>;
+      getApiUrl?: () => Promise<string>;
+      setApiUrl?: (url: string) => Promise<boolean>;
       onMaximizeChange: (cb: (maximized: boolean) => void) => void;
       removeAllListeners: (channel: string) => void;
       checkForUpdates: () => void;
@@ -38,6 +42,9 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
   const [version, setVersion]       = useState("");
   const [update, setUpdate]         = useState<UpdateState>({ stage: "idle" });
   const [toastDismissed, setToastDismissed] = useState(false);
+  const [serverOpen, setServerOpen] = useState(false);
+  const [apiUrl, setApiUrl] = useState("");
+  const [apiError, setApiError] = useState("");
 
   useEffect(() => {
     if (!isElectron()) return;
@@ -45,6 +52,12 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
 
     api.isMaximized().then(setMaximized);
     api.getVersion().then(setVersion);
+    api.getApiUrl?.().then((url) => {
+      if (url) {
+        setApiUrl(url);
+        setApiBase(url);
+      }
+    });
     api.onMaximizeChange(setMaximized);
 
     api.onUpdateAvailable((info) => {
@@ -112,6 +125,16 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
 
         {/* Drag zone */}
         <div className="h-full flex-1" />
+
+        <button
+          type="button"
+          onClick={() => setServerOpen((open) => !open)}
+          className="mr-2 max-w-[180px] truncate rounded px-2 py-0.5 text-[10px] text-white/35 hover:bg-white/5 hover:text-white/70"
+          style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+          title="Backend server"
+        >
+          {apiUrl ? apiUrl.replace(/^https?:\/\//, "") : "Server"}
+        </button>
 
         {/* Download progress bar in titlebar */}
         {update.stage === "downloading" ? (
@@ -188,6 +211,35 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
           </button>
         </div>
       </div>
+
+      {serverOpen ? (
+        <form
+          className="flex items-center gap-2 border-b border-white/10 bg-ink-950 px-3 py-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const url = apiUrl.trim().replace(/\/$/, "");
+            if (!/^https?:\/\/.+/i.test(url)) {
+              setApiError("Use a full address, like https://your-server.com");
+              return;
+            }
+            setApiError("");
+            setApiBase(url);
+            window.electronAPI?.setApiUrl?.(url).finally(() => window.location.reload());
+          }}
+        >
+          <input
+            value={apiUrl}
+            onChange={(e) => setApiUrl(e.target.value)}
+            className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-white outline-none focus:border-copper-400"
+            placeholder="https://your-server.com"
+            spellCheck={false}
+          />
+          <button type="submit" className="rounded-md bg-copper-500 px-2 py-1 text-[11px] font-medium text-ink-950">
+            Save
+          </button>
+          {apiError ? <span className="text-[10px] text-red-300">{apiError}</span> : null}
+        </form>
+      ) : null}
 
       {/* ── Update toast — bottom right ── */}
       {showToast ? (

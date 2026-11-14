@@ -60,10 +60,39 @@ export default function ShowroomPOS() {
   const [invoice, setInvoice] = useState<CarInvoiceData | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      api("/api/showroom/cars/?status=available").then((d) => setCars(asList(d as any))),
-      api("/api/showroom/showroom-customers/").then((d) => setCustomers(asList(d as any))),
-    ]).catch(() => {});
+    let alive = true;
+    (async () => {
+      try {
+        const [carData, customerData] = await Promise.all([
+          api("/api/showroom/cars/?status=available"),
+          api("/api/showroom/showroom-customers/"),
+        ]);
+        if (!alive) return;
+        let list = asList<CarItem>(carData as CarItem[] | { results: CarItem[] });
+        const picked = new URLSearchParams(window.location.search).get("car");
+        if (picked && !list.some((row) => row.id === picked)) {
+          try {
+            const one = await api<CarItem>(`/api/showroom/cars/${picked}/`);
+            if (one.status !== "sold") list = [one, ...list];
+          } catch {
+            /* car may already be sold */
+          }
+        }
+        if (!alive) return;
+        setCars(list);
+        setCustomers(asList<Customer>(customerData as Customer[] | { results: Customer[] }));
+        const match = picked ? list.find((row) => row.id === picked) : undefined;
+        if (match) {
+          setSelectedCar(match);
+          setSellingPrice(match.selling_price);
+        }
+      } catch {
+        /* counter still opens; lists stay empty */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
   }, []);
 
   // When car is selected, prefill selling price

@@ -95,7 +95,7 @@ export default function SalesPage() {
         <CarSaleInvoice data={invoice} onClose={() => setInvoice(null)} />
       ) : null}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Showroom</p>
           <h1 className="font-display text-2xl font-semibold text-slate-900">Car Sales</h1>
@@ -108,7 +108,7 @@ export default function SalesPage() {
         </Link>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
         {loading ? (
           <p className="px-5 py-8 text-slate-400">Loading…</p>
         ) : sales.length === 0 ? (
@@ -117,7 +117,7 @@ export default function SalesPage() {
             <Link href="/showroom/sales/new" className="mt-2 inline-block text-sm text-indigo-600 hover:underline">Record first sale</Link>
           </div>
         ) : (
-          <table className="w-full text-sm text-left">
+          <table className="w-full min-w-[720px] text-sm text-left">
             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-400">
               <tr>
                 <th className="px-5 py-3">Car</th>

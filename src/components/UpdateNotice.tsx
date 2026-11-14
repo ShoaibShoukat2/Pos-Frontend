@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
+import { isElectron } from "@/components/TitleBar";
+import { apiBase } from "@/lib/api";
 import { APP_VERSION, isNewerVersion, type AppRelease } from "@/lib/updates";
-
-const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 
 export function UpdateNotice() {
   const [release, setRelease] = useState<AppRelease | null>(null);
@@ -15,7 +15,8 @@ export function UpdateNotice() {
     let stop = false;
 
     const check = () => {
-      fetch(`${API_URL}/api/app-update/`)
+      if (isElectron()) return;
+      fetch(`${apiBase()}/api/app-update/`)
         .then((r) => (r.ok ? r.json() : null))
         .then((data: AppRelease | null) => {
           if (stop) return;

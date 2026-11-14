@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-import { NetworkError, api, clearTokens, saveTokens } from "./api";
+import { NetworkError, api, clearTokens, saveTokens, setApiBase } from "./api";
 import type { AuthPayload, User } from "./types";
 
 const USER_KEY = "upos_user";
@@ -78,30 +78,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("upos_access") : null;
-    const cached = typeof window !== "undefined" ? localStorage.getItem(USER_KEY) : null;
-    if (cached) {
+    let alive = true;
+    (async () => {
       try {
-        const parsed = JSON.parse(cached);
-        setUser(parsed);
-        applyBusinessTheme(parsed);
-        setLoading(false);
+        const fromDesktop = await window.electronAPI?.getApiUrl?.();
+        if (fromDesktop) setApiBase(fromDesktop);
       } catch {
-        /* ignore */
+        /* website build has no desktop bridge */
       }
-    }
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-    refreshUser()
-      .catch((err) => {
-        if (err instanceof NetworkError) return;
-        clearTokens();
-        cacheUser(null);
-        setUser(null);
-      })
-      .finally(() => setLoading(false));
+      if (!alive) return;
+      const token = localStorage.getItem("upos_access");
+      const cached = localStorage.getItem(USER_KEY);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setUser(parsed);
+          applyBusinessTheme(parsed);
+        } catch {
+          /* ignore */
+        }
+      }
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      try {
+        await refreshUser();
+      } catch (err) {
+        if (!(err instanceof NetworkError)) {
+          clearTokens();
+          cacheUser(null);
+          setUser(null);
+        }
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -132,11 +147,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return;
     }
-    // Car showroom business — stay in /showroom, redirect away from general dashboard
+    // Car showroom accounts use the showroom shell. Retail routes render blank for them.
     if (isCarShowroom(user)) {
+      const publicStay = pathname === "/" || pathname.startsWith("/scan") || pathname.startsWith("/check");
       if (pathname === "/login" || pathname === "/register" || pathname === "/platform/login" || isCashierLogin) {
         router.replace("/showroom");
-      } else if (!isShowroomRoute && pathname !== "/" && isPlatformRoute) {
+      } else if (!isShowroomRoute && !publicStay) {
         router.replace("/showroom");
       }
       return;
@@ -178,7 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(data.user);
         cacheUser(data.user);
         applyBusinessTheme(data.user);
-        router.push("/dashboard");
+        router.push(homeFor(data.user));
       },
       logout() {
         const dest = user?.is_platform_admin ? "/platform/login" : isCashier(user) ? "/cashier/login" : "/login";

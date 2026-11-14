@@ -20,8 +20,8 @@ export default function PaymentsPage() {
       {pending.length > 0 && (
         <div>
           <h2 className="mb-3 text-sm font-semibold text-red-600 uppercase tracking-widest">Pending Dues ({pending.length})</h2>
-          <div className="rounded-2xl border border-red-200 bg-white shadow-sm overflow-hidden">
-            <table className="w-full text-sm text-left">
+          <div className="rounded-2xl border border-red-200 bg-white overflow-x-auto shadow-sm">
+            <table className="w-full min-w-[640px] text-sm text-left">
               <thead className="bg-red-50 text-xs uppercase tracking-wide text-red-400">
                 <tr><th className="px-5 py-3">Car</th><th className="px-5 py-3">Customer</th><th className="px-5 py-3">Total</th><th className="px-5 py-3">Received</th><th className="px-5 py-3">Due</th><th className="px-5 py-3">Method</th></tr>
               </thead>
@@ -44,9 +44,9 @@ export default function PaymentsPage() {
 
       <div>
         <h2 className="mb-3 text-sm font-semibold text-emerald-600 uppercase tracking-widest">Completed ({completed.length})</h2>
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-slate-200 bg-white overflow-x-auto shadow-sm">
           {loading ? <p className="p-6 text-slate-400">Loading…</p> : completed.length === 0 ? <p className="p-6 text-slate-400">No completed payments.</p> : (
-            <table className="w-full text-sm text-left">
+            <table className="w-full min-w-[640px] text-sm text-left">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-400">
                 <tr><th className="px-5 py-3">Car</th><th className="px-5 py-3">Customer</th><th className="px-5 py-3">Date</th><th className="px-5 py-3">Amount</th><th className="px-5 py-3">Method</th></tr>
               </thead>

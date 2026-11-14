@@ -33,11 +33,23 @@ export function invalidateApiCache(prefix?: string) {
   }
 }
 
-function defaultApiUrl() {
-  return process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+const API_URL_KEY = "upos_api_url";
+let runtimeApiUrl: string | null = null;
+
+export function setApiBase(url: string) {
+  const clean = url.trim().replace(/\/$/, "");
+  runtimeApiUrl = clean;
+  if (typeof window !== "undefined" && clean) localStorage.setItem(API_URL_KEY, clean);
 }
 
-const API_URL = defaultApiUrl();
+function defaultApiUrl() {
+  if (runtimeApiUrl) return runtimeApiUrl;
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem(API_URL_KEY);
+    if (saved) return saved.replace(/\/$/, "");
+  }
+  return (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+}
 
 const ACCESS_KEY = "upos_access";
 const REFRESH_KEY = "upos_refresh";
@@ -99,7 +111,7 @@ async function refreshAccess(): Promise<string | null> {
   const refresh = localStorage.getItem(REFRESH_KEY);
   if (!refresh) return null;
   try {
-    const res = await fetch(`${API_URL}/api/auth/refresh/`, {
+    const res = await fetch(`${defaultApiUrl()}/api/auth/refresh/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh }),
