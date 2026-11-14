@@ -129,30 +129,30 @@ export default function HomePage() {
     <div className="min-h-dvh bg-paper-50 text-ink-900">
 
       {/* ── Nav ── */}
-      <header className="sticky top-0 z-40 border-b border-paper-200/80 bg-paper-50/95 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-ink-950/95 text-white backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
           <Link href="/" className="flex items-center gap-2.5" onClick={() => setOpen(false)}>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-950">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/15">
               <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
-                <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#d4892a" />
-                <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.6" />
-                <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.6" />
-                <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.3" />
+                <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#a5b4fc" />
+                <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#a5b4fc" opacity="0.6" />
+                <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#a5b4fc" opacity="0.6" />
+                <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#a5b4fc" opacity="0.3" />
               </svg>
             </div>
-            <span className="font-display text-xl text-ink-950">Universal POS</span>
+            <span className="font-display text-xl text-white">Universal POS</span>
           </Link>
 
-          <nav className="hidden items-center gap-7 text-sm text-ink-700/70 lg:flex">
+          <nav className="hidden items-center gap-7 text-sm text-white/65 lg:flex">
             {NAV.map((item) => (
-              <a key={item.href} href={item.href} className="hover:text-ink-950 transition-colors">
+              <a key={item.href} href={item.href} className="transition-colors hover:text-white">
                 {item.label}
               </a>
             ))}
           </nav>
 
           <div className="hidden items-center gap-2 lg:flex">
-            <Link href="/login" className="btn btn-ghost px-3 py-2 text-sm">
+            <Link href="/login" className="rounded-xl px-3 py-2 text-sm text-white/80 transition hover:bg-white/10 hover:text-white">
               Sign in
             </Link>
             <Link href={startHref} className="btn btn-copper gap-1.5 text-sm">
@@ -162,7 +162,7 @@ export default function HomePage() {
 
           <button
             type="button"
-            className="grid h-10 w-10 place-items-center rounded-xl border border-paper-200 bg-white lg:hidden"
+            className="grid h-10 w-10 place-items-center rounded-xl border border-white/15 bg-white/5 text-white lg:hidden"
             onClick={() => setOpen((v) => !v)}
           >
             {open ? <X size={16} /> : <Menu size={16} />}
@@ -170,16 +170,16 @@ export default function HomePage() {
         </div>
 
         {open && (
-          <div className="border-t border-paper-200 bg-white px-4 pb-5 pt-4 lg:hidden">
+          <div className="border-t border-white/10 bg-ink-950 px-4 pb-5 pt-4 lg:hidden">
             <nav className="grid gap-0.5">
               {NAV.map((item) => (
-                <a key={item.href} href={item.href} className="rounded-xl px-3 py-2.5 text-sm hover:bg-paper-50" onClick={() => setOpen(false)}>
+                <a key={item.href} href={item.href} className="rounded-xl px-3 py-2.5 text-sm text-white/80 hover:bg-white/10" onClick={() => setOpen(false)}>
                   {item.label}
                 </a>
               ))}
             </nav>
             <div className="mt-4 grid gap-2">
-              <Link href="/login" className="btn btn-ghost w-full text-center text-sm" onClick={() => setOpen(false)}>Sign in</Link>
+              <Link href="/login" className="btn w-full border border-white/15 bg-white/5 text-center text-sm text-white" onClick={() => setOpen(false)}>Sign in</Link>
               <Link href={startHref} className="btn btn-copper w-full text-center text-sm" onClick={() => setOpen(false)}>{startLabel}</Link>
             </div>
           </div>
@@ -188,39 +188,52 @@ export default function HomePage() {
 
       <main>
         {/* ── Hero ── */}
-        <section className="relative overflow-hidden border-b border-paper-200">
-          {/* Background texture */}
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(212,137,42,0.08),transparent)]" />
+        <section className="relative overflow-hidden bg-ink-950 text-white">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_15%_0%,rgba(99,102,241,0.45),transparent_55%),radial-gradient(ellipse_50%_40%_at_90%_20%,rgba(129,140,248,0.2),transparent_50%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
 
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
-            <div className="mx-auto max-w-3xl text-center">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-copper-500/25 bg-copper-500/8 px-3.5 py-1.5">
-                <Zap size={12} className="text-copper-500" />
-                <span className="text-xs font-medium text-copper-600">Built for Pakistani shops — PKR, GST ready</span>
+          <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:py-24">
+            <div>
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5">
+                <Zap size={12} className="text-copper-300" />
+                <span className="text-xs font-medium text-white/85">Built for Pakistani shops — PKR, GST ready</span>
               </div>
 
-              <h1 className="font-display text-4xl leading-[1.06] tracking-tight text-ink-950 sm:text-5xl lg:text-6xl">
+              <h1 className="max-w-xl font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
                 The counter, stock and cash —{" "}
-                <span className="text-copper-500">one POS.</span>
+                <span className="text-copper-300">one POS.</span>
               </h1>
 
-              <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-ink-700/65 sm:text-lg">
-                Sell at the counter, print an invoice, track stock and see today's money.
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-white/65 sm:text-lg">
+                Sell at the counter, print an invoice, track stock and see today&apos;s money.
                 Owner watches the numbers. Cashier stays on the sale.
               </p>
 
-              <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href={startHref} className="btn btn-copper w-full gap-2 sm:w-auto">
                   {startLabel} <ArrowRight size={15} />
                 </Link>
-                <a href="#features" className="btn btn-ghost w-full sm:w-auto">
-                  See what's included
+                <a href="#features" className="btn w-full border border-white/15 bg-white/5 text-white hover:bg-white/10 sm:w-auto">
+                  See what&apos;s included
                 </a>
               </div>
+
+              <dl className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-white/10 pt-6">
+                {[
+                  ["Web + Windows", "One account"],
+                  ["Owner + cashier", "Separate logins"],
+                  ["First month", "Free"],
+                ].map(([value, label]) => (
+                  <div key={label}>
+                    <dt className="text-[11px] uppercase tracking-wide text-white/40">{label}</dt>
+                    <dd className="mt-1 text-sm font-medium text-white">{value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
 
             {/* Dashboard preview card */}
-            <div className="mx-auto mt-14 max-w-3xl overflow-hidden rounded-2xl border border-paper-200 bg-white shadow-[0_8px_40px_-8px_rgba(28,24,20,0.18)]">
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-white text-ink-950 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.65)]">
               {/* Card top bar */}
               <div className="flex items-center justify-between border-b border-paper-200 bg-ink-950 px-5 py-4">
                 <div>
@@ -272,15 +285,15 @@ export default function HomePage() {
 
         {/* ── Trust strip ── */}
         <section className="border-b border-paper-200 bg-white">
-          <div className="mx-auto grid max-w-6xl gap-px divide-y divide-paper-200 px-4 sm:divide-x sm:divide-y-0 sm:grid-cols-3 sm:px-6">
+          <div className="mx-auto grid max-w-6xl gap-4 px-4 py-5 sm:grid-cols-3 sm:px-6">
             {[
               { title: "Owner + Cashier", sub: "Separate logins. Each person sees only what they need." },
               { title: "Rupee-first", sub: "PKR totals, GST setup, thermal receipts out of the box." },
               { title: "Web + Desktop", sub: "Use it in the browser or install the Windows desktop app." },
             ].map((f) => (
-              <div key={f.title} className="px-6 py-6">
+              <div key={f.title} className="rounded-2xl border border-paper-200 bg-paper-50 px-5 py-4">
                 <p className="font-medium text-ink-950">{f.title}</p>
-                <p className="mt-1 text-sm text-ink-700/60">{f.sub}</p>
+                <p className="mt-1 text-sm leading-relaxed text-ink-700/60">{f.sub}</p>
               </div>
             ))}
           </div>
@@ -298,9 +311,9 @@ export default function HomePage() {
             {FEATURES.map((item) => {
               const Icon = item.icon;
               return (
-                <article key={item.title} className="group rounded-2xl border border-paper-200 bg-white p-5 transition hover:border-copper-300 hover:shadow-card">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-copper-500/10 text-copper-600">
-                    <Icon size={17} />
+                <article key={item.title} className="group rounded-2xl border border-paper-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-copper-300 hover:shadow-card">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100">
+                    <Icon size={18} />
                   </div>
                   <h3 className="mt-4 font-medium text-ink-950">{item.title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-ink-700/60">{item.text}</p>
@@ -321,7 +334,7 @@ export default function HomePage() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {INDUSTRIES.map((item) => (
-                <article key={item.title} className="rounded-2xl border border-white/8 bg-white/5 p-5 transition hover:bg-white/8">
+                <article key={item.title} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 transition hover:border-white/20 hover:bg-white/[0.08]">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white/80">
                     {item.icon}
                   </div>
@@ -343,17 +356,14 @@ export default function HomePage() {
               </h2>
             </div>
             <div className="grid gap-4 md:grid-cols-4">
-              {STEPS.map((step, i) => (
-                <div key={step.n} className="relative">
-                  {i < STEPS.length - 1 && (
-                    <div className="absolute left-full top-5 hidden w-4 -translate-x-1/2 border-t-2 border-dashed border-paper-200 md:block" style={{ width: "calc(100% - 2.5rem)", left: "calc(2.5rem + 50%)" }} />
-                  )}
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-copper-500 font-display text-lg text-ink-950">
+              {STEPS.map((step) => (
+                <article key={step.n} className="rounded-2xl border border-paper-200 bg-paper-50 p-5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink-950 font-display text-lg text-white">
                     {step.n}
                   </div>
                   <h3 className="mt-4 font-medium text-ink-950">{step.title}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-ink-700/60">{step.text}</p>
-                </div>
+                </article>
               ))}
             </div>
           </div>
@@ -533,9 +543,9 @@ export default function HomePage() {
           </div>
         </section>
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <div className="relative overflow-hidden rounded-3xl bg-surface-900 px-8 py-12 text-center sm:px-12">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_100%,rgba(99,102,241,0.18),transparent)]" />
-            <p className="relative text-xs font-semibold uppercase tracking-[0.2em] text-brand-400">Get started today</p>
+          <div className="relative overflow-hidden rounded-3xl bg-ink-950 px-8 py-14 text-center sm:px-12">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_120%,rgba(99,102,241,0.35),transparent)]" />
+            <p className="relative text-xs font-semibold uppercase tracking-[0.2em] text-copper-300">Get started today</p>
             <h2 className="relative mt-3 font-display text-3xl text-white sm:text-4xl lg:text-5xl">
               First month free.
             </h2>
@@ -555,27 +565,27 @@ export default function HomePage() {
       </main>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-paper-200 bg-white">
+      <footer className="border-t border-white/10 bg-ink-950 text-white">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.5fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink-950">
                 <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-                  <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#d4892a" />
-                  <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.6" />
-                  <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.6" />
-                  <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.3" />
+                  <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#a5b4fc" />
+                  <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#a5b4fc" opacity="0.6" />
+                  <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#a5b4fc" opacity="0.6" />
+                  <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#a5b4fc" opacity="0.3" />
                 </svg>
               </div>
-              <span className="font-display text-lg text-ink-950">Universal POS</span>
+              <span className="font-display text-lg text-white">Universal POS</span>
             </div>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink-700/60">
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/55">
               A Senvante product. Built by Shoaib Shoukat for shops that sell in Pakistani rupees.
             </p>
           </div>
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-700/40">Product</p>
-            <ul className="space-y-2 text-sm text-ink-700/70">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/40">Product</p>
+            <ul className="space-y-2 text-sm text-white/70">
               {NAV.map((item) => (
                 <li key={item.href}>
                   <a href={item.href} className="hover:text-copper-600 transition-colors">{item.label}</a>
@@ -584,8 +594,8 @@ export default function HomePage() {
             </ul>
           </div>
           <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-700/40">Get the app</p>
-            <ul className="space-y-2 text-sm text-ink-700/70">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/40">Get the app</p>
+            <ul className="space-y-2 text-sm text-white/70">
               <li>
                 <a
                   href="https://github.com/ShoaibShoukat2/Pos-Desktop/releases/latest/download/Universal-POS-Setup-1.0.0.exe"
@@ -605,8 +615,8 @@ export default function HomePage() {
                 </a>
               </li>
             </ul>
-            <p className="mb-3 mt-5 text-xs font-semibold uppercase tracking-wide text-ink-700/40">Sign in</p>
-            <ul className="space-y-2 text-sm text-ink-700/70">
+            <p className="mb-3 mt-5 text-xs font-semibold uppercase tracking-wide text-white/40">Sign in</p>
+            <ul className="space-y-2 text-sm text-white/70">
               <li><Link href="/login" className="hover:text-copper-600 transition-colors">Business owner</Link></li>
               <li><Link href="/login?role=cashier" className="hover:text-copper-600 transition-colors">Cashier</Link></li>
               <li><Link href="/register" className="hover:text-copper-600 transition-colors">Create account</Link></li>
@@ -618,8 +628,8 @@ export default function HomePage() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-paper-200 px-4 py-4 sm:px-6">
-          <p className="mx-auto max-w-6xl text-xs text-ink-700/40">
+        <div className="border-t border-white/10 px-4 py-4 sm:px-6">
+          <p className="mx-auto max-w-6xl text-xs text-white/40">
             © {new Date().getFullYear()} Senvante · Universal POS
           </p>
         </div>
