@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { ApiError, api, asList, fieldErrors } from "@/lib/api";
 import { CarSaleInvoice, type CarInvoiceData } from "@/components/showroom/CarSaleInvoice";
+import { invoiceFromSale } from "@/lib/showroomInvoice";
 import { useAuth } from "@/lib/auth";
 
 type Ref = { id: string; display_name?: string; name?: string };
@@ -38,42 +39,10 @@ export default function NewSalePage() {
     e.preventDefault(); setPending(true); setErrors({});
     try {
       const sale = await api<any>("/api/showroom/car-sales/", { method: "POST", body: JSON.stringify(form) });
-
-      // Fetch car + customer for invoice
-      const [carDetail, customerDetail] = await Promise.all([
-        api<any>(`/api/showroom/cars/${form.car}/`),
-        api<any>(`/api/showroom/showroom-customers/${form.customer}/`),
-      ]);
-
-      const invoiceData: CarInvoiceData = {
-        invoice_number: `INV-${sale.id.toString().slice(0, 8).toUpperCase()}`,
-        sale_date: sale.sale_date,
-        shop_name: user?.business_name || "Car Showroom",
-        customer_name: customerDetail.name,
-        customer_phone: customerDetail.phone || "",
-        customer_cnic: customerDetail.cnic || "",
-        customer_address: customerDetail.address || "",
-        car_brand: carDetail.brand_name || "",
-        car_model: carDetail.model || "",
-        car_variant: carDetail.variant || "",
-        car_year: carDetail.model_year || 0,
-        car_color: carDetail.color || "",
-        registration_number: carDetail.registration_number || "",
-        chassis_number: carDetail.chassis_number || "",
-        engine_number: carDetail.engine_number || "",
-        engine_cc: carDetail.engine_cc || 0,
-        fuel_type: carDetail.fuel_type_name || "",
-        transmission: carDetail.transmission_name || "",
-        mileage_km: carDetail.mileage_km || 0,
-        selling_price: parseFloat(form.selling_price || "0"),
-        discount: parseFloat(form.discount || "0"),
-        final_amount: final,
-        received_amount: parseFloat(form.received_amount || "0"),
-        remaining_amount: remaining,
-        payment_method: form.payment_method,
-        notes: form.notes,
-      };
-      setInvoice(invoiceData);
+      setInvoice(invoiceFromSale(sale, {
+        name: user?.business_name || "Car Showroom",
+        cashier: user?.full_name || "",
+      }));
     } catch (err) {
       if (err instanceof ApiError) setErrors(fieldErrors(err.body));
     } finally { setPending(false); }

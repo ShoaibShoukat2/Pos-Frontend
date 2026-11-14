@@ -8,6 +8,7 @@ import {
 import { ApiError, api, asList, fieldErrors } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { CarSaleInvoice, type CarInvoiceData } from "@/components/showroom/CarSaleInvoice";
+import { invoiceFromSale } from "@/lib/showroomInvoice";
 
 type CarItem = {
   id: string; display_name: string; brand_name: string; model: string;
@@ -141,38 +142,10 @@ export default function ShowroomPOS() {
         }),
       });
 
-      // Build invoice
-      const invoiceData: CarInvoiceData = {
-        invoice_number: `INV-${sale.id.toString().slice(0, 8).toUpperCase()}`,
-        sale_date: saleDate,
-        shop_name: user?.business_name || "Car Showroom",
-        customer_name: selectedCustomer.name,
-        customer_phone: selectedCustomer.phone || "",
-        customer_cnic: selectedCustomer.cnic || "",
-        customer_address: selectedCustomer.address || "",
-        car_brand: selectedCar.brand_name,
-        car_model: selectedCar.model,
-        car_variant: selectedCar.variant || "",
-        car_year: selectedCar.model_year,
-        car_color: selectedCar.color || "",
-        registration_number: selectedCar.registration_number || "",
-        chassis_number: selectedCar.chassis_number || "",
-        engine_number: selectedCar.engine_number || "",
-        engine_cc: selectedCar.engine_cc || 0,
-        fuel_type: selectedCar.fuel_type_name || "",
-        transmission: selectedCar.transmission_name || "",
-        mileage_km: selectedCar.mileage_km || 0,
-        selling_price: parseFloat(sellingPrice),
-        discount: parseFloat(discount || "0"),
-        final_amount: finalAmount,
-        received_amount: parseFloat(received || "0"),
-        remaining_amount: remaining,
-        payment_method: payMethod,
-        notes,
-        cashier_name: user?.full_name || "",
-      };
-
-      setInvoice(invoiceData);
+      setInvoice(invoiceFromSale(sale, {
+        name: user?.business_name || "Car Showroom",
+        cashier: user?.full_name || "",
+      }));
 
       // Remove sold car from list
       setCars((prev) => prev.filter((c) => c.id !== selectedCar.id));

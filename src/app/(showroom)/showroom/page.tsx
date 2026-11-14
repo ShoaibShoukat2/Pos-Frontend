@@ -33,9 +33,20 @@ type Dashboard = {
   total_profit: string;
   customer_dues: string;
   seller_dues: string;
+  cash_received?: string;
+  dues_count?: number;
+  unsigned_invoices?: number;
+  today_sales?: string;
+  today_count?: number;
+  month_sales?: string;
+  month_profit?: string;
+  month_count?: number;
+  stock_value?: string;
+  stock_cost?: string;
+  monthly?: { label: string; sales: string; count: number }[];
   recent_sales: {
-    id: string; car: string; customer: string;
-    amount: string; date: string; profit: string;
+    id: string; invoice_number?: string; car: string; customer: string;
+    amount: string; remaining?: string; date: string; profit: string; signed?: boolean;
   }[];
   available_cars: {
     id: string; name: string; color: string;
@@ -64,6 +75,9 @@ export default function ShowroomDashboard() {
   }
 
   const profit = parseFloat(data?.total_profit || "0");
+  const monthBars = data?.monthly || [];
+  const peak = Math.max(1, ...monthBars.map((row) => parseFloat(row.sales || "0")));
+  const todayLabel = new Date().toLocaleDateString("en-PK", { weekday: "long", day: "numeric", month: "long" });
 
   return (
     <div className="space-y-5">
@@ -94,6 +108,71 @@ export default function ShowroomDashboard() {
           </Link>
         </div>
       </div>
+
+      <section className="overflow-hidden rounded-2xl bg-slate-900 text-white shadow-sm">
+        <div className="grid gap-6 p-5 sm:p-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-300">{todayLabel}</p>
+            <p className="mt-3 text-sm text-white/60">This month</p>
+            <p className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">{rs(data?.month_sales ?? 0)}</p>
+            <p className="mt-2 text-sm text-white/70">
+              {data?.month_count ?? 0} cars sold · profit {rs(data?.month_profit ?? 0)} · today {rs(data?.today_sales ?? 0)}
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <HeroStat label="Received" value={rs(data?.cash_received ?? 0)} />
+            <HeroStat label="Stock value" value={rs(data?.stock_value ?? 0)} />
+            <HeroStat label="Dues" value={rs(data?.customer_dues ?? 0)} />
+          </div>
+        </div>
+        {(data?.unsigned_invoices || data?.dues_count) ? (
+          <div className="flex flex-wrap gap-2 border-t border-white/10 px-5 py-3 text-xs sm:px-6">
+            {data?.unsigned_invoices ? (
+              <Link href="/showroom/sales" className="rounded-full bg-amber-400/15 px-3 py-1 font-medium text-amber-200">
+                {data.unsigned_invoices} invoice{data.unsigned_invoices === 1 ? "" : "s"} waiting for a signature
+              </Link>
+            ) : null}
+            {data?.dues_count ? (
+              <Link href="/showroom/payments" className="rounded-full bg-red-400/15 px-3 py-1 font-medium text-red-200">
+                {data.dues_count} balance{data.dues_count === 1 ? "" : "s"} still open
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
+      </section>
+
+      {monthBars.length ? (
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="mb-4 flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sales</p>
+              <h2 className="font-semibold text-slate-900">Last 6 months</h2>
+            </div>
+            <Link href="/showroom/reports" className="text-xs font-medium text-indigo-600">Reports</Link>
+          </div>
+          <div className="grid h-36 grid-cols-6 items-end gap-2">
+            {monthBars.map((row) => {
+              const amount = parseFloat(row.sales || "0");
+              const height = Math.max(8, Math.round((amount / peak) * 100));
+              return (
+                <div key={row.label} className="flex h-full flex-col justify-end gap-2">
+                  <div className="flex flex-1 items-end">
+                    <div
+                      className="w-full rounded-t-lg bg-indigo-600"
+                      style={{ height: `${height}%` }}
+                      title={`${row.label}: ${rs(amount)}`}
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-[10px] font-medium text-slate-500">{row.label}</p>
+                    <p className="text-[10px] text-slate-400">{row.count}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       {/* ── Car status — 2 cols mobile, 4 cols desktop ── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -139,7 +218,7 @@ export default function ShowroomDashboard() {
         />
         <KpiCard
           icon={profit >= 0 ? TrendingUp : TrendingDown}
-          label="Net Profit / Loss"
+          label="Profit after expenses"
           value={rs(data?.total_profit ?? 0)}
           color={profit >= 0 ? "emerald" : "red"}
         />
@@ -187,16 +266,18 @@ export default function ShowroomDashboard() {
           ) : (
             <ul className="divide-y divide-slate-100">
               {data.recent_sales.map((row) => (
-                <li
-                  key={row.id}
-                  className="flex items-start justify-between gap-3 px-4 py-3 sm:px-5"
-                >
+                <li key={row.id}>
+                  <Link
+                    href={`/showroom/sales?invoice=${row.id}`}
+                    className="flex items-start justify-between gap-3 px-4 py-3 hover:bg-slate-50 sm:px-5"
+                  >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-slate-900">
                       {row.car}
                     </p>
                     <p className="truncate text-xs text-slate-400">
-                      {row.customer} · {row.date}
+                      {row.invoice_number ? `${row.invoice_number} · ` : ""}{row.customer} · {row.date}
+                      {row.signed ? "" : " · signature pending"}
                     </p>
                   </div>
                   <div className="shrink-0 text-right">
@@ -214,6 +295,7 @@ export default function ShowroomDashboard() {
                       {rs(row.profit)}
                     </p>
                   </div>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -244,10 +326,8 @@ export default function ShowroomDashboard() {
           ) : (
             <ul className="divide-y divide-slate-100">
               {data.available_cars.map((car) => (
-                <li
-                  key={car.id}
-                  className="flex items-center gap-3 px-4 py-3 sm:px-5"
-                >
+                <li key={car.id}>
+                  <Link href={`/showroom/inventory/${car.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 sm:px-5">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50">
                     <Car size={16} className="text-indigo-600" />
                   </div>
@@ -269,6 +349,7 @@ export default function ShowroomDashboard() {
                   <p className="shrink-0 font-display text-sm font-semibold text-slate-900">
                     {rs(car.price)}
                   </p>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -306,6 +387,15 @@ export default function ShowroomDashboard() {
 }
 
 /* ── Helper components ─────────────────────────────────────────── */
+
+function HeroStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-white/10 px-3 py-3">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-white/50">{label}</p>
+      <p className="mt-1 font-display text-sm font-semibold leading-tight sm:text-base">{value}</p>
+    </div>
+  );
+}
 
 function StatusCard({
   icon: Icon,

@@ -22,7 +22,7 @@ export default function ReportsPage() {
     { label: "Total Investment", value: rs(data?.total_investment ?? 0) },
     { label: "Total Sales Revenue", value: rs(data?.total_sales_revenue ?? 0) },
     { label: "Total Expenses", value: rs(data?.total_expenses ?? 0) },
-    { label: "Net Profit / Loss", value: rs(data?.total_profit ?? 0), highlight: profit >= 0 ? "emerald" : "red" },
+    { label: "Profit after expenses", value: rs(data?.total_profit ?? 0), highlight: profit >= 0 ? "emerald" : "red" },
     { label: "Customer Dues", value: rs(data?.customer_dues ?? 0) },
     { label: "Seller Dues", value: rs(data?.seller_dues ?? 0) },
   ];

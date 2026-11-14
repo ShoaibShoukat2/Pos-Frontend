@@ -1,10 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Printer } from "lucide-react";
 import { SignaturePad } from "@/components/showroom/SignaturePad";
+import { api, apiBase } from "@/lib/api";
 
 export type CarInvoiceData = {
+  sale_id?: string;
   invoice_number: string;
   sale_date: string;
   // Shop
@@ -40,6 +42,9 @@ export type CarInvoiceData = {
   // Optional
   notes?: string;
   cashier_name?: string;
+  customer_signature?: string;
+  dealer_signature?: string;
+  payments?: { date: string; amount: number; method: string }[];
 };
 
 const METHOD_LABEL: Record<string, string> = {
@@ -56,12 +61,59 @@ function rs(v: number) {
 
 export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClose?: () => void }) {
   const printRef = useRef<HTMLDivElement>(null);
-  const [customerSig, setCustomerSig] = useState<string>("");
-  const [dealerSig, setDealerSig] = useState<string>("");
-  const [sigsDone, setSigsDone] = useState(false);
+  const [customerSig, setCustomerSig] = useState(data.customer_signature || "");
+  const [dealerSig, setDealerSig] = useState(data.dealer_signature || "");
+  const [sigsDone, setSigsDone] = useState(Boolean(data.customer_signature || data.dealer_signature));
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [shop, setShop] = useState({ phone: data.shop_phone || "", address: data.shop_address || "", ntn: data.shop_ntn || "", logo: "" });
 
-  function print() {
-    window.print();
+  useEffect(() => {
+    api<{ phone?: string; address?: string; city?: string; tax_number?: string; logo?: string | null }>("/api/business/")
+      .then((biz) => {
+        const address = [biz.address, biz.city].filter(Boolean).join(", ");
+        const logo = biz.logo ? (biz.logo.startsWith("http") ? biz.logo : `${apiBase()}${biz.logo}`) : "";
+        setShop({
+          phone: biz.phone || data.shop_phone || "",
+          address: address || data.shop_address || "",
+          ntn: biz.tax_number || data.shop_ntn || "",
+          logo,
+        });
+      })
+      .catch(() => {});
+  }, [data.shop_address, data.shop_ntn, data.shop_phone]);
+
+  function printInvoice() {
+    document.body.classList.add("printing-car-invoice");
+    const cleanup = () => document.body.classList.remove("printing-car-invoice");
+    window.addEventListener("afterprint", cleanup, { once: true });
+    window.setTimeout(() => {
+      window.print();
+      window.setTimeout(cleanup, 1000);
+    }, 50);
+  }
+
+  async function saveSignatures(thenPrint: boolean) {
+    if (data.sale_id && (customerSig || dealerSig)) {
+      setSaving(true);
+      setSaveError("");
+      try {
+        await api(`/api/showroom/car-sales/${data.sale_id}/`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            customer_signature: customerSig,
+            dealer_signature: dealerSig,
+          }),
+        });
+      } catch {
+        setSaveError("Signatures could not be saved. Check the connection and try again.");
+        setSaving(false);
+        return;
+      }
+      setSaving(false);
+    }
+    setSigsDone(true);
+    if (thenPrint) window.setTimeout(printInvoice, 200);
   }
 
   return (
@@ -75,16 +127,18 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
           </div>
           <div className="flex items-center gap-2">
             {!sigsDone ? (
-              <p className="text-xs text-amber-600">← Sign the invoice below first</p>
-            ) : null}
+              <p className="hidden text-xs text-amber-700 sm:block">Sign, then save. The copy that prints is the saved one.</p>
+            ) : (
+              <p className="hidden text-xs text-emerald-700 sm:block">Signatures are saved on this sale.</p>
+            )}
             <button
               type="button"
-              onClick={print}
-              disabled={!sigsDone}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              onClick={() => (sigsDone ? printInvoice() : saveSignatures(true))}
+              disabled={saving}
+              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-40"
             >
               <Printer size={15} />
-              Print Invoice
+              {saving ? "Saving…" : sigsDone ? "Print invoice" : "Save & print"}
             </button>
             {onClose ? (
               <button
@@ -104,11 +158,16 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
           {/* Header */}
           <div className="border-b-2 border-slate-900 px-8 py-6">
             <div className="flex items-start justify-between gap-4">
-              <div>
-                <h1 className="font-display text-3xl font-bold text-slate-900">{data.shop_name}</h1>
-                {data.shop_address ? <p className="mt-1 text-sm text-slate-500">{data.shop_address}</p> : null}
-                {data.shop_phone ? <p className="text-sm text-slate-500">Tel: {data.shop_phone}</p> : null}
-                {data.shop_ntn ? <p className="text-sm text-slate-500">NTN: {data.shop_ntn}</p> : null}
+              <div className="flex items-start gap-4">
+                {shop.logo ? (
+                  <img src={shop.logo} alt="" className="h-14 w-14 rounded-lg object-cover" />
+                ) : null}
+                <div>
+                  <h1 className="font-display text-3xl font-bold text-slate-900">{data.shop_name}</h1>
+                  {shop.address ? <p className="mt-1 text-sm text-slate-500">{shop.address}</p> : null}
+                  {shop.phone ? <p className="text-sm text-slate-500">Tel: {shop.phone}</p> : null}
+                  {shop.ntn ? <p className="text-sm text-slate-500">NTN: {shop.ntn}</p> : null}
+                </div>
               </div>
               <div className="text-right">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Sale Invoice</p>
@@ -193,6 +252,23 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
             </div>
           </div>
 
+          {data.payments && data.payments.length > 0 ? (
+            <div className="border-t border-slate-100 px-8 py-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Payments received</p>
+              <table className="mt-2 w-full text-sm">
+                <tbody>
+                  {data.payments.map((row, index) => (
+                    <tr key={`${row.date}-${index}`}>
+                      <td className="py-1 text-slate-500">{row.date}</td>
+                      <td className="py-1 text-slate-500">{METHOD_LABEL[row.method] || row.method}</td>
+                      <td className="py-1 text-right font-medium text-slate-900">{rs(row.amount)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+
           {/* Notes */}
           {data.notes ? (
             <div className="border-t border-slate-100 px-8 py-4">
@@ -219,25 +295,33 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
                     onSave={setDealerSig}
                   />
                 </div>
-                <div className="flex justify-center gap-3">
+                {saveError ? <p className="text-center text-sm text-red-600">{saveError}</p> : null}
+                <div className="flex flex-wrap justify-center gap-3">
                   <button
                     type="button"
-                    onClick={() => setSigsDone(true)}
-                    className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+                    disabled={saving || (!customerSig && !dealerSig)}
+                    onClick={() => saveSignatures(false)}
+                    className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors disabled:opacity-40"
                   >
-                    Confirm signatures
+                    {saving ? "Saving…" : "Save signatures"}
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setSigsDone(true); }}
+                    onClick={printInvoice}
                     className="rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-sm text-slate-500 hover:bg-slate-50"
                   >
-                    Skip & print without
+                    Print without saving
                   </button>
                 </div>
               </div>
             ) : (
               /* Signed view — shows on print */
+              <div>
+              <div className="invoice-no-print mb-4 text-center">
+                <button type="button" className="text-xs font-medium text-indigo-600" onClick={() => setSigsDone(false)}>
+                  Change signatures
+                </button>
+              </div>
               <div className="grid grid-cols-2 gap-8">
                 <div className="text-center">
                   {customerSig ? (
@@ -257,6 +341,7 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
                   <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Dealer Signature</p>
                   <p className="mt-0.5 text-sm text-slate-600">{data.shop_name}</p>
                 </div>
+              </div>
               </div>
             )}
           </div>
