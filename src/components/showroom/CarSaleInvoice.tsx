@@ -7,6 +7,7 @@ import { SignaturePad } from "@/components/showroom/SignaturePad";
 import { api, apiBase } from "@/lib/api";
 import { listOsPrinters, printToConnectedPrinter, rememberPrinter, savedPrinterName, type OsPrinter } from "@/lib/desktopPrint";
 import { useHardware } from "@/lib/hardware";
+import { readShowroomPaper, saveShowroomPaper, type ShowroomPaper } from "@/lib/showroomInvoice";
 
 export type CarInvoiceData = {
   sale_id?: string;
@@ -64,7 +65,19 @@ function rs(v: number) {
   return `Rs ${v.toLocaleString("en-PK", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
-export function CarSaleInvoice({ data, onClose, embedded = false }: { data: CarInvoiceData; onClose?: () => void; embedded?: boolean }) {
+export function CarSaleInvoice({
+  data,
+  onClose,
+  layout = "modal",
+  paper,
+  onPaperChange,
+}: {
+  data: CarInvoiceData;
+  onClose?: () => void;
+  layout?: "modal" | "preview";
+  paper?: ShowroomPaper;
+  onPaperChange?: (paper: ShowroomPaper) => void;
+}) {
   const hardware = useHardware();
   const [customerSig, setCustomerSig] = useState(data.customer_signature || "");
   const [dealerSig, setDealerSig] = useState(data.dealer_signature || "");
@@ -75,11 +88,22 @@ export function CarSaleInvoice({ data, onClose, embedded = false }: { data: CarI
   const [redrawDealer, setRedrawDealer] = useState(!data.dealer_signature);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
-  const [printSize, setPrintSize] = useState<"a4" | "80mm">("a4");
+  const [printSize, setPrintSize] = useState<ShowroomPaper>("a4");
   const [printNote, setPrintNote] = useState("");
   const [osPrinters, setOsPrinters] = useState<OsPrinter[] | null>(null);
   const [printerName, setPrinterName] = useState("");
   const [shop, setShop] = useState({ phone: data.shop_phone || "", address: data.shop_address || "", ntn: data.shop_ntn || "", logo: "" });
+  const preview = layout === "preview";
+
+  useEffect(() => {
+    setPrintSize(paper || readShowroomPaper());
+  }, [paper]);
+
+  function choosePaper(next: ShowroomPaper) {
+    setPrintSize(next);
+    saveShowroomPaper(next);
+    onPaperChange?.(next);
+  }
 
   useEffect(() => {
     api<{ phone?: string; address?: string; city?: string; tax_number?: string; logo?: string | null }>("/api/business/")
@@ -208,13 +232,13 @@ export function CarSaleInvoice({ data, onClose, embedded = false }: { data: CarI
   }
 
   return (
-    <div className={embedded ? "w-full" : "fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm"}>
-      <div className={embedded ? "w-full" : "w-full max-w-[48rem]"}>
+    <div className={preview ? "w-full" : "fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm"}>
+      <div className={preview ? "w-full" : "w-full max-w-[48rem]"}>
         {/* Toolbar — hidden on print */}
         <div className="invoice-no-print mb-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">{embedded ? "Invoice design" : "Sale Invoice"}</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">{preview ? "Preview" : "Sale Invoice"}</p>
             <p className="font-medium text-slate-900">{data.invoice_number}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -222,7 +246,7 @@ export function CarSaleInvoice({ data, onClose, embedded = false }: { data: CarI
             <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
               <button
                 type="button"
-                onClick={() => setPrintSize("a4")}
+                onClick={() => choosePaper("a4")}
                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                   printSize === "a4"
                     ? "bg-white text-slate-900 shadow-sm"
@@ -233,7 +257,7 @@ export function CarSaleInvoice({ data, onClose, embedded = false }: { data: CarI
               </button>
               <button
                 type="button"
-                onClick={() => setPrintSize("80mm")}
+                onClick={() => choosePaper("80mm")}
                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                   printSize === "80mm"
                     ? "bg-white text-slate-900 shadow-sm"
@@ -243,7 +267,9 @@ export function CarSaleInvoice({ data, onClose, embedded = false }: { data: CarI
                 80mm Thermal
               </button>
             </div>
-            {!sigsDone ? (
+            {preview ? (
+              <p className="hidden text-xs text-slate-500 sm:block">Used on every sale.</p>
+            ) : !sigsDone ? (
               <p className="hidden text-xs text-amber-700 sm:block">Photo, thumb, then save & print.</p>
             ) : printerReady ? (
               <p className="hidden text-xs text-emerald-700 sm:block">Ready to print.</p>
@@ -252,12 +278,12 @@ export function CarSaleInvoice({ data, onClose, embedded = false }: { data: CarI
             )}
             <button
               type="button"
-              onClick={() => (sigsDone ? printInvoice() : saveEvidence(true))}
-              disabled={saving || (sigsDone && !printerReady)}
+              onClick={() => (preview || sigsDone ? printInvoice() : saveEvidence(true))}
+              disabled={saving || ((preview || sigsDone) && !printerReady)}
               className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-40"
             >
               <Printer size={15} />
-              {saving ? "Saving…" : sigsDone ? `Print (${printSize === "a4" ? "A4" : "Thermal"})` : "Save & print"}
+              {saving ? "Saving…" : preview || sigsDone ? `Print (${printSize === "a4" ? "A4" : "Thermal"})` : "Save & print"}
             </button>
             {onClose ? (
               <button
@@ -447,7 +473,7 @@ export function CarSaleInvoice({ data, onClose, embedded = false }: { data: CarI
 
           {/* Photo, thumb impression, and signatures */}
           <div className="border-t-2 border-dashed border-slate-300 px-8 py-6">
-            {!sigsDone ? (
+            {!preview && !sigsDone ? (
               <div className="invoice-no-print mb-6 space-y-5">
                 <p className="text-center text-sm font-semibold text-slate-700">
                   Take the customer photo and thumb impression, then sign
@@ -500,13 +526,13 @@ export function CarSaleInvoice({ data, onClose, embedded = false }: { data: CarI
                   </button>
                 </div>
               </div>
-            ) : (
+            ) : !preview ? (
               <div className="invoice-no-print mb-4 text-center">
                 <button type="button" className="text-xs font-medium text-indigo-600" onClick={() => setSigsDone(false)}>
                   Change photo, thumb or signatures
                 </button>
               </div>
-            )}
+            ) : null}
             <div className="car-evidence grid grid-cols-2 gap-6 sm:grid-cols-4">
               <EvidenceShot label="Customer photo" src={photo} name={data.customer_name} cover />
               <EvidenceShot label="Thumb impression" src={thumb} name={data.customer_name} />

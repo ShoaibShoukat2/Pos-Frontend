@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Car, Check, ChevronDown, CreditCard,
-  FileText, Search, User, X,
-} from "lucide-react";
+import { Car, Check, ChevronDown, CreditCard, FileText, Search, User, X } from "lucide-react";
+import { HardwareSetup, HardwareToasts } from "@/components/HardwareBar";
 import { ApiError, api, asList, fieldErrors } from "@/lib/api";
+import { useHardware } from "@/lib/hardware";
 import { useAuth } from "@/lib/auth";
 import { CarSaleInvoice, type CarInvoiceData } from "@/components/showroom/CarSaleInvoice";
 import { invoiceFromSale } from "@/lib/showroomInvoice";
@@ -34,6 +33,7 @@ function rs(v: number) {
 
 export default function ShowroomPOS() {
   const { user } = useAuth();
+  const hardware = useHardware();
 
   // Data
   const [cars, setCars] = useState<CarItem[]>([]);
@@ -179,6 +179,7 @@ export default function ShowroomPOS() {
           onClose={resetForm}
         />
       ) : null}
+      <HardwareToasts hardware={hardware} />
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
@@ -192,6 +193,8 @@ export default function ShowroomPOS() {
           {cars.length} available
         </div>
       </div>
+
+      <HardwareSetup hardware={hardware} compact />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
 
@@ -494,6 +497,9 @@ export default function ShowroomPOS() {
                   </>
                 )}
               </button>
+              <p className="text-center text-[11px] leading-relaxed text-slate-400">
+                The invoice opens next for the customer photo, thumb impression and signatures, then prints on the connected printer.
+              </p>
             </div>
           </div>
         </div>

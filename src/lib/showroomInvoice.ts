@@ -71,3 +71,16 @@ export function invoiceFromSale(
     })),
   };
 }
+
+export type ShowroomPaper = "a4" | "80mm";
+
+const PAPER_KEY = "showroom_invoice_paper";
+
+export function readShowroomPaper(): ShowroomPaper {
+  if (typeof window === "undefined") return "a4";
+  return localStorage.getItem(PAPER_KEY) === "80mm" ? "80mm" : "a4";
+}
+
+export function saveShowroomPaper(paper: ShowroomPaper) {
+  localStorage.setItem(PAPER_KEY, paper);
+}
