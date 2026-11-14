@@ -66,6 +66,7 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
   const [sigsDone, setSigsDone] = useState(Boolean(data.customer_signature || data.dealer_signature));
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [printSize, setPrintSize] = useState<"a4" | "80mm">("a4");
   const [shop, setShop] = useState({ phone: data.shop_phone || "", address: data.shop_address || "", ntn: data.shop_ntn || "", logo: "" });
 
   useEffect(() => {
@@ -84,8 +85,13 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
   }, [data.shop_address, data.shop_ntn, data.shop_phone]);
 
   function printInvoice() {
+    // Set print size class on body
+    document.body.setAttribute("data-car-print-size", printSize);
     document.body.classList.add("printing-car-invoice");
-    const cleanup = () => document.body.classList.remove("printing-car-invoice");
+    const cleanup = () => {
+      document.body.classList.remove("printing-car-invoice");
+      document.body.removeAttribute("data-car-print-size");
+    };
     window.addEventListener("afterprint", cleanup, { once: true });
     window.setTimeout(() => {
       window.print();
@@ -120,16 +126,41 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
     <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm">
       <div className="w-full max-w-[48rem]">
         {/* Toolbar — hidden on print */}
-        <div className="invoice-no-print mb-3 flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+        <div className="invoice-no-print mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Sale Invoice</p>
             <p className="font-medium text-slate-900">{data.invoice_number}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Print size selector */}
+            <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
+              <button
+                type="button"
+                onClick={() => setPrintSize("a4")}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                  printSize === "a4"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-400 hover:text-slate-700"
+                }`}
+              >
+                A4
+              </button>
+              <button
+                type="button"
+                onClick={() => setPrintSize("80mm")}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                  printSize === "80mm"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-400 hover:text-slate-700"
+                }`}
+              >
+                80mm Thermal
+              </button>
+            </div>
             {!sigsDone ? (
-              <p className="hidden text-xs text-amber-700 sm:block">Sign, then save. The copy that prints is the saved one.</p>
+              <p className="hidden text-xs text-amber-700 sm:block">Sign, then save & print.</p>
             ) : (
-              <p className="hidden text-xs text-emerald-700 sm:block">Signatures are saved on this sale.</p>
+              <p className="hidden text-xs text-emerald-700 sm:block">Signatures saved.</p>
             )}
             <button
               type="button"
@@ -138,7 +169,7 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
               className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-40"
             >
               <Printer size={15} />
-              {saving ? "Saving…" : sigsDone ? "Print invoice" : "Save & print"}
+              {saving ? "Saving…" : sigsDone ? `Print (${printSize === "a4" ? "A4" : "Thermal"})` : "Save & print"}
             </button>
             {onClose ? (
               <button
@@ -153,7 +184,13 @@ export function CarSaleInvoice({ data, onClose }: { data: CarInvoiceData; onClos
         </div>
 
         {/* Invoice body */}
-        <div id="car-invoice-print-root" ref={printRef} className="rounded-2xl border border-slate-200 bg-white shadow-lg">
+        <div
+          id="car-invoice-print-root"
+          ref={printRef}
+          className={`car-invoice rounded-2xl border border-slate-200 bg-white shadow-lg ${
+            printSize === "80mm" ? "car-invoice-80mm" : "car-invoice-a4"
+          }`}
+        >
 
           {/* Header */}
           <div className="border-b-2 border-slate-900 px-8 py-6">
