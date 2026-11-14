@@ -14,6 +14,8 @@ type SaleLike = {
   customer_name?: string;
   customer_signature?: string;
   dealer_signature?: string;
+  customer_photo?: string;
+  customer_thumbprint?: string;
   car_info?: Record<string, string | number | null> | null;
   customer_info?: Record<string, string | null> | null;
   payments?: { amount: string; payment_date: string; payment_method: string }[];
@@ -60,6 +62,8 @@ export function invoiceFromSale(
     cashier_name: shop?.cashier || "",
     customer_signature: sale.customer_signature || "",
     dealer_signature: sale.dealer_signature || "",
+    customer_photo: sale.customer_photo || "",
+    customer_thumbprint: sale.customer_thumbprint || "",
     payments: (sale.payments || []).map((row) => ({
       date: row.payment_date,
       amount: Number(row.amount || 0),

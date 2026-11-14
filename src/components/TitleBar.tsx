@@ -26,6 +26,8 @@ declare global {
       onUpdateProgress:   (cb: (data: { percent: number }) => void) => void;
       onUpdateDownloaded: (cb: (info: { version: string }) => void) => void;
       onUpdateError:      (cb: (data: { message: string }) => void) => void;
+      listPrinters?: () => Promise<{ name: string; isDefault: boolean }[]>;
+      printPage?: (options: { deviceName?: string; paper?: "a4" | "80mm" }) => Promise<{ success: boolean; printer: string; reason: string }>;
     };
   }
 }

@@ -244,6 +244,17 @@ th, td { overflow-wrap: break-word; }
     break-inside: auto;
   }
   body.printing-car-invoice .invoice-no-print { display: none !important; }
+  body.printing-car-invoice[data-car-print-size="a4"] #car-invoice-print-root { page: car-invoice-a4; }
+  body.printing-car-invoice[data-car-print-size="80mm"] #car-invoice-print-root { page: car-invoice-80; }
+}
+
+@page car-invoice-a4 {
+  size: A4 portrait;
+  margin: 10mm;
+}
+@page car-invoice-80 {
+  size: 80mm 400mm;
+  margin: 2mm;
 }
 
 /* ── Car Invoice print size overrides ───────────────────────────────────────── */
@@ -255,6 +266,10 @@ th, td { overflow-wrap: break-word; }
   }
   body[data-car-print-size="80mm"].printing-car-invoice .car-invoice-80mm .grid-cols-2 {
     grid-template-columns: 1fr !important;
+  }
+  body[data-car-print-size="80mm"].printing-car-invoice .car-evidence {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 3mm !important;
   }
   body[data-car-print-size="80mm"].printing-car-invoice .car-invoice-80mm .border-r {
     border-right: none !important;
