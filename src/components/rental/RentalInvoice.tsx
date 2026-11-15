@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Printer } from "lucide-react";
 import { ContractEvidence, type ContractEvidenceValues } from "@/components/contract/ContractEvidence";
 import { ApiError, api, apiBase, fieldErrors } from "@/lib/api";
@@ -21,10 +21,12 @@ export function RentalInvoice({
   data,
   onClose,
   layout = "modal",
+  autoPrint = false,
 }: {
   data: RentalInvoiceData;
   onClose?: () => void;
   layout?: "modal" | "preview";
+  autoPrint?: boolean;
 }) {
   const hardware = useHardware();
   const preview = layout === "preview";
@@ -126,6 +128,16 @@ export function RentalInvoice({
       setNote("Could not print. Check the printer and try again.");
     }
   }
+
+  const printRef = useRef(printInvoice);
+  printRef.current = printInvoice;
+  const autoPrinted = useRef(false);
+  useEffect(() => {
+    if (!autoPrint || preview || autoPrinted.current) return;
+    autoPrinted.current = true;
+    const timer = window.setTimeout(() => { void printRef.current(); }, 700);
+    return () => window.clearTimeout(timer);
+  }, [autoPrint, preview]);
 
   function setEvidenceField(key: keyof ContractEvidenceValues, value: string) {
     setEvidence((current) => ({ ...current, [key]: value }));
