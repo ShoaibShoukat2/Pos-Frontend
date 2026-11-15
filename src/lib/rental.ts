@@ -22,6 +22,12 @@ export type RentalInvoiceData = {
   customer_photo?: string;
   customer_signature?: string;
   dealer_signature?: string;
+  guarantor_signature?: string;
+  customer_thumbprint?: string;
+  guarantor_thumbprint?: string;
+  cnic_front?: string;
+  cnic_back?: string;
+  status?: string;
 };
 
 export function whatsAppLink(phone: string, message: string) {
@@ -82,6 +88,12 @@ type RentalApi = {
   customer_photo?: string;
   customer_signature?: string;
   dealer_signature?: string;
+  guarantor_signature?: string;
+  customer_thumbprint?: string;
+  guarantor_thumbprint?: string;
+  cnic_front?: string;
+  cnic_back?: string;
+  status?: string;
 };
 
 export function invoiceFromRental(row: RentalApi, shop?: { name?: string; cashier?: string }): RentalInvoiceData {
@@ -112,5 +124,11 @@ export function invoiceFromRental(row: RentalApi, shop?: { name?: string; cashie
     customer_photo: row.customer_photo || "",
     customer_signature: row.customer_signature || "",
     dealer_signature: row.dealer_signature || "",
+    guarantor_signature: row.guarantor_signature || "",
+    customer_thumbprint: row.customer_thumbprint || "",
+    guarantor_thumbprint: row.guarantor_thumbprint || "",
+    cnic_front: row.cnic_front || "",
+    cnic_back: row.cnic_back || "",
+    status: row.status || "",
   };
 }

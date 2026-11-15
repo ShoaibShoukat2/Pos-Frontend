@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Printer } from "lucide-react";
-import { ImageCapture } from "@/components/showroom/ImageCapture";
-import { SignaturePad } from "@/components/showroom/SignaturePad";
+import { ContractEvidence, type ContractEvidenceValues } from "@/components/contract/ContractEvidence";
 import { api, apiBase } from "@/lib/api";
 import { listOsPrinters, printToConnectedPrinter, rememberPrinter, savedPrinterName, type OsPrinter } from "@/lib/desktopPrint";
 import { useHardware } from "@/lib/hardware";
@@ -48,8 +47,12 @@ export type CarInvoiceData = {
   cashier_name?: string;
   customer_signature?: string;
   dealer_signature?: string;
+  guarantor_signature?: string;
   customer_photo?: string;
   customer_thumbprint?: string;
+  guarantor_thumbprint?: string;
+  cnic_front?: string;
+  cnic_back?: string;
   payments?: { date: string; amount: number; method: string }[];
 };
 
@@ -79,13 +82,20 @@ export function CarSaleInvoice({
   onPaperChange?: (paper: ShowroomPaper) => void;
 }) {
   const hardware = useHardware();
-  const [customerSig, setCustomerSig] = useState(data.customer_signature || "");
-  const [dealerSig, setDealerSig] = useState(data.dealer_signature || "");
-  const [photo, setPhoto] = useState(data.customer_photo || "");
-  const [thumb, setThumb] = useState(data.customer_thumbprint || "");
-  const [sigsDone, setSigsDone] = useState(Boolean(data.customer_photo && data.customer_thumbprint));
-  const [redrawCustomer, setRedrawCustomer] = useState(!data.customer_signature);
-  const [redrawDealer, setRedrawDealer] = useState(!data.dealer_signature);
+  const [evidence, setEvidence] = useState<ContractEvidenceValues>({
+    ownerSignature: data.dealer_signature || "",
+    partySignature: data.customer_signature || "",
+    guarantorSignature: data.guarantor_signature || "",
+    partyPhoto: data.customer_photo || "",
+    cnicFront: data.cnic_front || "",
+    cnicBack: data.cnic_back || "",
+    partyThumb: data.customer_thumbprint || "",
+    guarantorThumb: data.guarantor_thumbprint || "",
+  });
+  const [paid, setPaid] = useState(data.received_amount);
+  const [due, setDue] = useState(data.remaining_amount);
+  const [payAmount, setPayAmount] = useState("");
+  const [payError, setPayError] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [printSize, setPrintSize] = useState<ShowroomPaper>("a4");
@@ -196,39 +206,62 @@ export function CarSaleInvoice({
     }
   }
 
+  function setEvidenceField(key: keyof ContractEvidenceValues, value: string) {
+    setEvidence((current) => ({ ...current, [key]: value }));
+  }
+
   async function saveEvidence(thenPrint: boolean) {
-    const changed =
-      photo !== (data.customer_photo || "")
-      || thumb !== (data.customer_thumbprint || "")
-      || customerSig !== (data.customer_signature || "")
-      || dealerSig !== (data.dealer_signature || "");
-    if (data.sale_id && (changed || photo || thumb || customerSig || dealerSig)) {
+    const payload = {
+      dealer_signature: evidence.ownerSignature,
+      customer_signature: evidence.partySignature,
+      guarantor_signature: evidence.guarantorSignature,
+      customer_photo: evidence.partyPhoto,
+      cnic_front: evidence.cnicFront,
+      cnic_back: evidence.cnicBack,
+      customer_thumbprint: evidence.partyThumb,
+      guarantor_thumbprint: evidence.guarantorThumb,
+    };
+    const hasEvidence = Object.values(payload).some(Boolean);
+    if (data.sale_id && hasEvidence) {
       setSaving(true);
       setSaveError("");
       try {
         const saved = await api<{ customer_photo?: string; customer_thumbprint?: string }>(`/api/showroom/car-sales/${data.sale_id}/`, {
           method: "PATCH",
-          body: JSON.stringify({
-            customer_signature: customerSig,
-            dealer_signature: dealerSig,
-            customer_photo: photo,
-            customer_thumbprint: thumb,
-          }),
+          body: JSON.stringify(payload),
         });
-        if ((photo && !saved.customer_photo) || (thumb && !saved.customer_thumbprint)) {
+        if ((payload.customer_photo && !saved.customer_photo) || (payload.customer_thumbprint && !saved.customer_thumbprint)) {
           setSaveError("The photo or thumb impression was not stored. Update the server, then save again.");
           setSaving(false);
           return;
         }
       } catch {
-        setSaveError("Photo, thumb impression, or signatures could not be saved. Check the connection and try again.");
+        setSaveError("Signatures or photos could not be saved. Check the connection and try again.");
         setSaving(false);
         return;
       }
       setSaving(false);
     }
-    setSigsDone(true);
     if (thenPrint) window.setTimeout(() => { void printInvoice(); }, 200);
+  }
+
+  async function takePayment() {
+    if (!data.sale_id) return;
+    setPayError("");
+    setSaving(true);
+    try {
+      const saved = await api<{ received_amount?: string; remaining_amount?: string }>(`/api/showroom/car-sales/${data.sale_id}/receive/`, {
+        method: "POST",
+        body: JSON.stringify({ amount: payAmount, payment_method: data.payment_method }),
+      });
+      setPaid(Number(saved.received_amount || 0));
+      setDue(Number(saved.remaining_amount || 0));
+      setPayAmount("");
+    } catch {
+      setPayError("Payment was not saved.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -267,23 +300,15 @@ export function CarSaleInvoice({
                 80mm Thermal
               </button>
             </div>
-            {preview ? (
-              <p className="hidden text-xs text-slate-500 sm:block">Used on every sale.</p>
-            ) : !sigsDone ? (
-              <p className="hidden text-xs text-amber-700 sm:block">Photo, thumb, then save & print.</p>
-            ) : printerReady ? (
-              <p className="hidden text-xs text-emerald-700 sm:block">Ready to print.</p>
-            ) : (
-              <p className="hidden text-xs text-amber-700 sm:block">Connect a printer to print.</p>
-            )}
+            <p className="hidden text-xs text-slate-500 sm:block">A4 page / Save as PDF</p>
             <button
               type="button"
-              onClick={() => (preview || sigsDone ? printInvoice() : saveEvidence(true))}
-              disabled={saving || ((preview || sigsDone) && !printerReady)}
+              onClick={() => (preview || !data.sale_id ? void printInvoice() : saveEvidence(true))}
+              disabled={saving || !printerReady}
               className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-40"
             >
               <Printer size={15} />
-              {saving ? "Saving…" : preview || sigsDone ? `Print (${printSize === "a4" ? "A4" : "Thermal"})` : "Save & print"}
+              {saving ? "Saving…" : "Print contract"}
             </button>
             {onClose ? (
               <button
@@ -431,14 +456,14 @@ export function CarSaleInvoice({
                       Amount received
                       <span className="ml-2 text-xs text-slate-400">({METHOD_LABEL[data.payment_method] || data.payment_method})</span>
                     </td>
-                    <td className="px-5 py-3 text-right font-medium text-emerald-600">{rs(data.received_amount)}</td>
+                    <td className="px-5 py-3 text-right font-medium text-emerald-600">{rs(paid)}</td>
                   </tr>
-                  <tr className={data.remaining_amount > 0 ? "bg-red-50" : "bg-emerald-50"}>
-                    <td className={`px-5 py-3 font-semibold ${data.remaining_amount > 0 ? "text-red-700" : "text-emerald-700"}`}>
-                      {data.remaining_amount > 0 ? "Balance remaining" : "Fully paid"}
+                  <tr className={due > 0 ? "bg-red-50" : "bg-emerald-50"}>
+                    <td className={`px-5 py-3 font-semibold ${due > 0 ? "text-red-700" : "text-emerald-700"}`}>
+                      {due > 0 ? "Balance remaining" : "Fully paid"}
                     </td>
-                    <td className={`px-5 py-3 text-right font-display text-lg font-bold ${data.remaining_amount > 0 ? "text-red-700" : "text-emerald-700"}`}>
-                      {data.remaining_amount > 0 ? rs(data.remaining_amount) : "✓ Cleared"}
+                    <td className={`px-5 py-3 text-right font-display text-lg font-bold ${due > 0 ? "text-red-700" : "text-emerald-700"}`}>
+                      {due > 0 ? rs(due) : "✓ Cleared"}
                     </td>
                   </tr>
                 </tbody>
@@ -471,74 +496,25 @@ export function CarSaleInvoice({
             </div>
           ) : null}
 
-          {/* Photo, thumb impression, and signatures */}
           <div className="border-t-2 border-dashed border-slate-300 px-8 py-6">
-            {!preview && !sigsDone ? (
-              <div className="invoice-no-print mb-6 space-y-5">
-                <p className="text-center text-sm font-semibold text-slate-700">
-                  Take the customer photo and thumb impression, then sign
-                </p>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <ImageCapture
-                    label="Customer photo"
-                    hint="Face the camera and capture the customer."
-                    value={photo}
-                    onChange={setPhoto}
-                    facing="user"
-                  />
-                  <ImageCapture
-                    label="Thumb impression"
-                    hint="Ink the thumb, then capture it with the camera."
-                    value={thumb}
-                    onChange={setThumb}
-                    facing="environment"
-                  />
+            <ContractEvidence
+              partyLabel="Customer"
+              values={evidence}
+              onChange={setEvidenceField}
+              preview={preview}
+              saving={saving}
+              error={saveError}
+              onSave={preview ? undefined : () => saveEvidence(false)}
+            />
+            {!preview && data.sale_id && due > 0 ? (
+              <div className="invoice-no-print mt-4 space-y-2">
+                <div className="flex gap-2">
+                  <input value={payAmount} onChange={(event) => setPayAmount(event.target.value)} inputMode="decimal" placeholder="Amount" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
+                  <button type="button" disabled={saving || !payAmount} onClick={() => { void takePayment(); }} className="shrink-0 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40">Take payment</button>
                 </div>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  {!redrawCustomer && customerSig ? (
-                    <SavedMark label="Customer Signature" src={customerSig} onAgain={() => setRedrawCustomer(true)} />
-                  ) : (
-                    <SignaturePad label="Customer Signature" onSave={setCustomerSig} />
-                  )}
-                  {!redrawDealer && dealerSig ? (
-                    <SavedMark label="Dealer Signature" src={dealerSig} onAgain={() => setRedrawDealer(true)} />
-                  ) : (
-                    <SignaturePad label="Dealer Signature" onSave={setDealerSig} />
-                  )}
-                </div>
-                {saveError ? <p className="text-center text-sm text-red-600">{saveError}</p> : null}
-                <div className="flex flex-wrap justify-center gap-3">
-                  <button
-                    type="button"
-                    disabled={saving || (!customerSig && !dealerSig && !photo && !thumb)}
-                    onClick={() => saveEvidence(false)}
-                    className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors disabled:opacity-40"
-                  >
-                    {saving ? "Saving…" : "Save"}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!printerReady}
-                    onClick={() => { void printInvoice(); }}
-                    className="rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-sm text-slate-500 hover:bg-slate-50 disabled:opacity-40"
-                  >
-                    Print without saving
-                  </button>
-                </div>
-              </div>
-            ) : !preview ? (
-              <div className="invoice-no-print mb-4 text-center">
-                <button type="button" className="text-xs font-medium text-indigo-600" onClick={() => setSigsDone(false)}>
-                  Change photo, thumb or signatures
-                </button>
+                {payError ? <p className="text-sm text-red-600">{payError}</p> : null}
               </div>
             ) : null}
-            <div className="car-evidence grid grid-cols-2 gap-6 sm:grid-cols-4">
-              <EvidenceShot label="Customer photo" src={photo} name={data.customer_name} cover />
-              <EvidenceShot label="Thumb impression" src={thumb} name={data.customer_name} />
-              <EvidenceShot label="Customer signature" src={customerSig} name={data.customer_name} />
-              <EvidenceShot label="Dealer signature" src={dealerSig} name={data.shop_name} />
-            </div>
           </div>
 
           {/* Footer */}
@@ -549,43 +525,6 @@ export function CarSaleInvoice({
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function SavedMark({ label, src, onAgain }: { label: string; src: string; onAgain: () => void }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3">
-      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">{label}</p>
-      <img src={src} alt={label} className="mt-2 h-16 w-full object-contain" />
-      <button type="button" onClick={onAgain} className="mt-2 text-xs font-medium text-indigo-600">
-        Sign again
-      </button>
-    </div>
-  );
-}
-
-function EvidenceShot({ label, src, name, cover = false }: { label: string; src: string; name: string; cover?: boolean }) {
-  return (
-    <div className="text-center">
-      {src ? (
-        <img
-          src={src}
-          alt={label}
-          className={`mx-auto mb-2 rounded-lg border border-slate-200 bg-white object-center ${
-            cover ? "h-28 w-24 object-cover" : "h-20 w-full object-contain"
-          }`}
-        />
-      ) : (
-        <div className={`mx-auto mb-2 flex items-center justify-center rounded-lg border border-dashed border-slate-300 text-[10px] text-slate-300 ${
-          cover ? "h-28 w-24" : "h-20 w-full"
-        }`}
-        >
-          {label}
-        </div>
-      )}
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
-      <p className="mt-0.5 text-xs text-slate-600">{name}</p>
     </div>
   );
 }

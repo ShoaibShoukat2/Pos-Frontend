@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { RotateCcw } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
+import { RotateCcw, Upload } from "lucide-react";
 
 interface Props {
   label: string;
@@ -10,54 +10,72 @@ interface Props {
 }
 
 export function SignaturePad({ label, onSave, savedUrl }: Props) {
+  const fileId = useId();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [drawing, setDrawing] = useState(false);
-  const [isEmpty, setIsEmpty] = useState(true);
+  const [isEmpty, setIsEmpty] = useState(!savedUrl);
   const lastPos = useRef<{ x: number; y: number } | null>(null);
 
-  useEffect(() => {
+  function paintBlank() {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = "#0f172a";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.4;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-  }, []);
+  }
 
-  function getPos(e: React.MouseEvent | React.TouchEvent) {
+  useEffect(() => {
+    paintBlank();
+    if (!savedUrl) return;
+    const image = new Image();
+    image.onload = () => {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (!canvas || !ctx) return;
+      paintBlank();
+      const scale = Math.min(canvas.width / image.width, canvas.height / image.height);
+      const width = image.width * scale;
+      const height = image.height * scale;
+      ctx.drawImage(image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+      setIsEmpty(false);
+    };
+    image.src = savedUrl;
+  }, [savedUrl]);
+
+  function getPos(event: React.MouseEvent | React.TouchEvent) {
     const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    if ("touches" in e) {
+    if ("touches" in event) {
       return {
-        x: (e.touches[0].clientX - rect.left) * scaleX,
-        y: (e.touches[0].clientY - rect.top) * scaleY,
+        x: (event.touches[0].clientX - rect.left) * scaleX,
+        y: (event.touches[0].clientY - rect.top) * scaleY,
       };
     }
     return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
+      x: (event.clientX - rect.left) * scaleX,
+      y: (event.clientY - rect.top) * scaleY,
     };
   }
 
-  function startDraw(e: React.MouseEvent | React.TouchEvent) {
-    e.preventDefault();
+  function startDraw(event: React.MouseEvent | React.TouchEvent) {
+    event.preventDefault();
     setDrawing(true);
     setIsEmpty(false);
-    lastPos.current = getPos(e);
+    lastPos.current = getPos(event);
   }
 
-  function draw(e: React.MouseEvent | React.TouchEvent) {
-    e.preventDefault();
+  function draw(event: React.MouseEvent | React.TouchEvent) {
+    event.preventDefault();
     if (!drawing) return;
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext("2d")!;
-    const pos = getPos(e);
+    const pos = getPos(event);
     if (lastPos.current) {
       ctx.beginPath();
       ctx.moveTo(lastPos.current.x, lastPos.current.y);
@@ -67,50 +85,74 @@ export function SignaturePad({ label, onSave, savedUrl }: Props) {
     lastPos.current = pos;
   }
 
-  function endDraw(e: React.MouseEvent | React.TouchEvent) {
-    e.preventDefault();
+  function endDraw(event: React.MouseEvent | React.TouchEvent) {
+    event.preventDefault();
     if (!drawing) return;
     setDrawing(false);
     lastPos.current = null;
-    const canvas = canvasRef.current!;
-    onSave(canvas.toDataURL("image/png"));
+    onSave(canvasRef.current!.toDataURL("image/png"));
   }
 
   function clear() {
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d")!;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    paintBlank();
     setIsEmpty(true);
     onSave("");
   }
 
+  function upload(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext("2d");
+        if (!canvas || !ctx) return;
+        paintBlank();
+        const scale = Math.min(canvas.width / image.width, canvas.height / image.height);
+        const width = image.width * scale;
+        const height = image.height * scale;
+        ctx.drawImage(image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+        setIsEmpty(false);
+        onSave(canvas.toDataURL("image/png"));
+      };
+      image.src = String(reader.result || "");
+    };
+    reader.readAsDataURL(file);
+  }
+
   return (
     <div>
-      <div className="mb-1.5 flex items-center justify-between">
+      <div className="mb-1.5 flex items-center justify-between gap-2">
         <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">{label}</p>
-        {!isEmpty && (
-          <button
-            type="button"
-            onClick={clear}
-            className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-500 transition-colors"
-          >
-            <RotateCcw size={11} />
-            Clear
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          <label htmlFor={fileId} className="flex cursor-pointer items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-800">
+            <Upload size={12} />
+            Upload photo
+          </label>
+          <input id={fileId} type="file" accept="image/*" className="sr-only" onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (file) upload(file);
+          }} />
+          {!isEmpty ? (
+            <button type="button" onClick={clear} className="flex items-center gap-1 text-xs text-slate-400 hover:text-red-500">
+              <RotateCcw size={11} />
+              Clear
+            </button>
+          ) : null}
+        </div>
       </div>
-      <div className="relative overflow-hidden rounded-xl border-2 border-dashed border-slate-300 bg-white transition-colors focus-within:border-indigo-400">
-        {isEmpty && (
+      <div className="relative overflow-hidden rounded-xl border-2 border-dashed border-slate-300 bg-white">
+        {isEmpty ? (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <p className="text-sm text-slate-300 select-none">Sign here</p>
+            <p className="select-none text-sm text-slate-300">Sign here with finger or mouse</p>
           </div>
-        )}
+        ) : null}
         <canvas
           ref={canvasRef}
-          width={500}
-          height={160}
-          className="h-32 w-full touch-none cursor-crosshair"
+          width={640}
+          height={180}
+          className="h-36 w-full cursor-crosshair touch-none"
           onMouseDown={startDraw}
           onMouseMove={draw}
           onMouseUp={endDraw}
@@ -120,9 +162,8 @@ export function SignaturePad({ label, onSave, savedUrl }: Props) {
           onTouchEnd={endDraw}
         />
       </div>
-      {!isEmpty && (
-        <p className="mt-1 text-[10px] text-emerald-600">✓ Signature captured</p>
-      )}
+      <p className="mt-1 text-[11px] text-slate-400">Draw on the screen, or upload a picture of the signed paper.</p>
+      {!isEmpty ? <p className="mt-1 text-[10px] text-emerald-600">Signature captured</p> : null}
     </div>
   );
 }
