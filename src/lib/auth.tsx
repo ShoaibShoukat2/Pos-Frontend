@@ -20,10 +20,16 @@ export function isCarShowroom(user: User | null | undefined) {
   return type === "car_showroom";
 }
 
+export function isRentACar(user: User | null | undefined) {
+  const type = (user?.business_type || "").toLowerCase().replace(/\s+/g, "_");
+  return type === "rent_a_car";
+}
+
 export function homeFor(user: User) {
   if (user.is_platform_admin) return "/platform";
   if (isCashier(user)) return "/cashier";
   if (isCarShowroom(user)) return "/showroom";
+  if (isRentACar(user)) return "/rental";
   return "/dashboard";
 }
 
@@ -149,6 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isPublic = publicRoutes.includes(pathname) || pathname.startsWith("/scan") || pathname.startsWith("/check");
     const isPlatformRoute = pathname === "/platform" || pathname.startsWith("/platform/");
     const isShowroomRoute = pathname === "/showroom" || pathname.startsWith("/showroom/");
+    const isRentalRoute = pathname === "/rental" || pathname.startsWith("/rental/");
     const isCashierLogin = pathname === "/cashier/login";
     if (!user && !isPublic) {
       router.replace(isPlatformRoute ? "/platform/login" : pathname.startsWith("/cashier") ? "/cashier/login" : "/login");
@@ -175,6 +182,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isCarShowroom(user)) {
       const publicStay = pathname === "/" || pathname.startsWith("/scan") || pathname.startsWith("/check");
       if (!isShowroomRoute && !publicStay) goHome(user);
+      return;
+    }
+    if (isRentACar(user)) {
+      const publicStay = pathname === "/" || pathname.startsWith("/scan") || pathname.startsWith("/check");
+      if (!isRentalRoute && !publicStay) goHome(user);
       return;
     }
     if (pathname === "/login" || pathname === "/register" || pathname === "/platform/login" || isCashierLogin) {

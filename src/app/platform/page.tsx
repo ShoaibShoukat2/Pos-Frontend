@@ -18,6 +18,7 @@ const PERIODS = [
 const TYPE_LABEL: Record<string, string> = {
   grocery: "Grocery", clothing: "Clothing", restaurant: "Restaurant",
   pharmacy: "Pharmacy", electronics: "Electronics", pizza: "Pizza shop", general: "General",
+  car_showroom: "Car Showroom", rent_a_car: "Rent a Car",
 };
 
 export default function PlatformOverviewPage() {

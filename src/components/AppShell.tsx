@@ -27,7 +27,7 @@ import {
 
 import { FounderCredit } from "@/components/FounderCredit";
 import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
-import { isCarShowroom, isCashier, useAuth } from "@/lib/auth";
+import { isCarShowroom, isCashier, isRentACar, useAuth } from "@/lib/auth";
 
 const CASHIER_LINKS = new Set(["/cashier", "/pos", "/customers", "/cash", "/returns"]);
 
@@ -105,6 +105,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return (
       <div className="grid min-h-dvh place-items-center text-sm text-surface-400">
         Opening car showroom…
+      </div>
+    );
+  }
+  if (isRentACar(user)) {
+    if (typeof window !== "undefined" && !window.location.pathname.startsWith("/rental")) {
+      window.location.replace("/rental");
+    }
+    return (
+      <div className="grid min-h-dvh place-items-center text-sm text-surface-400">
+        Opening rent a car…
       </div>
     );
   }

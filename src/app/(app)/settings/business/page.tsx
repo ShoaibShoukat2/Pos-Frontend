@@ -107,7 +107,11 @@ export default function BusinessPage() {
         window.location.assign("/showroom");
         return;
       }
-      if (window.location.pathname.startsWith("/showroom")) {
+      if (data.business_type === "rent_a_car") {
+        window.location.assign("/rental");
+        return;
+      }
+      if (window.location.pathname.startsWith("/showroom") || window.location.pathname.startsWith("/rental")) {
         window.location.assign("/dashboard");
         return;
       }
@@ -340,6 +344,7 @@ export default function BusinessPage() {
               <option value="electronics">Electronics</option>
               <option value="pizza">Pizza shop</option>
               <option value="car_showroom">Car Showroom</option>
+              <option value="rent_a_car">Rent a Car</option>
             </Select>
           </Field>
           <Field label="Timezone">

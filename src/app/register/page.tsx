@@ -16,6 +16,7 @@ const TYPES = [
   { value: "electronics",  label: "Electronics" },
   { value: "pizza",        label: "Pizza shop" },
   { value: "car_showroom", label: "Car Showroom" },
+  { value: "rent_a_car",   label: "Rent a Car" },
 ];
 
 export default function RegisterPage() {
