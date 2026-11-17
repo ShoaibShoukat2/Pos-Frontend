@@ -7,9 +7,9 @@
   color-scheme: light;
 
   /* Business branding (overridden via JS from business settings) */
-  --brand-primary: #1e293b;
-  --brand-accent:  #6366f1;
-  --brand-accent-hover: #4f46e5;
+  --brand-primary: #1b0d3d;
+  --brand-accent:  #2a1458;
+  --brand-accent-hover: #3d2278;
 
   /* UI palette */
   --surface-0:   #ffffff;
@@ -108,19 +108,19 @@ input, select, textarea {
 }
 .btn:disabled { cursor: not-allowed; opacity: 0.5; }
 
-/* Primary — Indigo */
+/* Primary — royal purple */
 .btn-primary {
-  background: #4f46e5;
+  background: #2a1458;
   color: #ffffff;
 }
-.btn-primary:hover:not(:disabled) { background: #4338ca; }
+.btn-primary:hover:not(:disabled) { background: #1b0d3d; }
 
-/* Copper/Accent — also indigo */
+/* Accent — same royal family */
 .btn-copper {
-  background: #4f46e5;
+  background: #2a1458;
   color: #ffffff;
 }
-.btn-copper:hover:not(:disabled) { background: #4338ca; }
+.btn-copper:hover:not(:disabled) { background: #1b0d3d; }
 
 /* Ghost */
 .btn-ghost {

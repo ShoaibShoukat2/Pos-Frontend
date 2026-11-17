@@ -31,7 +31,7 @@ export default function NewExpensePage() {
     finally { setPending(false); }
   }
 
-  const inp = (k: string, type = "text") => <input type={type} value={(form as any)[k]} onChange={(e) => set(k, e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />;
+  const inp = (k: string, type = "text") => <input type={type} value={(form as any)[k]} onChange={(e) => set(k, e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />;
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
@@ -40,7 +40,7 @@ export default function NewExpensePage() {
         {errors.detail && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{errors.detail}</div>}
         <label className="block space-y-1.5">
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Category *</span>
-          <select value={form.category} onChange={(e) => set("category", e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500">
+          <select value={form.category} onChange={(e) => set("category", e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700">
             <option value="">Select category</option>
             {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
@@ -51,7 +51,7 @@ export default function NewExpensePage() {
         </label>
         <label className="block space-y-1.5">
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Car (optional — for car-specific expense)</span>
-          <select value={form.car} onChange={(e) => set("car", e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500">
+          <select value={form.car} onChange={(e) => set("car", e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700">
             <option value="">General expense</option>
             {cars.map((c) => <option key={c.id} value={c.id}>{c.display_name || c.name}</option>)}
           </select>
@@ -68,13 +68,13 @@ export default function NewExpensePage() {
         </div>
         <label className="block space-y-1.5">
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Payment Method</span>
-          <select value={form.payment_method} onChange={(e) => set("payment_method", e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500">
+          <select value={form.payment_method} onChange={(e) => set("payment_method", e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700">
             {["cash","bank","card","jazzcash","easypaisa"].map((m) => <option key={m} value={m} className="capitalize">{m}</option>)}
           </select>
         </label>
         <label className="block space-y-1.5">
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Description</span>
-          <textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={2} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500" />
+          <textarea value={form.description} onChange={(e) => set("description", e.target.value)} rows={2} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700" />
         </label>
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={pending} className="btn btn-primary flex-1">{pending ? "Saving…" : "Save Expense"}</button>

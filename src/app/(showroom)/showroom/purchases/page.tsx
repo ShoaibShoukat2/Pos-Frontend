@@ -31,7 +31,7 @@ export default function PurchasesPage() {
                   <td className="px-5 py-3 text-slate-600">{r.seller_name}</td>
                   <td className="px-5 py-3 text-slate-500">{r.purchase_date}</td>
                   <td className="px-5 py-3 font-semibold">{rs(r.total_cost)}</td>
-                  <td className="px-5 py-3"><span className={parseFloat(r.remaining_payment) > 0 ? "text-red-600 font-medium" : "text-emerald-600"}>{rs(r.remaining_payment)}</span></td>
+                  <td className="px-5 py-3"><span className={parseFloat(r.remaining_payment) > 0 ? "text-red-600 font-medium" : "text-royal-700"}>{rs(r.remaining_payment)}</span></td>
                 </tr>
               ))}
             </tbody>

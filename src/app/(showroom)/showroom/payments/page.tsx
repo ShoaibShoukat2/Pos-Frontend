@@ -64,7 +64,7 @@ export default function PaymentsPage() {
 
       {active ? (
         <form onSubmit={onReceive} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Receive balance</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-royal-700">Receive balance</p>
           <h2 className="mt-1 font-semibold text-slate-900">{active.car_display}</h2>
           <p className="text-sm text-slate-500">{active.customer_name} · due {rs(active.remaining_amount)}</p>
           {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
@@ -105,7 +105,7 @@ export default function PaymentsPage() {
                     <td className="px-5 py-3 font-medium text-slate-900">{s.car_display}</td>
                     <td className="px-5 py-3 text-slate-600">{s.customer_name}</td>
                     <td className="px-5 py-3">{rs(s.final_amount)}</td>
-                    <td className="px-5 py-3 text-emerald-600">{rs(s.received_amount)}</td>
+                    <td className="px-5 py-3 text-royal-700">{rs(s.received_amount)}</td>
                     <td className="px-5 py-3 font-semibold text-red-600">{rs(s.remaining_amount)}</td>
                     <td className="px-5 py-3 capitalize text-slate-500">{s.payment_method}</td>
                     <td className="px-5 py-3 text-right">
@@ -122,7 +122,7 @@ export default function PaymentsPage() {
       )}
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-emerald-600 uppercase tracking-widest">Completed ({completed.length})</h2>
+        <h2 className="mb-3 text-sm font-semibold text-royal-700 uppercase tracking-widest">Completed ({completed.length})</h2>
         <div className="rounded-2xl border border-slate-200 bg-white overflow-x-auto shadow-sm">
           {loading ? <p className="p-6 text-slate-400">Loading…</p> : completed.length === 0 ? <p className="p-6 text-slate-400">No completed payments.</p> : (
             <table className="w-full min-w-[640px] text-sm text-left">
@@ -135,7 +135,7 @@ export default function PaymentsPage() {
                     <td className="px-5 py-3 font-medium text-slate-900">{s.car_display}</td>
                     <td className="px-5 py-3 text-slate-600">{s.customer_name}</td>
                     <td className="px-5 py-3 text-slate-500">{s.sale_date}</td>
-                    <td className="px-5 py-3 font-semibold text-emerald-600">{rs(s.final_amount)}</td>
+                    <td className="px-5 py-3 font-semibold text-royal-700">{rs(s.final_amount)}</td>
                     <td className="px-5 py-3 capitalize text-slate-500">{s.payment_method}</td>
                   </tr>
                 ))}

@@ -163,7 +163,7 @@ export function SignaturePad({ label, onSave, savedUrl }: Props) {
         />
       </div>
       <p className="mt-1 text-[11px] text-slate-400">Draw on the screen, or upload a picture of the signed paper.</p>
-      {!isEmpty ? <p className="mt-1 text-[10px] text-emerald-600">Signature captured</p> : null}
+      {!isEmpty ? <p className="mt-1 text-[10px] text-royal-700">Signature captured</p> : null}
     </div>
   );
 }

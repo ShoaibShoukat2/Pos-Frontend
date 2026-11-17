@@ -16,8 +16,8 @@ type Car = {
 };
 
 const STATUS: Record<string, string> = {
-  available: "bg-emerald-50 text-emerald-700",
-  rented: "bg-sky-50 text-sky-700",
+  available: "bg-royal-50 text-royal-800",
+  rented: "bg-gold-300/40 text-royal-950",
   maintenance: "bg-amber-50 text-amber-700",
 };
 
@@ -42,7 +42,7 @@ export default function FleetPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-semibold text-slate-900">Fleet</h1>
-        <Link href="/rental/fleet/new" className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white"><Plus size={16} /> Add car</Link>
+        <Link href="/rental/fleet/new" className="inline-flex items-center gap-2 rounded-xl bg-royal-900 px-4 py-2.5 text-sm font-medium text-white"><Plus size={16} /> Add car</Link>
       </div>
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
         {loading ? <p className="p-6 text-slate-400">Loading…</p> : rows.length === 0 ? <p className="p-6 text-slate-400">No cars yet.</p> : (

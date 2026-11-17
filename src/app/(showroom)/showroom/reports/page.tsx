@@ -34,7 +34,7 @@ export default function ReportsPage() {
         {stats.map((s) => (
           <div key={s.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">{s.label}</p>
-            <p className={`mt-1.5 font-display text-2xl font-semibold ${s.highlight === "emerald" ? "text-emerald-600" : s.highlight === "red" ? "text-red-600" : "text-slate-900"}`}>{s.value}</p>
+            <p className={`mt-1.5 font-display text-2xl font-semibold ${s.highlight === "emerald" ? "text-royal-700" : s.highlight === "red" ? "text-red-600" : "text-slate-900"}`}>{s.value}</p>
           </div>
         ))}
       </div>

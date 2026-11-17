@@ -71,7 +71,7 @@ export default function RentalTermsPage() {
     <div className="mx-auto w-full max-w-3xl space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">Owner terms</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-royal-800">Owner terms</p>
           <h1 className="font-display text-2xl font-semibold text-slate-950">شرائط</h1>
           <p className="mt-0.5 text-sm text-slate-500">The owner’s sheet. It also prints after the rental contract on A4.</p>
         </div>
@@ -79,7 +79,7 @@ export default function RentalTermsPage() {
           type="button"
           onClick={() => { void printTerms(); }}
           disabled={printing || (desktop && !activePrinter)}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-40 sm:w-auto"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-royal-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-40 sm:w-auto"
         >
           <Printer size={15} />
           {printing ? "Printing…" : "Print terms"}

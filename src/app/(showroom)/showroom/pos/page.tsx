@@ -241,12 +241,12 @@ export default function ShowroomPOS() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Car Showroom</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-royal-700">Car Showroom</p>
           <h1 className="font-display text-2xl font-semibold text-slate-900 sm:text-3xl">Sale Counter</h1>
           <p className="mt-0.5 text-sm text-slate-400">Select a car and customer, enter payment, complete sale.</p>
         </div>
         <div className="hidden sm:flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-500">
-          <Car size={15} className="text-indigo-500" />
+          <Car size={15} className="text-royal-700" />
           {cars.length} available
         </div>
       </div>
@@ -271,8 +271,8 @@ export default function ShowroomPOS() {
             <div className="p-4">
               {selectedCar ? (
                 /* Selected car card */
-                <div className="flex items-start gap-4 rounded-xl border-2 border-indigo-500 bg-indigo-50 p-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-600">
+                <div className="flex items-start gap-4 rounded-xl border-2 border-royal-700 bg-royal-50 p-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-royal-800">
                     <Car size={22} className="text-white" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -285,7 +285,7 @@ export default function ShowroomPOS() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="font-display text-xl font-bold text-indigo-700">{rs(parseFloat(selectedCar.selling_price))}</p>
+                    <p className="font-display text-xl font-bold text-royal-800">{rs(parseFloat(selectedCar.selling_price))}</p>
                     <p className="text-xs text-slate-400">Listed price</p>
                   </div>
                 </div>
@@ -299,7 +299,7 @@ export default function ShowroomPOS() {
                       onChange={(e) => { setCarSearch(e.target.value); setShowCarList(true); }}
                       onFocus={() => setShowCarList(true)}
                       placeholder="Search by name, reg. no., color…"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/10"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-royal-700 focus:bg-white focus:ring-2 focus:ring-royal-700/10"
                     />
                   </div>
                   {errors.car ? <p className="mt-1 text-xs text-red-600">{errors.car}</p> : null}
@@ -312,10 +312,10 @@ export default function ShowroomPOS() {
                           key={car.id}
                           type="button"
                           onClick={() => selectCar(car)}
-                          className="flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left last:border-b-0 hover:bg-indigo-50 transition-colors"
+                          className="flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left last:border-b-0 hover:bg-royal-50 transition-colors"
                         >
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-100">
-                            <Car size={16} className="text-indigo-600" />
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-royal-100">
+                            <Car size={16} className="text-royal-700" />
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-medium text-slate-900">{car.display_name}</p>
@@ -345,8 +345,8 @@ export default function ShowroomPOS() {
             </div>
             <div className="p-4">
               {selectedCustomer ? (
-                <div className="flex items-center gap-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 p-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600">
+                <div className="flex items-center gap-3 rounded-xl border-2 border-royal-700 bg-royal-50 p-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-royal-800">
                     <User size={18} className="text-white" />
                   </div>
                   <div className="min-w-0">
@@ -355,7 +355,7 @@ export default function ShowroomPOS() {
                       {[selectedCustomer.phone, selectedCustomer.cnic].filter(Boolean).join(" · ")}
                     </p>
                   </div>
-                  <Check size={18} className="ml-auto shrink-0 text-emerald-600" />
+                  <Check size={18} className="ml-auto shrink-0 text-royal-700" />
                 </div>
               ) : (
                 <div>
@@ -365,13 +365,13 @@ export default function ShowroomPOS() {
                       value={customerSearch}
                       onChange={(e) => setCustomerSearch(e.target.value)}
                       placeholder="Search by name or phone…"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/10"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-royal-700 focus:bg-white focus:ring-2 focus:ring-royal-700/10"
                     />
                   </div>
                   {errors.customer ? <p className="mt-1 text-xs text-red-600">{errors.customer}</p> : null}
                   <div className="mt-2 max-h-52 overflow-y-auto rounded-xl border border-slate-200">
                     {filteredCustomers.length === 0 ? (
-                      <p className="p-4 text-sm text-slate-400">No customers found. <a href="/showroom/customers/new" className="text-indigo-600 underline">Add one</a></p>
+                      <p className="p-4 text-sm text-slate-400">No customers found. <a href="/showroom/customers/new" className="text-royal-700 underline">Add one</a></p>
                     ) : filteredCustomers.map((c) => (
                       <button
                         key={c.id}
@@ -431,14 +431,14 @@ export default function ShowroomPOS() {
               <div>
                 <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Sale Date</label>
                 <input type="date" value={saleDate} onChange={(e) => setSaleDate(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />
               </div>
 
               {/* Selling price */}
               <div>
                 <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Selling Price (Rs)</label>
                 <input type="number" value={sellingPrice} onChange={(e) => setSellingPrice(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-center font-display text-xl outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-center font-display text-xl outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />
                 {errors.price ? <p className="mt-1 text-xs text-red-600">{errors.price}</p> : null}
               </div>
 
@@ -446,7 +446,7 @@ export default function ShowroomPOS() {
               <div>
                 <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Discount (Rs)</label>
                 <input type="number" value={discount} onChange={(e) => setDiscount(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />
               </div>
 
               {/* Final amount display */}
@@ -459,30 +459,30 @@ export default function ShowroomPOS() {
               <div>
                 <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Received Amount (Rs)</label>
                 <input type="number" value={received} onChange={(e) => setReceived(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-center font-display text-lg outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-center font-display text-lg outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />
               </div>
 
               {/* Quick amounts */}
               <div className="flex flex-wrap gap-1.5">
                 <button type="button" onClick={() => setReceived(String(finalAmount))}
-                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:border-indigo-400">
+                  className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:border-royal-300">
                   Full amount
                 </button>
                 {[500000, 1000000, 1500000, 2000000].map((a) => (
                   <button key={a} type="button" onClick={() => setReceived(String(a))}
-                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:border-indigo-400">
+                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:border-royal-300">
                     {rs(a)}
                   </button>
                 ))}
               </div>
 
               {/* Remaining */}
-              <div className={`rounded-xl px-4 py-3 ${remaining > 0 ? "bg-red-50 border border-red-200" : "bg-emerald-50 border border-emerald-200"}`}>
+              <div className={`rounded-xl px-4 py-3 ${remaining > 0 ? "bg-red-50 border border-red-200" : "bg-royal-50 border border-royal-200"}`}>
                 <div className="flex items-center justify-between">
-                  <p className={`text-[10px] font-semibold uppercase tracking-widest ${remaining > 0 ? "text-red-500" : "text-emerald-600"}`}>
+                  <p className={`text-[10px] font-semibold uppercase tracking-widest ${remaining > 0 ? "text-red-500" : "text-royal-700"}`}>
                     {remaining > 0 ? "Balance Remaining" : "Fully Paid"}
                   </p>
-                  <p className={`font-display text-xl font-bold ${remaining > 0 ? "text-red-700" : "text-emerald-700"}`}>
+                  <p className={`font-display text-xl font-bold ${remaining > 0 ? "text-red-700" : "text-royal-800"}`}>
                     {remaining > 0 ? rs(remaining) : "✓"}
                   </p>
                 </div>
@@ -496,8 +496,8 @@ export default function ShowroomPOS() {
                     <button key={val} type="button" onClick={() => setPayMethod(val)}
                       className={`rounded-xl border py-2 text-xs font-semibold transition-all ${
                         payMethod === val
-                          ? "border-indigo-600 bg-indigo-600 text-white shadow-sm"
-                          : "border-slate-200 bg-slate-50 text-slate-600 hover:border-indigo-300"
+                          ? "border-royal-800 bg-royal-800 text-white shadow-sm"
+                          : "border-slate-200 bg-slate-50 text-slate-600 hover:border-royal-200"
                       }`}>
                       {label}
                     </button>
@@ -510,7 +510,7 @@ export default function ShowroomPOS() {
                 <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-widest text-slate-400">Notes (optional)</label>
                 <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2}
                   placeholder="Token amount received, delivery date…"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />
               </div>
 
               {/* Profit preview */}
@@ -518,7 +518,7 @@ export default function ShowroomPOS() {
                 <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-2.5 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Estimated profit</span>
-                    <span className={profit >= 0 ? "font-semibold text-emerald-600" : "font-semibold text-red-600"}>
+                    <span className={profit >= 0 ? "font-semibold text-royal-700" : "font-semibold text-red-600"}>
                       {profit >= 0 ? "+" : ""}{rs(profit)}
                     </span>
                   </div>
@@ -535,7 +535,7 @@ export default function ShowroomPOS() {
                   type="checkbox"
                   checked={printSlip}
                   onChange={(event) => setPrintSlip(event.target.checked)}
-                  className="h-4 w-4 accent-indigo-600"
+                  className="h-4 w-4 accent-royal-800"
                 />
                 Print slip after sale
               </label>
@@ -543,12 +543,12 @@ export default function ShowroomPOS() {
                 type="button"
                 onClick={() => setSlipOpen(true)}
                 disabled={!selectedCar}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-indigo-300 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:border-royal-200 hover:text-royal-800 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <FileText size={16} />
                 Preview invoice
               </button>
-              {savedNote ? <p className="text-center text-sm text-emerald-700">{savedNote}</p> : null}
+              {savedNote ? <p className="text-center text-sm text-royal-800">{savedNote}</p> : null}
 
               {/* Complete sale */}
               <button
@@ -558,7 +558,7 @@ export default function ShowroomPOS() {
                 className={`flex h-14 w-full items-center justify-center gap-2.5 rounded-xl text-base font-bold transition-all ${
                   !selectedCar || !selectedCustomer
                     ? "cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400"
-                    : "bg-indigo-600 text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-700 active:scale-[0.98]"
+                    : "bg-royal-800 text-white shadow-lg shadow-royal-900/20 hover:bg-royal-950 active:scale-[0.98]"
                 }`}
               >
                 {pending ? (

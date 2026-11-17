@@ -15,7 +15,7 @@ export default function NewCustomerPage() {
     catch (err) { if (err instanceof ApiError) setErrors(fieldErrors(err.body)); }
     finally { setPending(false); }
   }
-  const inp = (k: string) => <input value={(form as any)[k]} onChange={(e) => set(k, e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />;
+  const inp = (k: string) => <input value={(form as any)[k]} onChange={(e) => set(k, e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />;
   return (
     <div className="mx-auto max-w-lg space-y-6">
       <h1 className="font-display text-2xl font-semibold text-slate-900">New Customer</h1>
@@ -29,7 +29,7 @@ export default function NewCustomerPage() {
         ))}
         <label className="block space-y-1.5">
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Address</span>
-          <textarea value={form.address} onChange={(e) => set("address", e.target.value)} rows={2} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />
+          <textarea value={form.address} onChange={(e) => set("address", e.target.value)} rows={2} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />
         </label>
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={pending} className="btn btn-primary flex-1">{pending ? "Saving…" : "Save Customer"}</button>

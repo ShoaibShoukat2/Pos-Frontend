@@ -118,13 +118,13 @@ export default function CarDetailPage() {
   }
 
   const fieldClass =
-    "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10";
+    "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10";
 
   if (missing) {
     return (
       <div className="mx-auto max-w-lg py-16 text-center">
         <p className="font-medium text-slate-700">This car is not in the inventory.</p>
-        <Link href="/showroom/inventory" className="mt-3 inline-block text-sm text-indigo-600">Back to inventory</Link>
+        <Link href="/showroom/inventory" className="mt-3 inline-block text-sm text-royal-700">Back to inventory</Link>
       </div>
     );
   }
@@ -135,7 +135,7 @@ export default function CarDetailPage() {
     <div className="mx-auto max-w-3xl space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
-          <Link href="/showroom/inventory" className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Inventory</Link>
+          <Link href="/showroom/inventory" className="text-xs font-semibold uppercase tracking-widest text-royal-700">Inventory</Link>
           <h1 className="font-display text-2xl font-semibold text-slate-900 sm:text-3xl">{car.display_name}</h1>
           <p className="mt-1 text-sm text-slate-400">
             Listed {rs(car.selling_price)} · Cost {rs(car.purchase_price)}
@@ -226,7 +226,7 @@ export default function CarDetailPage() {
         <div className="flex flex-wrap items-center gap-3 md:col-span-2">
           <button type="submit" disabled={pending} className="btn btn-primary">{pending ? "Saving…" : "Save car"}</button>
           <button type="button" className="btn btn-ghost" onClick={() => router.push("/showroom/inventory")}>Back</button>
-          {saved ? <span className="text-sm text-emerald-700">Saved</span> : null}
+          {saved ? <span className="text-sm text-royal-800">Saved</span> : null}
         </div>
       </form>
     </div>

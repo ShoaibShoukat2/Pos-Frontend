@@ -131,7 +131,7 @@ export function ImageCapture({
             <button
               type="button"
               onClick={capture}
-              className="flex-1 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
+              className="flex-1 rounded-lg bg-royal-800 px-3 py-2 text-xs font-semibold text-white hover:bg-royal-950"
             >
               Capture
             </button>

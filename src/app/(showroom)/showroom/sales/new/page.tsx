@@ -50,7 +50,7 @@ export default function NewSalePage() {
 
   const inp = (k: string, type = "text") => (
     <input type={type} value={(form as any)[k]} onChange={(e) => set(k, e.target.value)}
-      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />
+      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />
   );
 
   return (
@@ -62,7 +62,7 @@ export default function NewSalePage() {
         />
       ) : null}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Sales</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-royal-700">Sales</p>
         <h1 className="font-display text-2xl font-semibold text-slate-900">New Car Sale</h1>
       </div>
       <form onSubmit={onSubmit} className="space-y-5">
@@ -72,7 +72,7 @@ export default function NewSalePage() {
           <label className="block space-y-1.5">
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Car *</span>
             <select value={form.car} onChange={(e) => { set("car", e.target.value); const c = cars.find(c => c.id === e.target.value); }}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500">
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700">
               <option value="">Select available car</option>
               {cars.map((c) => <option key={c.id} value={c.id}>{c.display_name || c.name}</option>)}
             </select>
@@ -80,7 +80,7 @@ export default function NewSalePage() {
           <label className="block space-y-1.5">
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Customer *</span>
             <select value={form.customer} onChange={(e) => set("customer", e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500">
+              className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700">
               <option value="">Select customer</option>
               {customers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
@@ -109,14 +109,14 @@ export default function NewSalePage() {
             <label className="block space-y-1.5">
               <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Payment Method</span>
               <select value={form.payment_method} onChange={(e) => set("payment_method", e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500">
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700">
                 {["cash","bank","card","jazzcash","easypaisa"].map((m) => <option key={m} value={m} className="capitalize">{m}</option>)}
               </select>
             </label>
           </div>
           <div className="mt-2 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-4 text-sm">
             <div><p className="text-slate-400">Final Amount</p><p className="font-display text-xl font-semibold text-slate-900">Rs {final.toLocaleString()}</p></div>
-            <div><p className="text-slate-400">Remaining</p><p className={`font-display text-xl font-semibold ${remaining > 0 ? "text-red-600" : "text-emerald-600"}`}>Rs {remaining.toLocaleString()}</p></div>
+            <div><p className="text-slate-400">Remaining</p><p className={`font-display text-xl font-semibold ${remaining > 0 ? "text-red-600" : "text-royal-700"}`}>Rs {remaining.toLocaleString()}</p></div>
           </div>
         </div>
 

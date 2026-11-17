@@ -210,7 +210,7 @@ export function Pill({ children, tone = "violet" }: { children: React.ReactNode;
   const tones = {
     violet: "bg-royal-100 text-royal-800",
     gold: "bg-gold-300/40 text-royal-950",
-    green: "bg-emerald-50 text-emerald-700",
+    green: "bg-royal-100 text-royal-800",
     red: "bg-red-50 text-red-700",
   };
   return <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${tones[tone]}`}>{children}</span>;

@@ -58,12 +58,12 @@ type Dashboard = {
 type DeskFilter = "open" | "due" | "all";
 
 const STATUS: Record<string, string> = {
-  active: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+  active: "bg-royal-50 text-royal-800 ring-royal-100",
   due_today: "bg-amber-50 text-amber-800 ring-amber-100",
   overdue: "bg-red-50 text-red-700 ring-red-100",
   completed: "bg-slate-100 text-slate-500 ring-slate-200",
-  available: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-  rented: "bg-sky-50 text-sky-700 ring-sky-100",
+  available: "bg-royal-50 text-royal-800 ring-royal-100",
+  rented: "bg-gold-300/40 text-royal-950 ring-gold-300",
   maintenance: "bg-amber-50 text-amber-800 ring-amber-100",
 };
 
@@ -317,7 +317,7 @@ export default function RentalDashboardPage() {
                             onCopy={() => wa && copyLink(wa)}
                           />
                           <div className="mt-2 flex gap-3 text-xs font-medium">
-                            <button type="button" onClick={() => openInvoice(row.id, false)} className="text-emerald-700">Preview</button>
+                            <button type="button" onClick={() => openInvoice(row.id, false)} className="text-royal-800">Preview</button>
                             {open ? <button type="button" onClick={() => markReturned(row.id)} className="text-slate-500">Return</button> : null}
                           </div>
                         </td>
@@ -339,7 +339,7 @@ export default function RentalDashboardPage() {
           </button>
           <div className="flex flex-col justify-between gap-4 p-4 sm:p-5">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">Owner option</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-royal-800">Owner option</p>
               <h2 className="mt-1 font-display text-xl font-semibold text-slate-950">شرائط</h2>
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-500">
                 The owner’s handwritten terms stay on the desk. Open the sheet here, or print it after the rental contract on A4.
@@ -365,7 +365,7 @@ export default function RentalDashboardPage() {
             <h2 className="font-semibold text-slate-950">Fleet</h2>
             <p className="text-xs text-slate-400">{data?.available ?? 0} free · {data?.rented ?? 0} out</p>
           </div>
-          <Link href="/rental/fleet" className="text-xs font-semibold text-emerald-700">Manage</Link>
+          <Link href="/rental/fleet" className="text-xs font-semibold text-royal-800">Manage</Link>
         </div>
         {!data || data.fleet.length === 0 ? (
           <p className="p-6 text-sm text-slate-400">No cars in the fleet yet.</p>
@@ -438,7 +438,7 @@ function RentalCard({
       <div className="mt-2 flex items-center justify-between text-xs">
         <span className="text-slate-400">{row.invoice_number || "—"} · {row.signed ? "Signed" : "Not signed"}</span>
         <span className="flex gap-3 font-medium">
-          <button type="button" onClick={onPreview} className="text-emerald-700">Preview</button>
+          <button type="button" onClick={onPreview} className="text-royal-800">Preview</button>
           {open ? <button type="button" onClick={onReturn} className="text-slate-500">Return</button> : null}
         </span>
       </div>
@@ -468,18 +468,18 @@ function RentalActions({
           {printing ? <FillRing /> : <Printer size={15} />}
           Print
         </button>
-        <button type="button" disabled={!wa} onClick={onShare} className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 text-sm font-semibold text-white disabled:opacity-40">
+        <button type="button" disabled={!wa} onClick={onShare} className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-royal-800 px-3 text-sm font-semibold text-white disabled:opacity-40">
           <Share2 size={15} />
           WhatsApp
         </button>
       </div>
       {shareOpen && wa ? (
-        <div className="rental-drop mt-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-          <p className="text-xs font-semibold text-emerald-800">Copy link</p>
+        <div className="rental-drop mt-2 rounded-xl border border-royal-200 bg-royal-50 p-3">
+          <p className="text-xs font-semibold text-royal-900">Copy link</p>
           <p className="mt-1 break-all text-[11px] text-slate-500">{wa}</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            <button type="button" onClick={onCopy} className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white">Copy link</button>
-            <a href={wa} target="_blank" rel="noreferrer" className="rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-800">Open WhatsApp</a>
+            <button type="button" onClick={onCopy} className="rounded-lg bg-royal-900 px-3 py-2 text-xs font-semibold text-white">Copy link</button>
+            <a href={wa} target="_blank" rel="noreferrer" className="rounded-lg border border-royal-200 bg-white px-3 py-2 text-xs font-semibold text-royal-900">Open WhatsApp</a>
           </div>
         </div>
       ) : null}
@@ -493,7 +493,7 @@ function TermsSheet({ onClose }: { onClose: () => void }) {
       <div className="mx-auto flex h-full min-h-0 w-full max-w-3xl flex-col" onClick={(event) => event.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between gap-3 text-white">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-300">Owner terms</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-300">Owner terms</p>
             <h2 className="font-display text-xl font-semibold">شرائط</h2>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -544,14 +544,14 @@ function PrintBanner() {
   return (
     <div className="rental-drop fixed inset-x-0 top-0 z-[91] bg-white shadow-lg">
       <div className="flex items-center gap-3 px-4 py-3">
-        <span className="text-emerald-700"><FillRing /></span>
+        <span className="text-royal-800"><FillRing /></span>
         <div>
           <p className="text-sm font-semibold text-slate-900">Printing invoice</p>
           <p className="text-xs text-slate-500">Filling the slip</p>
         </div>
       </div>
-      <div className="h-1 bg-emerald-100">
-        <div className="rental-bar h-full bg-emerald-600" />
+      <div className="h-1 bg-royal-100">
+        <div className="rental-bar h-full bg-royal-800" />
       </div>
     </div>
   );

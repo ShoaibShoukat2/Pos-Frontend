@@ -32,7 +32,7 @@ export default function NewPurchasePage() {
     finally { setPending(false); }
   }
 
-  const inp = (k: string, type = "text") => <input type={type} value={(form as any)[k]} onChange={(e) => set(k, e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />;
+  const inp = (k: string, type = "text") => <input type={type} value={(form as any)[k]} onChange={(e) => set(k, e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -42,14 +42,14 @@ export default function NewPurchasePage() {
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
           <label className="block space-y-1.5">
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Car *</span>
-            <select value={form.car} onChange={(e) => set("car", e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500">
+            <select value={form.car} onChange={(e) => set("car", e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700">
               <option value="">Select car</option>
               {cars.map((c) => <option key={c.id} value={c.id}>{c.display_name || c.name}</option>)}
             </select>
           </label>
           <label className="block space-y-1.5">
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Seller *</span>
-            <select value={form.seller} onChange={(e) => set("seller", e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500">
+            <select value={form.seller} onChange={(e) => set("seller", e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700">
               <option value="">Select seller</option>
               {sellers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
@@ -67,14 +67,14 @@ export default function NewPurchasePage() {
             <label className="block space-y-1.5"><span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Advance Paid (Rs)</span>{inp("advance_paid","number")}</label>
             <label className="block space-y-1.5">
               <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Payment Method</span>
-              <select value={form.payment_method} onChange={(e) => set("payment_method", e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500">
+              <select value={form.payment_method} onChange={(e) => set("payment_method", e.target.value)} className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700">
                 {["cash","bank","card","jazzcash","easypaisa"].map((m) => <option key={m} value={m}>{m}</option>)}
               </select>
             </label>
           </div>
           <div className="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-4 text-sm">
             <div><p className="text-slate-400">Total Cost</p><p className="font-display text-xl font-semibold text-slate-900">Rs {total.toLocaleString()}</p></div>
-            <div><p className="text-slate-400">Remaining</p><p className={`font-display text-xl font-semibold ${remaining > 0 ? "text-red-600" : "text-emerald-600"}`}>Rs {remaining.toLocaleString()}</p></div>
+            <div><p className="text-slate-400">Remaining</p><p className={`font-display text-xl font-semibold ${remaining > 0 ? "text-red-600" : "text-royal-700"}`}>Rs {remaining.toLocaleString()}</p></div>
           </div>
         </div>
         <div className="flex gap-3">

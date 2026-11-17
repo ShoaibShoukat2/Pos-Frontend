@@ -77,7 +77,7 @@ export default function SalesPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Showroom</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-royal-700">Showroom</p>
           <h1 className="font-display text-2xl font-semibold text-slate-900">Car Sales</h1>
         </div>
         <Link
@@ -94,7 +94,7 @@ export default function SalesPage() {
         ) : sales.length === 0 ? (
           <div className="px-5 py-12 text-center">
             <p className="text-slate-400">No sales yet.</p>
-            <Link href="/showroom/sales/new" className="mt-2 inline-block text-sm text-indigo-600 hover:underline">Record first sale</Link>
+            <Link href="/showroom/sales/new" className="mt-2 inline-block text-sm text-royal-700 hover:underline">Record first sale</Link>
           </div>
         ) : (
           <table className="w-full min-w-[860px] text-sm text-left">
@@ -120,17 +120,17 @@ export default function SalesPage() {
                   <td className="px-5 py-3 text-slate-500">{s.sale_date}</td>
                   <td className="px-5 py-3 font-semibold text-slate-900">{rs(parseFloat(s.final_amount || "0"))}</td>
                   <td className="px-5 py-3">
-                    <span className={parseFloat(s.remaining_amount) > 0 ? "font-medium text-red-600" : "text-emerald-600"}>
+                    <span className={parseFloat(s.remaining_amount) > 0 ? "font-medium text-red-600" : "text-royal-700"}>
                       {parseFloat(s.remaining_amount) > 0 ? rs(parseFloat(s.remaining_amount)) : "Paid ✓"}
                     </span>
                   </td>
                   <td className="px-5 py-3">
-                    <span className={parseFloat(s.profit) >= 0 ? "text-emerald-600" : "text-red-600"}>
+                    <span className={parseFloat(s.profit) >= 0 ? "text-royal-700" : "text-red-600"}>
                       {parseFloat(s.profit) >= 0 ? "+" : ""}{rs(parseFloat(s.profit || "0"))}
                     </span>
                   </td>
                   <td className="px-5 py-3">
-                    <span className={s.signed ? "text-emerald-600" : "text-amber-600"}>
+                    <span className={s.signed ? "text-royal-700" : "text-amber-600"}>
                       {s.signed ? "Saved" : "Pending"}
                     </span>
                   </td>
@@ -138,7 +138,7 @@ export default function SalesPage() {
                     <button
                       type="button"
                       onClick={() => openInvoice(s)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100 transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-royal-100 bg-royal-50 px-3 py-1.5 text-xs font-medium text-royal-800 hover:bg-royal-100 transition-colors"
                     >
                       <FileText size={13} />
                       View / Print

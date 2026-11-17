@@ -27,7 +27,7 @@ export default function NewRentalCustomerPage() {
     }
   }
 
-  const field = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600";
+  const field = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-800";
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
@@ -49,7 +49,7 @@ export default function NewRentalCustomerPage() {
           <textarea value={form.address} onChange={(event) => set("address", event.target.value)} rows={2} className={field} />
         </label>
         <div className="flex gap-3 pt-2">
-          <button type="submit" disabled={pending} className="flex-1 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40">{pending ? "Saving…" : "Save customer"}</button>
+          <button type="submit" disabled={pending} className="flex-1 rounded-xl bg-royal-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40">{pending ? "Saving…" : "Save customer"}</button>
           <button type="button" onClick={() => router.back()} className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm">Cancel</button>
         </div>
       </form>

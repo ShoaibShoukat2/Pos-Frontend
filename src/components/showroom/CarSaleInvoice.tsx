@@ -271,7 +271,7 @@ export function CarSaleInvoice({
         <div className="invoice-no-print mb-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">{preview ? "Preview" : "Sale Invoice"}</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-royal-700">{preview ? "Preview" : "Sale Invoice"}</p>
             <p className="font-medium text-slate-900">{data.invoice_number}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -305,7 +305,7 @@ export function CarSaleInvoice({
               type="button"
               onClick={() => (preview || !data.sale_id ? void printInvoice() : saveEvidence(true))}
               disabled={saving || !printerReady}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-40"
+              className="flex items-center gap-2 rounded-xl bg-royal-800 px-4 py-2.5 text-sm font-medium text-white hover:bg-royal-950 transition-colors disabled:opacity-40"
             >
               <Printer size={15} />
               {saving ? "Saving…" : "Print contract"}
@@ -322,9 +322,9 @@ export function CarSaleInvoice({
           </div>
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
-            <Printer size={14} className={activePrinter ? "text-emerald-600" : "text-amber-600"} />
+            <Printer size={14} className={activePrinter ? "text-royal-700" : "text-amber-600"} />
             {activePrinter ? (
-              <span className="text-xs font-medium text-emerald-700">Printer connected: {activePrinter}</span>
+              <span className="text-xs font-medium text-royal-800">Printer connected: {activePrinter}</span>
             ) : desktopApp ? (
               <span className="text-xs font-medium text-amber-700">{desktopPrint ? "Printer not connected" : "Looking for a printer…"}</span>
             ) : (
@@ -444,7 +444,7 @@ export function CarSaleInvoice({
                   {data.discount > 0 ? (
                     <tr>
                       <td className="px-5 py-3 text-slate-500">Discount</td>
-                      <td className="px-5 py-3 text-right text-emerald-600">− {rs(data.discount)}</td>
+                      <td className="px-5 py-3 text-right text-royal-700">− {rs(data.discount)}</td>
                     </tr>
                   ) : null}
                   <tr className="bg-slate-900 text-white">
@@ -456,13 +456,13 @@ export function CarSaleInvoice({
                       Amount received
                       <span className="ml-2 text-xs text-slate-400">({METHOD_LABEL[data.payment_method] || data.payment_method})</span>
                     </td>
-                    <td className="px-5 py-3 text-right font-medium text-emerald-600">{rs(paid)}</td>
+                    <td className="px-5 py-3 text-right font-medium text-royal-700">{rs(paid)}</td>
                   </tr>
-                  <tr className={due > 0 ? "bg-red-50" : "bg-emerald-50"}>
-                    <td className={`px-5 py-3 font-semibold ${due > 0 ? "text-red-700" : "text-emerald-700"}`}>
+                  <tr className={due > 0 ? "bg-red-50" : "bg-royal-50"}>
+                    <td className={`px-5 py-3 font-semibold ${due > 0 ? "text-red-700" : "text-royal-800"}`}>
                       {due > 0 ? "Balance remaining" : "Fully paid"}
                     </td>
-                    <td className={`px-5 py-3 text-right font-display text-lg font-bold ${due > 0 ? "text-red-700" : "text-emerald-700"}`}>
+                    <td className={`px-5 py-3 text-right font-display text-lg font-bold ${due > 0 ? "text-red-700" : "text-royal-800"}`}>
                       {due > 0 ? rs(due) : "✓ Cleared"}
                     </td>
                   </tr>
@@ -510,7 +510,7 @@ export function CarSaleInvoice({
               <div className="invoice-no-print mt-4 space-y-2">
                 <div className="flex gap-2">
                   <input value={payAmount} onChange={(event) => setPayAmount(event.target.value)} inputMode="decimal" placeholder="Amount" className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm" />
-                  <button type="button" disabled={saving || !payAmount} onClick={() => { void takePayment(); }} className="shrink-0 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40">Take payment</button>
+                  <button type="button" disabled={saving || !payAmount} onClick={() => { void takePayment(); }} className="shrink-0 rounded-xl bg-royal-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40">Take payment</button>
                 </div>
                 {payError ? <p className="text-sm text-red-600">{payError}</p> : null}
               </div>

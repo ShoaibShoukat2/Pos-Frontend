@@ -63,11 +63,11 @@ export default function AddCarPage() {
   const inp = (k: string, type = "text", placeholder = "") => (
     <input type={type} value={(form as any)[k]} placeholder={placeholder}
       onChange={(e) => set(k, e.target.value)}
-      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />
+      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />
   );
   const sel = (k: string, opts: Ref[], placeholder = "Select…") => (
     <select value={(form as any)[k]} onChange={(e) => set(k, e.target.value)}
-      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10">
+      className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10">
       <option value="">{placeholder}</option>
       {opts.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
     </select>
@@ -76,7 +76,7 @@ export default function AddCarPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">Inventory</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-royal-700">Inventory</p>
         <h1 className="font-display text-2xl font-semibold text-slate-900">Add New Car</h1>
       </div>
 
@@ -94,7 +94,7 @@ export default function AddCarPage() {
             <F label="Color">{inp("color", "text", "e.g. White")}</F>
             <F label="Status">
               <select value={form.status} onChange={(e) => set("status", e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10">
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10">
                 <option value="available">Available</option>
                 <option value="reserved">Reserved</option>
                 <option value="sold">Sold</option>
@@ -130,7 +130,7 @@ export default function AddCarPage() {
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="mb-5 font-semibold text-slate-900">Notes</h2>
           <textarea value={form.notes} onChange={(e) => set("notes", e.target.value)} rows={3}
-            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />
+            className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />
         </div>
 
         <div className="flex gap-3">

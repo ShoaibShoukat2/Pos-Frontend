@@ -236,7 +236,7 @@ export function RentalInvoice({
         <div className="invoice-no-print mb-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">{preview ? "Preview" : "Rental invoice"}</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-royal-800">{preview ? "Preview" : "Rental invoice"}</p>
               <p className="font-medium text-slate-900">{data.invoice_number}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -245,17 +245,17 @@ export function RentalInvoice({
                 <button type="button" onClick={() => choosePaper("80mm")} className={`rounded-lg px-3 py-1.5 text-xs font-medium ${paper === "80mm" ? "bg-white shadow-sm" : "text-slate-400"}`}>80mm</button>
               </div>
               <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700">
-                <input type="checkbox" checked={includeTerms} onChange={(event) => setIncludeTerms(event.target.checked)} className="h-3.5 w-3.5 accent-emerald-700" />
+                <input type="checkbox" checked={includeTerms} onChange={(event) => setIncludeTerms(event.target.checked)} className="h-3.5 w-3.5 accent-royal-800" />
                 شرائط
               </label>
               {wa ? (
-                <a href={wa} target="_blank" rel="noreferrer" className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">WhatsApp</a>
+                <a href={wa} target="_blank" rel="noreferrer" className="rounded-xl border border-royal-200 bg-royal-50 px-3 py-2 text-sm font-medium text-royal-900">WhatsApp</a>
               ) : null}
               <button
                 type="button"
                 onClick={() => (preview || !data.rental_id ? void printInvoice() : saveEvidence(true))}
                 disabled={saving || !printerReady}
-                className="flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-40"
+                className="flex items-center gap-2 rounded-xl bg-royal-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-40"
               >
                 <Printer size={15} />
                 {saving ? "Saving…" : "Print contract"}
@@ -308,7 +308,7 @@ export function RentalInvoice({
               <tbody className="divide-y divide-slate-100">
                 <tr><td className="py-2 text-slate-500">Rent total</td><td className="py-2 text-right font-medium">{rs(terms.total_amount)}</td></tr>
                 <tr><td className="py-2 text-slate-500">Security deposit</td><td className="py-2 text-right font-medium">{rs(data.deposit)}</td></tr>
-                <tr><td className="py-2 text-slate-500">Paid ({METHOD[data.payment_method] || data.payment_method})</td><td className="py-2 text-right font-medium text-emerald-700">{rs(terms.received_amount)}</td></tr>
+                <tr><td className="py-2 text-slate-500">Paid ({METHOD[data.payment_method] || data.payment_method})</td><td className="py-2 text-right font-medium text-royal-800">{rs(terms.received_amount)}</td></tr>
                 <tr><td className="py-2 font-semibold">Balance</td><td className={`py-2 text-right font-display text-lg font-bold ${terms.balance > 0 ? "text-red-600" : ""}`}>{terms.balance > 0 ? rs(terms.balance) : "Cleared"}</td></tr>
               </tbody>
             </table>
@@ -326,7 +326,7 @@ export function RentalInvoice({
             />
             {!preview && data.rental_id && !terms.closed ? (
               <div className="invoice-no-print mt-4 space-y-2">
-                <button type="button" disabled={saving} onClick={() => { if (window.confirm("Check this car in and mark it available?")) void runAction("complete"); }} className="w-full rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white disabled:opacity-40">Check in</button>
+                <button type="button" disabled={saving} onClick={() => { if (window.confirm("Check this car in and mark it available?")) void runAction("complete"); }} className="w-full rounded-xl bg-royal-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-40">Check in</button>
                 <div className="grid grid-cols-2 gap-2">
                   <button type="button" onClick={() => setAction(action === "extend" ? "" : "extend")} className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium">Extend</button>
                   <button type="button" onClick={() => setAction(action === "pay" ? "" : "pay")} className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium">Take payment</button>
@@ -345,7 +345,7 @@ export function RentalInvoice({
                 ) : null}
               </div>
             ) : null}
-            {!preview && terms.closed ? <p className="invoice-no-print mt-3 text-center text-sm text-emerald-700">Car checked in.</p> : null}
+            {!preview && terms.closed ? <p className="invoice-no-print mt-3 text-center text-sm text-royal-800">Car checked in.</p> : null}
           </div>
           <div className="border-t border-slate-200 bg-slate-50 px-8 py-4 text-center text-xs text-slate-400">
             Rental agreement from {data.shop_name}. {data.cashier_name ? `Prepared by ${data.cashier_name}.` : ""}

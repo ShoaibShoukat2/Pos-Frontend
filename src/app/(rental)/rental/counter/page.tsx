@@ -141,7 +141,7 @@ export default function RentCounterPage() {
     }
   }
 
-  const field = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/10";
+  const field = "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-royal-800 focus:ring-2 focus:ring-royal-700/10";
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -156,7 +156,7 @@ export default function RentCounterPage() {
       <HardwareToasts hardware={hardware} />
 
       <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Rent a Car</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-royal-800">Rent a Car</p>
         <h1 className="font-display text-2xl font-semibold text-slate-900">Rent Counter</h1>
         <p className="mt-0.5 text-sm text-slate-400">Choose the car and customer, then preview or print the rental slip.</p>
       </div>
@@ -168,7 +168,7 @@ export default function RentCounterPage() {
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
               <p className="font-semibold text-slate-900">Car</p>
-              <Link href="/rental/fleet/new" className="text-xs font-medium text-emerald-700">Add car</Link>
+              <Link href="/rental/fleet/new" className="text-xs font-medium text-royal-800">Add car</Link>
             </div>
             <select value={carId} onChange={(event) => chooseCar(event.target.value)} className={field}>
               <option value="">Available cars</option>
@@ -182,7 +182,7 @@ export default function RentCounterPage() {
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
               <p className="font-semibold text-slate-900">Customer</p>
-              <Link href="/rental/customers/new" className="text-xs font-medium text-emerald-700">Add customer</Link>
+              <Link href="/rental/customers/new" className="text-xs font-medium text-royal-800">Add customer</Link>
             </div>
             <select value={customerId} onChange={(event) => setCustomerId(event.target.value)} className={field}>
               <option value="">Customers</option>
@@ -233,11 +233,11 @@ export default function RentCounterPage() {
             <span>Print slip after this rental. Photo, customer signature, and dealer signature are taken on the invoice.</span>
           </label>
           {errors.form || errors.detail ? <p className="mt-3 text-sm text-red-600">{errors.form || errors.detail}</p> : null}
-          {savedNote ? <p className="mt-3 text-sm text-emerald-700">{savedNote}</p> : null}
+          {savedNote ? <p className="mt-3 text-sm text-royal-800">{savedNote}</p> : null}
           <button type="button" disabled={!car || !customer} onClick={() => setPreview(draft())} className="mt-4 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 disabled:opacity-40">
             Preview invoice
           </button>
-          <button type="submit" disabled={pending} className="mt-2 w-full rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40">
+          <button type="submit" disabled={pending} className="mt-2 w-full rounded-xl bg-royal-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40">
             {pending ? "Saving…" : printSlip ? "Complete rental & print invoice" : "Complete rental"}
           </button>
         </aside>

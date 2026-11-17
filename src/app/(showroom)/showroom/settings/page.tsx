@@ -32,7 +32,7 @@ function Section({ title, endpoint }: { title: string; endpoint: string }) {
       <h3 className="mb-4 font-semibold text-slate-900">{title}</h3>
       <form onSubmit={add} className="mb-4 flex gap-2">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder={`Add ${title.toLowerCase()}…`}
-          className="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10" />
+          className="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm outline-none focus:border-royal-700 focus:ring-2 focus:ring-royal-700/10" />
         <button type="submit" disabled={saving} className="btn btn-primary px-4 py-2 text-sm">Add</button>
       </form>
       <ul className="space-y-1">
