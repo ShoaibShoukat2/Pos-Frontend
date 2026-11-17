@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { LogOut, Menu, MoreHorizontal, X, type LucideIcon } from "lucide-react";
 
+import { ASIDE, NAV_ACTIVE, NAV_IDLE } from "@/components/dashboard/kit";
 import { FounderCredit } from "@/components/FounderCredit";
 
 export type ChromeLink = {
@@ -77,10 +78,9 @@ export function NavDrawer({
 
       {/* Drawer */}
       <aside
-        className={`safe-top safe-bottom fixed inset-y-0 left-0 z-50 flex w-[min(20rem,calc(100vw-2.5rem))] flex-col shadow-2xl transition-transform duration-200 ${
+        className={`safe-top safe-bottom fixed inset-y-0 left-0 z-50 flex w-[min(20rem,calc(100vw-2.5rem))] flex-col shadow-2xl transition-transform duration-200 ${ASIDE} ${
           open ? "translate-x-0" : "pointer-events-none -translate-x-full"
         }`}
-        style={{ background: "var(--brand-primary, #1e293b)", color: "#f8fafc" }}
         aria-hidden={!open}
         {...(!open ? { inert: true } : {})}
       >
@@ -119,18 +119,7 @@ export function NavDrawer({
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
-                className="flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors"
-                style={
-                  active
-                    ? { background: "var(--brand-accent, #6366f1)", color: "#fff", fontWeight: 500 }
-                    : { color: "rgba(248,250,252,0.65)" }
-                }
-                onMouseOver={(e) => {
-                  if (!active) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
-                }}
-                onMouseOut={(e) => {
-                  if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
-                }}
+                className={`flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors ${active ? NAV_ACTIVE : NAV_IDLE}`}
               >
                 <Icon size={16} className="shrink-0" />
                 {item.label}
@@ -182,7 +171,7 @@ export function BottomNav({
               key={item.href}
               href={item.href}
               className={`flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-medium transition-colors ${
-                active ? "text-brand-600" : "text-surface-400"
+                active ? "text-royal-800" : "text-surface-400"
               }`}
             >
               <Icon size={18} />
@@ -194,7 +183,7 @@ export function BottomNav({
           type="button"
           onClick={onMore}
           className={`flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-medium transition-colors ${
-            moreOpen ? "text-brand-600" : "text-surface-400"
+            moreOpen ? "text-royal-800" : "text-surface-400"
           }`}
         >
           <MoreHorizontal size={18} />

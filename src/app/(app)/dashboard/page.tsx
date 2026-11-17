@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { UserPlus } from "lucide-react";
+import { Package, ShoppingBag, UserPlus, Users, Wallet } from "lucide-react";
 
-import { TableSkeleton } from "@/components/DataTable";
-import { Badge, PageHeader } from "@/components/ui";
+import { AreaChart, DashHeader, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
+import { Badge } from "@/components/ui";
 import { api } from "@/lib/api";
 import { isCarShowroom, useAuth } from "@/lib/auth";
 import { num, rs } from "@/lib/money";
-import type { LiveProduct, OwnerOverview, ReportSeries } from "@/lib/types";
+import type { LiveProduct, OwnerOverview } from "@/lib/types";
 
 const PERIODS = [
   { id: "today", label: "Today" },
@@ -98,66 +98,36 @@ export default function DashboardPage() {
   const selected = visible.find((row) => row.id === selectedId) || visible[0] || products[0] || null;
   const counts = data?.live_counts;
 
-  const kpis = data
-    ? [
-        { label: period === "today" ? "Sales today" : "Sales", value: rs(data.today_sales), href: "/reports" },
-        { label: "Net profit", value: rs(data.today_profit), href: "/reports" },
-        { label: "Orders", value: String(data.orders), href: "/reports" },
-        { label: "Customers", value: String(data.customers), href: "/customers" },
-        { label: "Receivables", value: rs(data.outstanding), href: "/customers" },
-        { label: "Payables", value: rs(data.payables), href: "/purchases" },
-        { label: "Expenses", value: rs(data.expenses), href: "/expenses" },
-        { label: "Products", value: String(data.products), href: "/products" },
-        { label: "Services", value: String(data.services ?? 0), href: "/services" },
-        { label: "Staff", value: `${data.users_active}/${data.users_total}`, href: "/settings/cashiers" },
-      ]
-    : [];
+  const firstName = user?.first_name || user?.full_name?.split(" ")[0] || "";
+  const trend = (data?.daily || []).slice(-8).map((row) => ({ label: shortDate(row.date), value: num(row.total) }));
 
   return (
-    <div>
-      <PageHeader
-        eyebrow={
-          user?.business_type === "pizza"
-            ? "Pizza shop"
-            : user?.is_owner
-              ? "Owner overview"
-              : "Business overview"
-        }
-        title={`${user?.business_name || "Dashboard"}${user?.first_name ? ` · ${user.first_name}` : ""}`}
-        description={
+    <div className="space-y-5">
+      <DashHeader
+        name={firstName}
+        subtitle={
           user?.business_type === "pizza"
             ? "Menu, counter, today’s pizzas, cash and staff."
-            : `${data ? `${data.from} → ${data.to}` : "Live sales, cash, people and catalog activity."}`
+            : data
+              ? `${data.from} → ${data.to}`
+              : "Live sales, cash, people and catalog activity."
         }
-        action={
-          <div className="flex w-full flex-col items-stretch gap-2 sm:items-end">
-            <div className="flex w-full rounded-xl border border-surface-200 bg-white p-1 sm:w-auto">
-              {PERIODS.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setPeriod(p.id)}
-                  className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-medium sm:flex-none ${
-                    period === p.id
-                      ? "bg-surface-900 text-white"
-                      : "text-surface-500 hover:text-surface-900"
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-              <Link href="/settings/cashiers" className="btn btn-primary text-center">
-                Add cashier
-              </Link>
-              <Link href="/pos" className="btn btn-copper text-center">
-                Open POS
-              </Link>
-            </div>
-          </div>
-        }
-      />
+      >
+        <div className="flex rounded-xl bg-white p-1 shadow-card">
+          {PERIODS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setPeriod(p.id)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${period === p.id ? "bg-royal-900 text-white" : "text-slate-500"}`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <Link href="/pos" className="rounded-xl bg-royal-900 px-4 py-2.5 text-sm font-semibold text-white">Open POS</Link>
+        <Link href="/settings/cashiers" className="rounded-xl border border-royal-200 bg-white px-4 py-2.5 text-sm font-semibold text-royal-900">Add cashier</Link>
+      </DashHeader>
 
       {user?.business_type === "pizza" ? <PizzaBoard data={data} period={period} /> : null}
 
@@ -176,7 +146,7 @@ export default function DashboardPage() {
         </span>
       </Link>
 
-      {loading && !data ? <TableSkeleton rows={3} cols={4} /> : null}
+      {loading && !data ? <p className="text-sm text-slate-400">Loading workspace numbers…</p> : null}
 
       {data?.alerts.length ? (
         <div className="mb-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -192,55 +162,37 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      {kpis.length ? (
-        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-          {kpis.map((card) => (
-            <Link key={card.label} href={card.href} className="card p-4 hover:border-brand-400">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-surface-400">{card.label}</p>
-              <p className="stat-value mt-1.5">{card.value}</p>
-            </Link>
-          ))}
-        </div>
+      {data ? (
+        <StatGrid>
+          <StatCard icon={Wallet} tone="hero" label={period === "today" ? "Sales today" : "Sales"} value={rs(data.today_sales)} hint={`${data.orders} orders`} href="/reports" />
+          <StatCard icon={ShoppingBag} label="Net profit" value={rs(data.today_profit)} href="/reports" />
+          <StatCard icon={Users} label="Customers" value={String(data.customers)} hint={rs(data.outstanding)} href="/customers" />
+          <StatCard icon={Package} label="Products" value={String(data.products)} hint={`${data.services ?? 0} services`} href="/products" />
+        </StatGrid>
       ) : !loading ? (
         <p className="text-sm text-surface-400">Numbers appear once you have report access.</p>
       ) : null}
 
       {data ? (
-        <div className="mt-6 grid gap-4 lg:grid-cols-2">
-          <div className="card p-6">
-            <h2 className="font-display text-xl">Profit and loss</h2>
-            <p className="mt-1 text-xs text-surface-400">
-              {data.from} → {data.to}
-            </p>
-            <dl className="mt-5 space-y-2 text-sm">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.75fr)]">
+          <Panel title={period === "today" ? "Today’s sales" : "Sales overview"} action={<span className="text-sm font-semibold text-royal-800">{rs(data.today_sales)}</span>}>
+            <AreaChart points={trend} />
+          </Panel>
+          <Panel title="Catalog sold">
+            <Donut
+              center={`${num(data.product_sale_percent).toFixed(0)}%`}
+              caption="Sold"
+              parts={[
+                { label: "Sold", value: data.products_sold ?? 0 },
+                { label: "Still in catalog", value: Math.max(0, data.products - (data.products_sold ?? 0)) },
+              ]}
+            />
+            <dl className="mt-4 space-y-2 border-t border-royal-50 pt-3 text-sm">
               <Row label="Revenue" value={rs(data.revenue)} />
-              <Row label="Cost of goods" value={rs(data.cost)} />
-              <div className="border-t border-surface-200 pt-2">
-                <Row label="Gross profit" value={rs(data.gross_profit)} strong />
-              </div>
               <Row label="Expenses" value={rs(data.expenses)} />
-              <div className="border-t border-surface-200 pt-2">
-                <Row label="Net profit" value={rs(data.today_profit)} strong />
-              </div>
+              <Row label="Net profit" value={rs(data.today_profit)} strong />
             </dl>
-          </div>
-          <div className="card p-6">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="font-display text-xl">{period === "today" ? "Today's sale" : "Sales"}</h2>
-                <p className="mt-1 text-xs text-surface-400">
-                  {data.from} → {data.to}
-                </p>
-              </div>
-              <p className="font-display text-2xl text-surface-900">{rs(data.today_sales)}</p>
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-2 text-sm">
-              <Stat label="Orders" value={String(data.orders)} />
-              <Stat label="Products sold" value={String(data.products_sold ?? 0)} />
-              <Stat label="Catalog sold" value={`${num(data.product_sale_percent).toFixed(0)}%`} />
-            </div>
-            <SalesChart rows={data.daily} />
-          </div>
+          </Panel>
         </div>
       ) : null}
 
@@ -583,46 +535,6 @@ function shortDate(iso: string) {
   const at = new Date(`${iso}T00:00:00`);
   if (Number.isNaN(at.getTime())) return iso.slice(5);
   return at.toLocaleDateString("en-PK", { day: "2-digit", month: "short" });
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl bg-surface-50 px-3 py-2">
-      <p className="text-[11px] uppercase tracking-wide text-surface-400">{label}</p>
-      <p className="mt-0.5 font-medium text-surface-900">{value}</p>
-    </div>
-  );
-}
-
-function SalesChart({ rows }: { rows: ReportSeries[] }) {
-  const points = rows.slice(-10);
-  if (points.length === 0) {
-    return <p className="mt-4 text-sm text-surface-400">No sales in this period yet.</p>;
-  }
-  const max = Math.max(...points.map((row) => num(row.total)), 1);
-  const width = 560;
-  const height = 150;
-  const gap = 14;
-  const barW = Math.min(42, (width - gap * (points.length + 1)) / points.length);
-  const group = points.length * barW + (points.length + 1) * gap;
-  const offset = Math.max(0, (width - group) / 2);
-  return (
-    <svg viewBox={`0 0 ${width} ${height + 28}`} className="mt-4 h-44 w-full" role="img" aria-label="Sales by day">
-      {points.map((row, index) => {
-        const barH = Math.max((num(row.total) / max) * (height - 8), 3);
-        const x = offset + gap + index * (barW + gap);
-        const y = height - barH;
-        return (
-          <g key={row.date}>
-            <rect x={x} y={y} width={barW} height={barH} rx="4" fill="#6366f1" />
-            <text x={x + barW / 2} y={height + 16} textAnchor="middle" fill="#475569" fontSize="10">
-              {shortDate(row.date)}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
 }
 
 function SoldRing({ percent }: { percent: number }) {

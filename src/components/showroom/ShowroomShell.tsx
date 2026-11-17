@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 
+import { ASIDE, MAIN, NAV_ACTIVE, NAV_IDLE } from "@/components/dashboard/kit";
 import { useAuth } from "@/lib/auth";
 
 const NAV = [
@@ -70,11 +71,7 @@ export function ShowroomShell({ children }: { children: React.ReactNode }) {
             key={item.href}
             href={item.href}
             onClick={onClose}
-            className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-colors ${
-              active
-                ? "bg-indigo-600 text-white font-medium"
-                : "text-white/60 hover:bg-white/8 hover:text-white"
-            }`}
+            className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-colors ${active ? NAV_ACTIVE : NAV_IDLE}`}
           >
             <Icon size={16} className="shrink-0" />
             {item.label}
@@ -88,12 +85,12 @@ export function ShowroomShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-dvh flex-col lg:grid lg:h-full lg:min-h-0 lg:grid-cols-[260px_1fr] lg:overflow-hidden">
 
       {/* ── Desktop sidebar ─────────────────────────────────────────── */}
-      <aside className="hidden min-h-0 flex-col bg-slate-900 text-white lg:flex lg:h-full lg:overflow-hidden">
+      <aside className={`hidden min-h-0 flex-col text-white lg:flex lg:h-full lg:overflow-hidden ${ASIDE}`}>
         {/* Brand */}
         <div className="shrink-0 border-b border-white/8 px-5 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600">
-              <Car size={18} className="text-white" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold-400 text-royal-950">
+              <Car size={18} className="text-royal-950" />
             </div>
             <div>
               <p className="font-display text-base font-semibold leading-tight text-white">Car Showroom</p>
@@ -121,22 +118,22 @@ export function ShowroomShell({ children }: { children: React.ReactNode }) {
       {/* ── Mobile drawer backdrop ───────────────────────────────────── */}
       {drawerOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-royal-950/50 backdrop-blur-sm lg:hidden"
           onClick={() => setDrawerOpen(false)}
         />
       )}
 
       {/* ── Mobile drawer ───────────────────────────────────────────── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-slate-900 text-white shadow-2xl transition-transform duration-200 lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col ${ASIDE} text-white shadow-2xl transition-transform duration-200 lg:hidden ${
           drawerOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand + close */}
         <div className="flex shrink-0 items-center justify-between border-b border-white/8 px-5 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600">
-              <Car size={18} className="text-white" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold-400 text-royal-950">
+              <Car size={18} className="text-royal-950" />
             </div>
             <div>
               <p className="font-display text-base font-semibold leading-tight text-white">Car Showroom</p>
@@ -188,13 +185,13 @@ export function ShowroomShell({ children }: { children: React.ReactNode }) {
             <p className="truncate text-xs text-slate-400">{user.business_name}</p>
           </div>
           {/* Car showroom icon */}
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600">
-            <Car size={15} className="text-white" />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gold-400 text-royal-950">
+            <Car size={15} className="text-royal-950" />
           </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto bg-slate-50 px-4 py-5 sm:px-6 sm:py-6 lg:overflow-y-auto">
+        <main className={`flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-6 lg:overflow-y-auto ${MAIN}`}>
           {children}
         </main>
       </div>

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { KeyRound, Printer, ScrollText, Share2, X } from "lucide-react";
+import { Car, KeyRound, Printer, ScrollText, Share2, Wallet, X } from "lucide-react";
 
+import { DashHeader, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
 import { RentalInvoice } from "@/components/rental/RentalInvoice";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -88,7 +89,6 @@ export default function RentalDashboardPage() {
   const [toast, setToast] = useState("");
   const [filter, setFilter] = useState<DeskFilter>("open");
   const [termsOpen, setTermsOpen] = useState(false);
-  const [todayLabel, setTodayLabel] = useState("");
 
   const load = useCallback(() => {
     api<Dashboard>("/api/rental/dashboard/")
@@ -100,9 +100,6 @@ export default function RentalDashboardPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
-  useEffect(() => {
-    setTodayLabel(new Date().toLocaleDateString("en-PK", { weekday: "long", day: "numeric", month: "long" }));
-  }, []);
 
   async function openInvoice(id: string, print: boolean) {
     if (print) setPrintingId(id);
@@ -168,67 +165,61 @@ export default function RentalDashboardPage() {
       {printingId ? <PrintBanner /> : null}
       <style>{RENTAL_MOTION}</style>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">Rent a Car</p>
-          <h1 className="truncate font-display text-xl font-semibold text-slate-950 sm:text-2xl">{user?.business_name || "Dashboard"}</h1>
-          <p className="mt-0.5 text-sm text-slate-500">Cars out, return dates, and money still open.</p>
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:flex">
-          <button type="button" onClick={() => setTermsOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-800 shadow-sm">
-            <ScrollText size={15} />
-            Owner terms
-          </button>
-          <Link href="/rental/counter" className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-3 py-2.5 text-sm font-medium text-white shadow-sm">
-            <KeyRound size={15} />
-            New rental
-          </Link>
-        </div>
-      </div>
+      <DashHeader name={user?.full_name?.split(" ")[0] || user?.business_name || ""} subtitle="Cars out, return dates, and money still open.">
+        <button type="button" onClick={() => setTermsOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-xl border border-royal-200 bg-white px-3 py-2.5 text-sm font-semibold text-royal-900">
+          <ScrollText size={15} />
+          Owner terms
+        </button>
+        <Link href="/rental/counter" className="inline-flex items-center justify-center gap-2 rounded-xl bg-royal-900 px-3 py-2.5 text-sm font-semibold text-white">
+          <KeyRound size={15} />
+          New rental
+        </Link>
+      </DashHeader>
 
       {error ? <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{error}</p> : null}
 
-      <section className="overflow-hidden rounded-2xl bg-slate-950 text-white shadow-sm">
-        <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)] lg:items-end">
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-300">{todayLabel}</p>
-            <p className="mt-4 text-xs font-medium uppercase tracking-wide text-white/45">This month</p>
-            <p className="mt-1 font-display text-3xl font-semibold tracking-tight sm:text-4xl">{data ? money(data.month_revenue) : "—"}</p>
-            <p className="mt-2 text-sm text-white/70">
-              {data?.active_count ?? 0} on the road
-              {" · "}
-              {data?.due_today ?? 0} due today
-              {" · "}
-              {data?.overdue ?? 0} overdue
-            </p>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <HeroStat label="Available" value={data ? String(data.available) : "—"} />
-            <HeroStat label="On rent" value={data ? String(data.rented) : "—"} />
-            <HeroStat label="Outstanding" value={data ? money(data.outstanding) : "—"} />
-          </div>
+      {data && (data.due_today > 0 || data.overdue > 0) ? (
+        <div className="flex flex-wrap gap-2">
+          {data.overdue > 0 ? (
+            <button type="button" onClick={() => setFilter("due")} className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+              {data.overdue} overdue return{data.overdue === 1 ? "" : "s"}
+            </button>
+          ) : null}
+          {data.due_today > 0 ? (
+            <button type="button" onClick={() => setFilter("due")} className="rounded-full bg-gold-300/50 px-3 py-1 text-xs font-semibold text-royal-950">
+              {data.due_today} due back today
+            </button>
+          ) : null}
         </div>
-        {data && (data.due_today > 0 || data.overdue > 0) ? (
-          <div className="flex flex-wrap gap-2 border-t border-white/10 px-4 py-3 sm:px-5">
-            {data.overdue > 0 ? (
-              <button type="button" onClick={() => setFilter("due")} className="rounded-full bg-red-400/15 px-3 py-1 text-xs font-medium text-red-200">
-                {data.overdue} overdue return{data.overdue === 1 ? "" : "s"}
-              </button>
-            ) : null}
-            {data.due_today > 0 ? (
-              <button type="button" onClick={() => setFilter("due")} className="rounded-full bg-amber-400/15 px-3 py-1 text-xs font-medium text-amber-100">
-                {data.due_today} due back today
-              </button>
-            ) : null}
-          </div>
-        ) : null}
-      </section>
+      ) : null}
 
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
-        <Stat label="Fleet" value={data ? String(data.cars_total) : "—"} hint={data?.maintenance ? `${data.maintenance} in workshop` : "Cars on the books"} />
-        <Stat label="Deposits held" value={data ? money(data.deposits_held) : "—"} hint="Security still with the desk" />
-        <Stat label="Due today" value={data ? String(data.due_today) : "—"} hint="Returns expected today" tone={data?.due_today ? "amber" : undefined} />
-        <Stat label="Overdue" value={data ? String(data.overdue) : "—"} hint="Past the return date" tone={data?.overdue ? "red" : undefined} />
+      <StatGrid>
+        <StatCard icon={Wallet} tone="hero" label="This month" value={data ? money(data.month_revenue) : "—"} hint={`${data?.active_count ?? 0} on the road`} />
+        <StatCard icon={Car} label="Available" value={data ? String(data.available) : "—"} hint={`${data?.cars_total ?? 0} in fleet`} href="/rental/fleet" />
+        <StatCard icon={KeyRound} label="On rent" value={data ? String(data.rented) : "—"} hint={`${data?.due_today ?? 0} due today`} />
+        <StatCard icon={ScrollText} label="Outstanding" value={data ? money(data.outstanding) : "—"} hint={data ? money(data.deposits_held) + " deposits" : "Deposits"} />
+      </StatGrid>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(260px,0.7fr)_minmax(0,1.3fr)]">
+        <Panel title="Fleet status">
+          <Donut
+            center={String(data?.cars_total ?? 0)}
+            caption="Cars"
+            parts={[
+              { label: "Available", value: data?.available ?? 0 },
+              { label: "On rent", value: data?.rented ?? 0 },
+              { label: "Workshop", value: data?.maintenance ?? 0 },
+            ]}
+          />
+        </Panel>
+        <Panel title="Desk">
+          <StatGrid cols="sm:grid-cols-2">
+            <StatCard icon={Wallet} label="Deposits held" value={data ? money(data.deposits_held) : "—"} />
+            <StatCard icon={Car} label="Due today" value={data ? String(data.due_today) : "—"} />
+            <StatCard icon={KeyRound} label="Overdue" value={data ? String(data.overdue) : "—"} />
+            <StatCard icon={ScrollText} label="Workshop" value={data ? String(data.maintenance) : "—"} />
+          </StatGrid>
+        </Panel>
       </div>
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -519,26 +510,6 @@ function TermsSheet({ onClose }: { onClose: () => void }) {
           Print sheet
         </Link>
       </div>
-    </div>
-  );
-}
-
-function HeroStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl bg-white/8 px-2 py-3 sm:px-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-white/45">{label}</p>
-      <p className="mt-1 truncate font-display text-sm font-semibold sm:text-base">{value}</p>
-    </div>
-  );
-}
-
-function Stat({ label, value, hint, tone }: { label: string; value: string; hint: string; tone?: "amber" | "red" }) {
-  const valueColor = tone === "red" ? "text-red-600" : tone === "amber" ? "text-amber-700" : "text-slate-950";
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-3.5 py-3 shadow-sm sm:px-4 sm:py-4">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
-      <p className={`mt-1 truncate font-display text-xl font-semibold sm:text-2xl ${valueColor}`}>{value}</p>
-      <p className="mt-1 truncate text-[11px] text-slate-400">{hint}</p>
     </div>
   );
 }

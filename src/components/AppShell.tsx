@@ -25,6 +25,7 @@ import {
   Wrench,
 } from "lucide-react";
 
+import { ASIDE, MAIN, NAV_ACTIVE, NAV_IDLE } from "@/components/dashboard/kit";
 import { FounderCredit } from "@/components/FounderCredit";
 import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
 import { isCarShowroom, isCashier, isRentACar, useAuth } from "@/lib/auth";
@@ -129,14 +130,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       style={accentStyle}
     >
       {/* ── Sidebar ── */}
-      <aside
-        className="hidden flex-col lg:flex lg:h-dvh lg:overflow-hidden lg:border-r"
-        style={{
-          background: "var(--brand-primary, #1e293b)",
-          borderColor: "rgba(255,255,255,0.07)",
-          color: "#f8fafc",
-        }}
-      >
+      <aside className={`hidden flex-col border-r border-white/10 lg:flex lg:h-dvh lg:overflow-hidden ${ASIDE}`}>
         {/* Brand / Logo */}
         <div className="shrink-0 px-4 py-4">
           <Link href="/dashboard" className="flex items-center gap-3">
@@ -189,24 +183,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 prefetch={false}
                 onMouseEnter={() => router.prefetch(item.href)}
-                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors"
-                style={
-                  active
-                    ? {
-                        background: "var(--brand-accent, #6366f1)",
-                        color: "#fff",
-                        fontWeight: 500,
-                      }
-                    : {
-                        color: "rgba(248,250,252,0.65)",
-                      }
-                }
-                onMouseOver={(e) => {
-                  if (!active) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
-                }}
-                onMouseOut={(e) => {
-                  if (!active) (e.currentTarget as HTMLElement).style.background = "transparent";
-                }}
+                className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors ${active ? NAV_ACTIVE : NAV_IDLE}`}
               >
                 <Icon size={15} className="shrink-0" />
                 {item.label}
@@ -261,7 +238,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </p>
           </div>
         </header>
-        <main className="page-pad min-h-0 min-w-0 flex-1 overflow-y-auto px-3 sm:px-6">
+        <main className={`page-pad min-h-0 min-w-0 flex-1 overflow-y-auto px-3 sm:px-6 ${MAIN}`}>
           {children}
         </main>
       </div>

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Building2, LayoutDashboard, LogOut, Users } from "lucide-react";
 
+import { ASIDE, MAIN, NAV_ACTIVE, NAV_IDLE } from "@/components/dashboard/kit";
 import { FounderCredit } from "@/components/FounderCredit";
 import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
 import { useAuth } from "@/lib/auth";
@@ -35,7 +36,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh lg:grid lg:h-dvh lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] lg:overflow-hidden">
-      <aside className="hidden flex-col border-ink-800 bg-ink-950 text-paper-50 lg:flex lg:h-dvh lg:overflow-hidden lg:border-r">
+      <aside className={`hidden flex-col border-r border-white/10 lg:flex lg:h-dvh lg:overflow-hidden ${ASIDE}`}>
         <div className="shrink-0 px-5 py-5">
           <p className="truncate font-display text-2xl tracking-tight">Universal POS</p>
           <p className="mt-0.5 text-[11px] uppercase tracking-[0.2em] text-copper-400">Platform control</p>
@@ -60,9 +61,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 prefetch={false}
                 onMouseEnter={() => router.prefetch(item.href)}
-                className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm ${
-                  active ? "bg-copper-500 text-ink-950" : "text-paper-50/75 hover:bg-white/5 hover:text-white"
-                }`}
+                className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm ${active ? NAV_ACTIVE : NAV_IDLE}`}
               >
                 <Icon size={16} className="shrink-0" />
                 {item.label}
@@ -89,7 +88,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             All registered businesses and users
           </p>
         </header>
-        <main className="page-pad min-h-0 min-w-0 flex-1 overflow-y-auto px-3 sm:px-6">{children}</main>
+        <main className={`page-pad min-h-0 min-w-0 flex-1 overflow-y-auto px-3 sm:px-6 ${MAIN}`}>{children}</main>
       </div>
       <NavDrawer
         open={menuOpen}

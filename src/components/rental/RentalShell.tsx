@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Car, KeyRound, LayoutDashboard, LogOut, Menu, ScrollText, Users, X } from "lucide-react";
 
+import { ASIDE, MAIN, NAV_ACTIVE, NAV_IDLE } from "@/components/dashboard/kit";
 import { useAuth } from "@/lib/auth";
 
 const NAV = [
@@ -49,9 +50,7 @@ export function RentalShell({ children }: { children: React.ReactNode }) {
             key={item.href}
             href={item.href}
             onClick={onClose}
-            className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-colors ${
-              active ? "bg-emerald-600 font-medium text-white" : "text-white/60 hover:bg-white/8 hover:text-white"
-            }`}
+            className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm transition-colors ${active ? NAV_ACTIVE : NAV_IDLE}`}
           >
             <Icon size={16} className="shrink-0" />
             {item.label}
@@ -63,11 +62,11 @@ export function RentalShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-full min-h-0 flex-col lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:overflow-hidden">
-      <aside className="hidden min-h-0 flex-col bg-slate-900 text-white lg:flex lg:h-full lg:overflow-hidden">
+      <aside className={`hidden min-h-0 flex-col lg:flex lg:h-full lg:overflow-hidden ${ASIDE}`}>
         <div className="shrink-0 border-b border-white/8 px-5 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600">
-              <KeyRound size={18} className="text-white" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold-400 text-royal-950">
+              <KeyRound size={18} className="text-royal-950" />
             </div>
             <div>
               <p className="font-display text-base font-semibold leading-tight text-white">Rent a Car</p>
@@ -89,11 +88,11 @@ export function RentalShell({ children }: { children: React.ReactNode }) {
 
       {drawerOpen ? <div className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden" onClick={() => setDrawerOpen(false)} /> : null}
 
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-slate-900 text-white shadow-2xl transition-transform duration-200 lg:hidden ${drawerOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col shadow-2xl transition-transform duration-200 lg:hidden ${ASIDE} ${drawerOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex shrink-0 items-center justify-between border-b border-white/8 px-5 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600">
-              <KeyRound size={18} className="text-white" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold-400 text-royal-950">
+              <KeyRound size={18} className="text-royal-950" />
             </div>
             <div>
               <p className="font-display text-base font-semibold leading-tight text-white">Rent a Car</p>
@@ -126,7 +125,7 @@ export function RentalShell({ children }: { children: React.ReactNode }) {
             <p className="truncate text-xs text-slate-400">{user.business_name}</p>
           </div>
         </header>
-        <main className="min-h-0 flex-1 overflow-y-auto bg-slate-100 px-3 py-4 sm:px-5 sm:py-5">{children}</main>
+        <main className={`min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-5 sm:py-5 ${MAIN}`}>{children}</main>
       </div>
     </div>
   );
