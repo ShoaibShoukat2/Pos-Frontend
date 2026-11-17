@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Car, KeyRound, LayoutDashboard, LogOut, Menu, Users, X } from "lucide-react";
+import { Car, KeyRound, LayoutDashboard, LogOut, Menu, ScrollText, Users, X } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
 
@@ -12,6 +12,7 @@ const NAV = [
   { href: "/rental/counter", label: "Rent Counter", icon: KeyRound },
   { href: "/rental/fleet", label: "Fleet", icon: Car },
   { href: "/rental/customers", label: "Customers", icon: Users },
+  { href: "/rental/terms", label: "Terms", icon: ScrollText },
 ];
 
 function isActive(pathname: string, href: string) {

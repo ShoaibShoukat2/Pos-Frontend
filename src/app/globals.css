@@ -244,6 +244,15 @@ th, td { overflow-wrap: break-word; }
     break-inside: auto;
   }
   body.printing-car-invoice .invoice-no-print { display: none !important; }
+  body.printing-car-invoice .rental-terms-sheet {
+    break-before: page;
+    page-break-before: always;
+  }
+  body.printing-car-invoice .rental-terms-sheet img {
+    width: 100% !important;
+    max-height: 270mm;
+    object-fit: contain;
+  }
   body.printing-car-invoice[data-car-print-size="a4"] #car-invoice-print-root { page: car-invoice-a4; }
   body.printing-car-invoice[data-car-print-size="80mm"] #car-invoice-print-root { page: car-invoice-80; }
 }

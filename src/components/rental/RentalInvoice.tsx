@@ -55,6 +55,7 @@ export function RentalInvoice({
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
   const [paper, setPaper] = useState<ShowroomPaper>("a4");
+  const [includeTerms, setIncludeTerms] = useState(true);
   const [printers, setPrinters] = useState<OsPrinter[] | null>(null);
   const [printerName, setPrinterName] = useState("");
   const [shop, setShop] = useState({ phone: "", address: "", logo: "" });
@@ -243,6 +244,10 @@ export function RentalInvoice({
                 <button type="button" onClick={() => choosePaper("a4")} className={`rounded-lg px-3 py-1.5 text-xs font-medium ${paper === "a4" ? "bg-white shadow-sm" : "text-slate-400"}`}>A4</button>
                 <button type="button" onClick={() => choosePaper("80mm")} className={`rounded-lg px-3 py-1.5 text-xs font-medium ${paper === "80mm" ? "bg-white shadow-sm" : "text-slate-400"}`}>80mm</button>
               </div>
+              <label className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700">
+                <input type="checkbox" checked={includeTerms} onChange={(event) => setIncludeTerms(event.target.checked)} className="h-3.5 w-3.5 accent-emerald-700" />
+                شرائط
+              </label>
               {wa ? (
                 <a href={wa} target="_blank" rel="noreferrer" className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">WhatsApp</a>
               ) : null}
@@ -260,6 +265,7 @@ export function RentalInvoice({
           </div>
           <p className="mt-2 text-xs text-slate-500">
             A4 page / Save as PDF. {activePrinter ? `Printer connected: ${activePrinter}` : desktop ? "Printer not connected" : "Print uses the connected printer."}
+            {includeTerms && paper === "80mm" ? " Terms sheet prints on A4." : ""}
             {note ? ` ${note}` : ""}
           </p>
         </div>
@@ -344,6 +350,11 @@ export function RentalInvoice({
           <div className="border-t border-slate-200 bg-slate-50 px-8 py-4 text-center text-xs text-slate-400">
             Rental agreement from {data.shop_name}. {data.cashier_name ? `Prepared by ${data.cashier_name}.` : ""}
           </div>
+          {includeTerms && paper === "a4" ? (
+            <div className="rental-terms-sheet bg-white px-4 py-4">
+              <img src="/rental-terms.jpg" alt="شرائط" className="mx-auto w-full max-w-[190mm]" />
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

@@ -169,9 +169,14 @@ export default function RentalDashboardPage() {
           <h1 className="font-display text-2xl font-semibold text-slate-900">Dashboard</h1>
           <p className="mt-0.5 text-sm text-slate-400">Live rentals, fleet, balances, and return dates.</p>
         </div>
-        <Link href="/rental/counter" className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white">
-          <KeyRound size={15} /> New rental
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/rental/terms" className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700">
+            شرائط
+          </Link>
+          <Link href="/rental/counter" className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white">
+            <KeyRound size={15} /> New rental
+          </Link>
+        </div>
       </div>
 
       {error ? <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{error}</p> : null}
