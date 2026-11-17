@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import { KeyRound, Printer, Share2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { KeyRound, Printer, ScrollText, Share2, X } from "lucide-react";
 
 import { RentalInvoice } from "@/components/rental/RentalInvoice";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { invoiceFromRental, rentalMessage, whatsAppLink, type RentalInvoiceData } from "@/lib/rental";
+import { RENTAL_TERMS_IMAGE, invoiceFromRental, rentalMessage, whatsAppLink, type RentalInvoiceData } from "@/lib/rental";
 
 type RentalRow = {
   id: string;
@@ -54,14 +54,16 @@ type Dashboard = {
   fleet: FleetRow[];
 };
 
+type DeskFilter = "open" | "due" | "all";
+
 const STATUS: Record<string, string> = {
-  active: "bg-emerald-50 text-emerald-700",
-  due_today: "bg-amber-50 text-amber-700",
-  overdue: "bg-red-50 text-red-700",
-  completed: "bg-slate-100 text-slate-500",
-  available: "bg-emerald-50 text-emerald-700",
-  rented: "bg-sky-50 text-sky-700",
-  maintenance: "bg-amber-50 text-amber-700",
+  active: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+  due_today: "bg-amber-50 text-amber-800 ring-amber-100",
+  overdue: "bg-red-50 text-red-700 ring-red-100",
+  completed: "bg-slate-100 text-slate-500 ring-slate-200",
+  available: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+  rented: "bg-sky-50 text-sky-700 ring-sky-100",
+  maintenance: "bg-amber-50 text-amber-800 ring-amber-100",
 };
 
 function money(value: string | number) {
@@ -71,6 +73,7 @@ function money(value: string | number) {
 function label(status: string) {
   if (status === "due_today") return "Due today";
   if (status === "overdue") return "Overdue";
+  if (status === "rented") return "On rent";
   return status.replace("_", " ");
 }
 
@@ -83,6 +86,9 @@ export default function RentalDashboardPage() {
   const [printingId, setPrintingId] = useState("");
   const [shareId, setShareId] = useState("");
   const [toast, setToast] = useState("");
+  const [filter, setFilter] = useState<DeskFilter>("open");
+  const [termsOpen, setTermsOpen] = useState(false);
+  const [todayLabel, setTodayLabel] = useState("");
 
   const load = useCallback(() => {
     api<Dashboard>("/api/rental/dashboard/")
@@ -94,6 +100,9 @@ export default function RentalDashboardPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    setTodayLabel(new Date().toLocaleDateString("en-PK", { weekday: "long", day: "numeric", month: "long" }));
+  }, []);
 
   async function openInvoice(id: string, print: boolean) {
     if (print) setPrintingId(id);
@@ -144,135 +153,167 @@ export default function RentalDashboardPage() {
     }
   }
 
-  const stats = data
-    ? [
-        ["Fleet", data.cars_total],
-        ["Available", data.available],
-        ["On rent", data.rented],
-        ["Due today", data.due_today],
-        ["Overdue", data.overdue],
-        ["This month", money(data.month_revenue)],
-        ["Deposits held", money(data.deposits_held)],
-        ["Outstanding", money(data.outstanding)],
-      ]
-    : [];
+  const rentals = useMemo(() => {
+    const rows = data?.rentals || [];
+    if (filter === "due") return rows.filter((row) => row.status === "due_today" || row.status === "overdue");
+    if (filter === "all") return rows;
+    return rows.filter((row) => row.status !== "completed");
+  }, [data, filter]);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-4">
       {invoice ? <RentalInvoice data={invoice} autoPrint={autoPrint} onClose={() => { setInvoice(null); setAutoPrint(false); }} /> : null}
+      {termsOpen ? <TermsSheet onClose={() => setTermsOpen(false)} /> : null}
       {toast ? <TopNotice text={toast} /> : null}
       {printingId ? <PrintBanner /> : null}
       <style>{RENTAL_MOTION}</style>
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Rent a Car</p>
-          <h1 className="font-display text-2xl font-semibold text-slate-900">Dashboard</h1>
-          <p className="mt-0.5 text-sm text-slate-400">Live rentals, fleet, balances, and return dates.</p>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">Rent a Car</p>
+          <h1 className="truncate font-display text-xl font-semibold text-slate-950 sm:text-2xl">{user?.business_name || "Dashboard"}</h1>
+          <p className="mt-0.5 text-sm text-slate-500">Cars out, return dates, and money still open.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/rental/terms" className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700">
-            شرائط
-          </Link>
-          <Link href="/rental/counter" className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white">
-            <KeyRound size={15} /> New rental
+        <div className="grid grid-cols-2 gap-2 sm:flex">
+          <button type="button" onClick={() => setTermsOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-800 shadow-sm">
+            <ScrollText size={15} />
+            Owner terms
+          </button>
+          <Link href="/rental/counter" className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-3 py-2.5 text-sm font-medium text-white shadow-sm">
+            <KeyRound size={15} />
+            New rental
           </Link>
         </div>
       </div>
 
       {error ? <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{error}</p> : null}
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {(stats.length ? stats : [["Fleet", "—"], ["Available", "—"], ["On rent", "—"], ["Outstanding", "—"]]).map(([name, value]) => (
-          <div key={name} className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{name}</p>
-            <p className="mt-1 font-display text-2xl font-semibold text-slate-900">{value}</p>
+      <section className="overflow-hidden rounded-2xl bg-slate-950 text-white shadow-sm">
+        <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)] lg:items-end">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-300">{todayLabel}</p>
+            <p className="mt-4 text-xs font-medium uppercase tracking-wide text-white/45">This month</p>
+            <p className="mt-1 font-display text-3xl font-semibold tracking-tight sm:text-4xl">{data ? money(data.month_revenue) : "—"}</p>
+            <p className="mt-2 text-sm text-white/70">
+              {data?.active_count ?? 0} on the road
+              {" · "}
+              {data?.due_today ?? 0} due today
+              {" · "}
+              {data?.overdue ?? 0} overdue
+            </p>
           </div>
-        ))}
+          <div className="grid grid-cols-3 gap-2">
+            <HeroStat label="Available" value={data ? String(data.available) : "—"} />
+            <HeroStat label="On rent" value={data ? String(data.rented) : "—"} />
+            <HeroStat label="Outstanding" value={data ? money(data.outstanding) : "—"} />
+          </div>
+        </div>
+        {data && (data.due_today > 0 || data.overdue > 0) ? (
+          <div className="flex flex-wrap gap-2 border-t border-white/10 px-4 py-3 sm:px-5">
+            {data.overdue > 0 ? (
+              <button type="button" onClick={() => setFilter("due")} className="rounded-full bg-red-400/15 px-3 py-1 text-xs font-medium text-red-200">
+                {data.overdue} overdue return{data.overdue === 1 ? "" : "s"}
+              </button>
+            ) : null}
+            {data.due_today > 0 ? (
+              <button type="button" onClick={() => setFilter("due")} className="rounded-full bg-amber-400/15 px-3 py-1 text-xs font-medium text-amber-100">
+                {data.due_today} due back today
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+      </section>
+
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+        <Stat label="Fleet" value={data ? String(data.cars_total) : "—"} hint={data?.maintenance ? `${data.maintenance} in workshop` : "Cars on the books"} />
+        <Stat label="Deposits held" value={data ? money(data.deposits_held) : "—"} hint="Security still with the desk" />
+        <Stat label="Due today" value={data ? String(data.due_today) : "—"} hint="Returns expected today" tone={data?.due_today ? "amber" : undefined} />
+        <Stat label="Overdue" value={data ? String(data.overdue) : "—"} hint="Past the return date" tone={data?.overdue ? "red" : undefined} />
       </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <h2 className="font-semibold text-slate-900">Rentals</h2>
-          <p className="text-xs text-slate-400">{data?.active_count ?? 0} active</p>
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div>
+            <h2 className="font-semibold text-slate-950">Rentals</h2>
+            <p className="text-xs text-slate-400">{data?.active_count ?? 0} active · {rentals.length} in this view</p>
+          </div>
+          <div className="grid grid-cols-3 rounded-xl bg-slate-100 p-1 text-xs font-semibold sm:flex">
+            {([
+              ["open", "On the road"],
+              ["due", "Due"],
+              ["all", "All"],
+            ] as const).map(([key, name]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setFilter(key)}
+                className={`rounded-lg px-3 py-2 ${filter === key ? "bg-white text-slate-950 shadow-sm" : "text-slate-500"}`}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
         </div>
         {!data ? (
-          <p className="p-6 text-sm text-slate-400">Loading rental details…</p>
-        ) : data.rentals.length === 0 ? (
-          <p className="p-6 text-sm text-slate-400">No rentals yet. Start one from the rent counter.</p>
+          <p className="p-6 text-sm text-slate-400">{error ? "Rental list is waiting on the server." : "Loading rental details…"}</p>
+        ) : rentals.length === 0 ? (
+          <p className="p-6 text-sm text-slate-400">
+            {filter === "open" ? "No open rentals. Start one from the rent counter." : "Nothing in this view."}
+          </p>
         ) : (
           <>
             <div className="space-y-3 p-3 lg:hidden">
-              {data.rentals.map((row) => {
-                const wa = whatsAppLink(row.phone, rentalMessage({ ...row, shop: user?.business_name }));
-                const open = row.status !== "completed";
-                return (
-                  <article key={row.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                    <RentalActions
-                      wa={wa}
-                      printing={printingId === row.id}
-                      shareOpen={shareId === row.id}
-                      onPrint={() => openInvoice(row.id, true)}
-                      onShare={() => wa && shareRow(row.id)}
-                      onCopy={() => wa && copyLink(wa)}
-                    />
-                    <div className="mt-3 flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-slate-900">{row.car}</p>
-                        <p className="text-xs text-slate-500">{row.customer}{row.phone ? ` · ${row.phone}` : ""}</p>
-                        <p className="mt-1 text-xs text-slate-400">{row.invoice_number || "—"} · {row.start_date} → {row.end_date}</p>
-                      </div>
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${STATUS[row.status] || STATUS.completed}`}>{label(row.status)}</span>
-                    </div>
-                    <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                      <Detail label="CNIC" value={row.cnic || "—"} />
-                      <Detail label="Days" value={String(row.days)} />
-                      <Detail label="Rate" value={money(row.daily_rate)} />
-                      <Detail label="Total" value={money(row.total_amount)} />
-                      <Detail label="Deposit" value={money(row.deposit)} />
-                      <Detail label="Received" value={money(row.received_amount)} />
-                      <Detail label="Balance" value={Number(row.balance) > 0 ? money(row.balance) : "Cleared"} />
-                      <Detail label="Signed" value={row.signed ? "Yes" : "No"} />
-                    </dl>
-                    <div className="mt-3 flex gap-3 text-xs font-medium">
-                      <button type="button" onClick={() => openInvoice(row.id, false)} className="text-emerald-700">Preview</button>
-                      {open ? <button type="button" onClick={() => markReturned(row.id)} className="text-slate-500">Return</button> : null}
-                    </div>
-                  </article>
-                );
-              })}
+              {rentals.map((row) => (
+                <RentalCard
+                  key={row.id}
+                  row={row}
+                  shop={user?.business_name}
+                  printing={printingId === row.id}
+                  shareOpen={shareId === row.id}
+                  onPrint={() => openInvoice(row.id, true)}
+                  onPreview={() => openInvoice(row.id, false)}
+                  onShare={() => shareRow(row.id)}
+                  onCopy={copyLink}
+                  onReturn={() => markReturned(row.id)}
+                />
+              ))}
             </div>
             <div className="hidden overflow-x-auto lg:block">
-              <table className="w-full min-w-[1180px] text-left text-sm">
-                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-400">
+              <table className="w-full min-w-[760px] text-left text-sm">
+                <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400">
                   <tr>
-                    {["Invoice", "Car", "Customer", "Phone", "CNIC", "Dates", "Days", "Rate", "Total", "Deposit", "Received", "Balance", "Status", ""].map((head) => (
+                    {["Car", "Customer", "Dates", "Money", "Status", ""].map((head) => (
                       <th key={head || "actions"} className="px-4 py-3 font-semibold">{head}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {data.rentals.map((row) => {
+                  {rentals.map((row) => {
                     const wa = whatsAppLink(row.phone, rentalMessage({ ...row, shop: user?.business_name }));
                     const open = row.status !== "completed";
+                    const balance = Number(row.balance);
                     return (
-                      <tr key={row.id} className="align-top hover:bg-slate-50">
-                        <td className="px-4 py-3 font-medium text-slate-900">{row.invoice_number || "—"}</td>
+                      <tr key={row.id} className="align-top hover:bg-slate-50/80">
                         <td className="px-4 py-3">
-                          <p className="font-medium text-slate-900">{row.car}</p>
-                          <p className="text-xs text-slate-400">{row.registration_number || "No registration"}</p>
+                          <p className="font-semibold text-slate-950">{row.car}</p>
+                          <p className="text-xs text-slate-400">{row.registration_number || "No registration"} · {row.invoice_number || "—"}</p>
                         </td>
-                        <td className="px-4 py-3 text-slate-700">{row.customer}</td>
-                        <td className="px-4 py-3 text-slate-600">{row.phone || "—"}</td>
-                        <td className="px-4 py-3 text-slate-600">{row.cnic || "—"}</td>
-                        <td className="px-4 py-3 text-slate-600">{row.start_date}<br />{row.end_date}</td>
-                        <td className="px-4 py-3">{row.days}</td>
-                        <td className="px-4 py-3">{money(row.daily_rate)}</td>
-                        <td className="px-4 py-3">{money(row.total_amount)}</td>
-                        <td className="px-4 py-3">{money(row.deposit)}</td>
-                        <td className="px-4 py-3">{money(row.received_amount)}</td>
-                        <td className="px-4 py-3 font-medium">{Number(row.balance) > 0 ? money(row.balance) : "Cleared"}</td>
                         <td className="px-4 py-3">
-                          <span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${STATUS[row.status] || STATUS.completed}`}>{label(row.status)}</span>
+                          <p className="font-medium text-slate-800">{row.customer}</p>
+                          <p className="text-xs text-slate-400">{row.phone || "No phone"}{row.cnic ? ` · ${row.cnic}` : ""}</p>
+                        </td>
+                        <td className="px-4 py-3 text-slate-600">
+                          <p>{row.start_date}</p>
+                          <p className="text-xs text-slate-400">{row.end_date} · {row.days} day{row.days === 1 ? "" : "s"}</p>
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="font-medium text-slate-900">{money(row.total_amount)}</p>
+                          <p className={`text-xs ${balance > 0 ? "font-medium text-red-600" : "text-slate-400"}`}>
+                            {balance > 0 ? `${money(balance)} due` : "Cleared"} · deposit {money(row.deposit)}
+                          </p>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium capitalize ring-1 ${STATUS[row.status] || STATUS.completed}`}>{label(row.status)}</span>
                           <p className="mt-1 text-[11px] text-slate-400">{row.signed ? "Signed" : "Not signed"}</p>
                         </td>
                         <td className="px-4 py-3">
@@ -299,31 +340,118 @@ export default function RentalDashboardPage() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <h2 className="font-semibold text-slate-900">Fleet</h2>
-          <Link href="/rental/fleet" className="text-xs font-medium text-emerald-700">Manage fleet</Link>
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="grid gap-0 lg:grid-cols-[minmax(220px,280px)_minmax(0,1fr)]">
+          <button type="button" onClick={() => setTermsOpen(true)} className="group relative block bg-slate-50 text-left lg:border-r lg:border-slate-100">
+            <img src={RENTAL_TERMS_IMAGE} alt="Owner terms sheet" className="mx-auto h-auto max-h-[460px] w-full object-contain p-3" />
+            <span className="absolute bottom-3 left-3 rounded-full bg-slate-950/80 px-2.5 py-1 text-[11px] font-medium text-white">Open full sheet</span>
+          </button>
+          <div className="flex flex-col justify-between gap-4 p-4 sm:p-5">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">Owner option</p>
+              <h2 className="mt-1 font-display text-xl font-semibold text-slate-950">شرائط</h2>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-500">
+                The owner’s handwritten terms stay on the desk. Open the sheet here, or print it after the rental contract on A4.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button type="button" onClick={() => setTermsOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white">
+                <ScrollText size={15} />
+                View terms
+              </button>
+              <Link href="/rental/terms" className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700">
+                <Printer size={15} />
+                Print sheet
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3.5 sm:px-5">
+          <div>
+            <h2 className="font-semibold text-slate-950">Fleet</h2>
+            <p className="text-xs text-slate-400">{data?.available ?? 0} free · {data?.rented ?? 0} out</p>
+          </div>
+          <Link href="/rental/fleet" className="text-xs font-semibold text-emerald-700">Manage</Link>
         </div>
         {!data || data.fleet.length === 0 ? (
           <p className="p-6 text-sm text-slate-400">No cars in the fleet yet.</p>
         ) : (
-          <div className="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-2 p-3 sm:grid-cols-2 sm:p-4 xl:grid-cols-3">
             {data.fleet.map((car) => (
-              <div key={car.id} className="rounded-xl border border-slate-200 px-4 py-3">
+              <div key={car.id} className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-slate-900">{car.name}</p>
-                    <p className="text-xs text-slate-400">{car.registration_number || "No registration"}{car.color ? ` · ${car.color}` : ""}</p>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-slate-950">{car.name}</p>
+                    <p className="truncate text-xs text-slate-400">{car.registration_number || "No registration"}{car.color ? ` · ${car.color}` : ""}</p>
                   </div>
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize ${STATUS[car.status] || STATUS.completed}`}>{car.status}</span>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ring-1 ${STATUS[car.status] || STATUS.completed}`}>{label(car.status)}</span>
                 </div>
-                <p className="mt-2 text-sm text-slate-600">{money(car.daily_rate)} / day</p>
+                <p className="mt-2 text-sm font-medium text-slate-700">{money(car.daily_rate)} <span className="font-normal text-slate-400">/ day</span></p>
               </div>
             ))}
           </div>
         )}
       </section>
     </div>
+  );
+}
+
+function RentalCard({
+  row,
+  shop,
+  printing,
+  shareOpen,
+  onPrint,
+  onPreview,
+  onShare,
+  onCopy,
+  onReturn,
+}: {
+  row: RentalRow;
+  shop?: string;
+  printing: boolean;
+  shareOpen: boolean;
+  onPrint: () => void;
+  onPreview: () => void;
+  onShare: () => void;
+  onCopy: (url: string) => void;
+  onReturn: () => void;
+}) {
+  const wa = whatsAppLink(row.phone, rentalMessage({ ...row, shop }));
+  const open = row.status !== "completed";
+  const balance = Number(row.balance);
+  return (
+    <article className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate font-semibold text-slate-950">{row.car}</p>
+          <p className="truncate text-xs text-slate-400">{row.registration_number || "No registration"}</p>
+        </div>
+        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ring-1 ${STATUS[row.status] || STATUS.completed}`}>{label(row.status)}</span>
+      </div>
+      <p className="mt-3 text-sm font-medium text-slate-800">{row.customer}</p>
+      <p className="truncate text-xs text-slate-400">{row.phone || "No phone"}{row.cnic ? ` · ${row.cnic}` : ""}</p>
+      <p className="mt-1 text-xs text-slate-500">{row.start_date} → {row.end_date} · {row.days} day{row.days === 1 ? "" : "s"}</p>
+      <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-slate-100 pt-3">
+        <Money label="Total" value={money(row.total_amount)} />
+        <Money label="Received" value={money(row.received_amount)} />
+        <Money label="Deposit" value={money(row.deposit)} />
+        <Money label="Balance" value={balance > 0 ? money(balance) : "Cleared"} emphasis={balance > 0} />
+      </dl>
+      <div className="mt-3">
+        <RentalActions wa={wa} printing={printing} shareOpen={shareOpen} onPrint={onPrint} onShare={() => wa && onShare()} onCopy={() => wa && onCopy(wa)} />
+      </div>
+      <div className="mt-2 flex items-center justify-between text-xs">
+        <span className="text-slate-400">{row.invoice_number || "—"} · {row.signed ? "Signed" : "Not signed"}</span>
+        <span className="flex gap-3 font-medium">
+          <button type="button" onClick={onPreview} className="text-emerald-700">Preview</button>
+          {open ? <button type="button" onClick={onReturn} className="text-slate-500">Return</button> : null}
+        </span>
+      </div>
+    </article>
   );
 }
 
@@ -345,22 +473,22 @@ function RentalActions({
   return (
     <div>
       <div className="grid grid-cols-2 gap-2">
-        <button type="button" disabled={printing} onClick={onPrint} className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-3 py-3 text-sm font-semibold text-white disabled:opacity-80">
-          {printing ? <FillRing /> : <Printer size={16} />}
-          Print invoice
+        <button type="button" disabled={printing} onClick={onPrint} className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-slate-950 px-3 text-sm font-semibold text-white disabled:opacity-80">
+          {printing ? <FillRing /> : <Printer size={15} />}
+          Print
         </button>
-        <button type="button" disabled={!wa} onClick={onShare} className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 py-3 text-sm font-semibold text-white disabled:opacity-40">
-          <Share2 size={16} />
-          WhatsApp share
+        <button type="button" disabled={!wa} onClick={onShare} className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 text-sm font-semibold text-white disabled:opacity-40">
+          <Share2 size={15} />
+          WhatsApp
         </button>
       </div>
       {shareOpen && wa ? (
-        <div className="rental-drop mt-2 rounded-xl border border-emerald-200 bg-white p-3">
+        <div className="rental-drop mt-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3">
           <p className="text-xs font-semibold text-emerald-800">Copy link</p>
-          <p className="mt-1 truncate text-[11px] text-slate-500">{wa}</p>
-          <div className="mt-2 flex gap-2">
+          <p className="mt-1 break-all text-[11px] text-slate-500">{wa}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
             <button type="button" onClick={onCopy} className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white">Copy link</button>
-            <a href={wa} target="_blank" rel="noreferrer" className="rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-800">Open WhatsApp</a>
+            <a href={wa} target="_blank" rel="noreferrer" className="rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-800">Open WhatsApp</a>
           </div>
         </div>
       ) : null}
@@ -368,18 +496,65 @@ function RentalActions({
   );
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function TermsSheet({ onClose }: { onClose: () => void }) {
   return (
-    <div className="rounded-xl bg-white px-3 py-2">
+    <div className="fixed inset-0 z-[70] flex flex-col bg-slate-950/75 p-3 backdrop-blur-sm sm:p-6" onClick={onClose}>
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-3xl flex-col" onClick={(event) => event.stopPropagation()}>
+        <div className="mb-3 flex items-center justify-between gap-3 text-white">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-300">Owner terms</p>
+            <h2 className="font-display text-xl font-semibold">شرائط</h2>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link href="/rental/terms" className="hidden rounded-xl bg-white px-3 py-2 text-sm font-medium text-slate-900 sm:inline-flex">Print sheet</Link>
+            <button type="button" onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white" aria-label="Close terms">
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl bg-white p-2 sm:p-4">
+          <img src={RENTAL_TERMS_IMAGE} alt="Owner car rental terms" className="mx-auto w-full" />
+        </div>
+        <Link href="/rental/terms" className="mt-3 inline-flex items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 sm:hidden">
+          Print sheet
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function HeroStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-white/8 px-2 py-3 sm:px-3">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-white/45">{label}</p>
+      <p className="mt-1 truncate font-display text-sm font-semibold sm:text-base">{value}</p>
+    </div>
+  );
+}
+
+function Stat({ label, value, hint, tone }: { label: string; value: string; hint: string; tone?: "amber" | "red" }) {
+  const valueColor = tone === "red" ? "text-red-600" : tone === "amber" ? "text-amber-700" : "text-slate-950";
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white px-3.5 py-3 shadow-sm sm:px-4 sm:py-4">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className={`mt-1 truncate font-display text-xl font-semibold sm:text-2xl ${valueColor}`}>{value}</p>
+      <p className="mt-1 truncate text-[11px] text-slate-400">{hint}</p>
+    </div>
+  );
+}
+
+function Money({ label, value, emphasis }: { label: string; value: string; emphasis?: boolean }) {
+  return (
+    <div className="min-w-0">
       <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</dt>
-      <dd className="text-sm font-medium text-slate-800">{value}</dd>
+      <dd className={`truncate text-sm font-semibold ${emphasis ? "text-red-600" : "text-slate-900"}`}>{value}</dd>
     </div>
   );
 }
 
 function FillRing() {
   return (
-    <svg viewBox="0 0 36 36" className="h-5 w-5 shrink-0" aria-hidden>
+    <svg viewBox="0 0 36 36" className="h-4 w-4 shrink-0" aria-hidden>
       <circle cx="18" cy="18" r="14" fill="none" stroke="currentColor" strokeOpacity="0.28" strokeWidth="3.5" />
       <circle cx="18" cy="18" r="14" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeDasharray="88" className="rental-ring" />
     </svg>
@@ -389,7 +564,7 @@ function FillRing() {
 function TopNotice({ text }: { text: string }) {
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-[90] flex justify-center px-4 pt-3">
-      <div className="rental-drop rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white shadow-xl">{text}</div>
+      <div className="rental-drop rounded-2xl bg-slate-950 px-4 py-3 text-sm font-medium text-white shadow-xl">{text}</div>
     </div>
   );
 }

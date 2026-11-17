@@ -6,7 +6,7 @@ import { ContractEvidence, type ContractEvidenceValues } from "@/components/cont
 import { ApiError, api, apiBase, fieldErrors } from "@/lib/api";
 import { listOsPrinters, printToConnectedPrinter, rememberPrinter, savedPrinterName, type OsPrinter } from "@/lib/desktopPrint";
 import { useHardware } from "@/lib/hardware";
-import { rentalMessage, whatsAppLink, type RentalInvoiceData } from "@/lib/rental";
+import { RENTAL_TERMS_IMAGE, rentalMessage, whatsAppLink, type RentalInvoiceData } from "@/lib/rental";
 import { readShowroomPaper, saveShowroomPaper, type ShowroomPaper } from "@/lib/showroomInvoice";
 
 function rs(v: number) {
@@ -352,7 +352,7 @@ export function RentalInvoice({
           </div>
           {includeTerms && paper === "a4" ? (
             <div className="rental-terms-sheet bg-white px-4 py-4">
-              <img src="/rental-terms.jpg" alt="شرائط" className="mx-auto w-full max-w-[190mm]" />
+              <img src={RENTAL_TERMS_IMAGE} alt="شرائط" className="mx-auto w-full max-w-[190mm]" />
             </div>
           ) : null}
         </div>

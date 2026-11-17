@@ -12,7 +12,7 @@ const NAV = [
   { href: "/rental/counter", label: "Rent Counter", icon: KeyRound },
   { href: "/rental/fleet", label: "Fleet", icon: Car },
   { href: "/rental/customers", label: "Customers", icon: Users },
-  { href: "/rental/terms", label: "Terms", icon: ScrollText },
+  { href: "/rental/terms", label: "Owner terms", icon: ScrollText },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -62,7 +62,7 @@ export function RentalShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="flex min-h-dvh flex-col lg:grid lg:h-full lg:min-h-0 lg:grid-cols-[260px_1fr] lg:overflow-hidden">
+    <div className="flex h-full min-h-0 flex-col lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:overflow-hidden">
       <aside className="hidden min-h-0 flex-col bg-slate-900 text-white lg:flex lg:h-full lg:overflow-hidden">
         <div className="shrink-0 border-b border-white/8 px-5 py-5">
           <div className="flex items-center gap-3">
@@ -79,6 +79,7 @@ export function RentalShell({ children }: { children: React.ReactNode }) {
           <NavLinks />
         </nav>
         <div className="shrink-0 border-t border-white/8 px-4 py-4">
+          <p className="truncate px-3 pb-2 text-xs text-white/45">{user.full_name || user.business_name}</p>
           <button type="button" onClick={logout} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/40 transition-colors hover:bg-white/5 hover:text-white">
             <LogOut size={15} />
             Sign out
@@ -107,6 +108,7 @@ export function RentalShell({ children }: { children: React.ReactNode }) {
           <NavLinks onClose={() => setDrawerOpen(false)} />
         </nav>
         <div className="shrink-0 border-t border-white/8 px-4 py-4">
+          <p className="truncate px-3 pb-2 text-xs text-white/45">{user.full_name || user.business_name}</p>
           <button type="button" onClick={logout} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/40 transition-colors hover:bg-white/5 hover:text-white">
             <LogOut size={15} />
             Sign out
@@ -114,7 +116,7 @@ export function RentalShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex min-h-0 min-w-0 flex-col lg:overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col lg:overflow-hidden">
         <header className="sticky top-0 z-30 flex shrink-0 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
           <button type="button" onClick={() => setDrawerOpen(true)} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600" aria-label="Open menu">
             <Menu size={18} />
@@ -124,7 +126,7 @@ export function RentalShell({ children }: { children: React.ReactNode }) {
             <p className="truncate text-xs text-slate-400">{user.business_name}</p>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto bg-slate-50 px-4 py-5 sm:px-6 sm:py-6">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto bg-slate-100 px-3 py-4 sm:px-5 sm:py-5">{children}</main>
       </div>
     </div>
   );

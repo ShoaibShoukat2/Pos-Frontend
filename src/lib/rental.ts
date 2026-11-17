@@ -1,3 +1,5 @@
+export const RENTAL_TERMS_IMAGE = "/rental-terms.jpg?v=20261118";
+
 export type RentalInvoiceData = {
   rental_id?: string;
   invoice_number: string;

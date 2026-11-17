@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Printer } from "lucide-react";
 
 import { listOsPrinters, printToConnectedPrinter, rememberPrinter, savedPrinterName, type OsPrinter } from "@/lib/desktopPrint";
+import { RENTAL_TERMS_IMAGE } from "@/lib/rental";
 
 export default function RentalTermsPage() {
   const [printers, setPrinters] = useState<OsPrinter[] | null>(null);
@@ -67,18 +68,18 @@ export default function RentalTermsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className="mx-auto w-full max-w-3xl space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Rent a Car</p>
-          <h1 className="font-display text-2xl font-semibold text-slate-900">شرائط</h1>
-          <p className="mt-0.5 text-sm text-slate-400">Owner terms sheet. It also prints after the rental contract on A4.</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">Owner terms</p>
+          <h1 className="font-display text-2xl font-semibold text-slate-950">شرائط</h1>
+          <p className="mt-0.5 text-sm text-slate-500">The owner’s sheet. It also prints after the rental contract on A4.</p>
         </div>
         <button
           type="button"
           onClick={() => { void printTerms(); }}
           disabled={printing || (desktop && !activePrinter)}
-          className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-40"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-40 sm:w-auto"
         >
           <Printer size={15} />
           {printing ? "Printing…" : "Print terms"}
@@ -98,8 +99,8 @@ export default function RentalTermsPage() {
       ) : null}
       {note ? <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">{note}</p> : null}
 
-      <div id="car-invoice-print-root" className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-        <img src="/rental-terms.jpg" alt="Car rental terms" className="mx-auto w-full" />
+      <div id="car-invoice-print-root" className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-sm sm:p-4">
+        <img src={RENTAL_TERMS_IMAGE} alt="Car rental terms" className="mx-auto w-full" />
       </div>
     </div>
   );
