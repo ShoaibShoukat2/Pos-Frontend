@@ -126,18 +126,18 @@ export default function HomePage() {
   const startLabel = loading ? "Loading…" : user ? "Open workspace" : "Start free";
 
   return (
-    <div className="min-h-dvh bg-paper-50 text-ink-900">
+    <div className="min-h-dvh bg-royal-50 text-slate-900">
 
       {/* ── Nav ── */}
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-ink-950/95 text-white backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-royal-950/95 text-white backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
           <Link href="/" className="flex items-center gap-2.5" onClick={() => setOpen(false)}>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/15">
               <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
-                <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#a5b4fc" />
-                <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#a5b4fc" opacity="0.6" />
-                <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#a5b4fc" opacity="0.6" />
-                <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#a5b4fc" opacity="0.3" />
+                <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#f0c14b" />
+                <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#f0c14b" opacity="0.6" />
+                <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#f0c14b" opacity="0.6" />
+                <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#f0c14b" opacity="0.3" />
               </svg>
             </div>
             <span className="font-display text-xl text-white">Universal POS</span>
@@ -155,7 +155,7 @@ export default function HomePage() {
             <Link href="/login" className="rounded-xl px-3 py-2 text-sm text-white/80 transition hover:bg-white/10 hover:text-white">
               Sign in
             </Link>
-            <Link href={startHref} className="btn btn-copper gap-1.5 text-sm">
+            <Link href={startHref} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold-300 to-gold-400 px-4 py-2.5 text-sm font-semibold text-royal-950 shadow-sm">
               {startLabel} <ArrowRight size={14} />
             </Link>
           </div>
@@ -170,7 +170,7 @@ export default function HomePage() {
         </div>
 
         {open && (
-          <div className="border-t border-white/10 bg-ink-950 px-4 pb-5 pt-4 lg:hidden">
+          <div className="border-t border-white/10 bg-royal-950 px-4 pb-5 pt-4 lg:hidden">
             <nav className="grid gap-0.5">
               {NAV.map((item) => (
                 <a key={item.href} href={item.href} className="rounded-xl px-3 py-2.5 text-sm text-white/80 hover:bg-white/10" onClick={() => setOpen(false)}>
@@ -180,7 +180,7 @@ export default function HomePage() {
             </nav>
             <div className="mt-4 grid gap-2">
               <Link href="/login" className="btn w-full border border-white/15 bg-white/5 text-center text-sm text-white" onClick={() => setOpen(false)}>Sign in</Link>
-              <Link href={startHref} className="btn btn-copper w-full text-center text-sm" onClick={() => setOpen(false)}>{startLabel}</Link>
+              <Link href={startHref} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold-300 to-gold-400 px-4 py-2.5 text-sm font-semibold text-royal-950 shadow-sm w-full text-center text-sm" onClick={() => setOpen(false)}>{startLabel}</Link>
             </div>
           </div>
         )}
@@ -188,20 +188,20 @@ export default function HomePage() {
 
       <main>
         {/* ── Hero ── */}
-        <section className="relative overflow-hidden bg-ink-950 text-white">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_15%_0%,rgba(99,102,241,0.45),transparent_55%),radial-gradient(ellipse_50%_40%_at_90%_20%,rgba(129,140,248,0.2),transparent_50%)]" />
+        <section className="relative overflow-hidden bg-royal-950 text-white">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_15%_0%,rgba(242,193,75,0.28),transparent_55%),radial-gradient(ellipse_50%_40%_at_90%_20%,rgba(91,53,168,0.45),transparent_50%)]" />
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
 
           <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:py-24">
             <div>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5">
-                <Zap size={12} className="text-copper-300" />
+                <Zap size={12} className="text-gold-300" />
                 <span className="text-xs font-medium text-white/85">Built for Pakistani shops — PKR, GST ready</span>
               </div>
 
               <h1 className="max-w-xl font-display text-4xl leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
                 The counter, stock and cash —{" "}
-                <span className="text-copper-300">one POS.</span>
+                <span className="text-gold-300">one POS.</span>
               </h1>
 
               <p className="mt-5 max-w-lg text-base leading-relaxed text-white/65 sm:text-lg">
@@ -210,7 +210,7 @@ export default function HomePage() {
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href={startHref} className="btn btn-copper w-full gap-2 sm:w-auto">
+                <Link href={startHref} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold-300 to-gold-400 px-4 py-2.5 text-sm font-semibold text-royal-950 shadow-sm w-full gap-2 sm:w-auto">
                   {startLabel} <ArrowRight size={15} />
                 </Link>
                 <a href="#features" className="btn w-full border border-white/15 bg-white/5 text-white hover:bg-white/10 sm:w-auto">
@@ -235,13 +235,13 @@ export default function HomePage() {
             {/* Dashboard preview card */}
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-white text-ink-950 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.65)]">
               {/* Card top bar */}
-              <div className="flex items-center justify-between border-b border-paper-200 bg-ink-950 px-5 py-4">
+              <div className="flex items-center justify-between border-b border-paper-200 bg-royal-950 px-5 py-4">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-copper-400">Owner dashboard</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-300">Owner dashboard</p>
                   <p className="mt-0.5 font-display text-xl text-paper-50">Today's overview</p>
                 </div>
                 <div className="flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-gold-400" />
                   <span className="text-xs text-paper-50/70">Live</span>
                 </div>
               </div>
@@ -312,7 +312,7 @@ export default function HomePage() {
               const Icon = item.icon;
               return (
                 <article key={item.title} className="group rounded-2xl border border-paper-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-copper-300 hover:shadow-card">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-royal-100 text-royal-800 ring-1 ring-royal-200">
                     <Icon size={18} />
                   </div>
                   <h3 className="mt-4 font-medium text-ink-950">{item.title}</h3>
@@ -324,10 +324,10 @@ export default function HomePage() {
         </section>
 
         {/* ── Industries ── */}
-        <section id="industries" className="scroll-mt-20 bg-ink-950">
+        <section id="industries" className="scroll-mt-20 bg-royal-950">
           <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
             <div className="mb-10">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-copper-400">Industries</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-300">Industries</p>
               <h2 className="mt-2 font-display text-3xl text-paper-50 sm:text-4xl">
                 Built for the shop you already run.
               </h2>
@@ -358,7 +358,7 @@ export default function HomePage() {
             <div className="grid gap-4 md:grid-cols-4">
               {STEPS.map((step) => (
                 <article key={step.n} className="rounded-2xl border border-paper-200 bg-paper-50 p-5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink-950 font-display text-lg text-white">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-royal-950 font-display text-lg text-white">
                     {step.n}
                   </div>
                   <h3 className="mt-4 font-medium text-ink-950">{step.title}</h3>
@@ -374,14 +374,14 @@ export default function HomePage() {
           <div className="overflow-hidden rounded-2xl border border-surface-200 bg-white shadow-card">
             <div className="grid md:grid-cols-[minmax(0,1fr)_auto]">
               <div className="px-8 py-8 sm:px-10">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-royal-200 bg-royal-50 px-3 py-1.5">
                   <svg viewBox="0 0 14 14" fill="none" className="h-3.5 w-3.5 shrink-0">
-                    <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#6366f1" />
-                    <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#6366f1" opacity="0.6" />
-                    <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#6366f1" opacity="0.6" />
-                    <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#6366f1" opacity="0.3" />
+                    <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#f0c14b" />
+                    <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#f0c14b" opacity="0.6" />
+                    <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#f0c14b" opacity="0.6" />
+                    <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#f0c14b" opacity="0.3" />
                   </svg>
-                  <span className="text-xs font-semibold text-indigo-700">Windows Desktop App</span>
+                  <span className="text-xs font-semibold text-royal-800">Windows Desktop App</span>
                 </div>
                 <h2 className="font-display text-2xl text-slate-900 sm:text-3xl">
                   Download Universal POS for Windows
@@ -399,7 +399,7 @@ export default function HomePage() {
                     "Free download",
                   ].map((item) => (
                     <li key={item} className="flex items-center gap-2">
-                      <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 shrink-0 text-indigo-500">
+                      <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 shrink-0 text-royal-700">
                         <circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.12" />
                         <path d="M5 8l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
@@ -439,10 +439,10 @@ export default function HomePage() {
                 <div className="text-center">
                   <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-900 shadow-xl">
                     <svg viewBox="0 0 14 14" fill="none" className="h-9 w-9">
-                      <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#6366f1" />
-                      <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#6366f1" opacity="0.65" />
-                      <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#6366f1" opacity="0.65" />
-                      <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#6366f1" opacity="0.3" />
+                      <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#f0c14b" />
+                      <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#f0c14b" opacity="0.65" />
+                      <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#f0c14b" opacity="0.65" />
+                      <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#f0c14b" opacity="0.3" />
                     </svg>
                   </div>
                   <p className="mt-3 text-sm font-semibold text-slate-700">Universal POS</p>
@@ -473,7 +473,7 @@ export default function HomePage() {
               <div className="relative overflow-hidden rounded-2xl border-2 border-brand-600 bg-white shadow-lg shadow-brand-600/10">
                 {/* Free trial badge */}
                 <div className="absolute right-5 top-5">
-                  <span className="rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-white shadow-sm">
+                  <span className="rounded-full bg-gold-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-royal-950 shadow-sm">
                     First month free
                   </span>
                 </div>
@@ -543,9 +543,9 @@ export default function HomePage() {
           </div>
         </section>
         <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <div className="relative overflow-hidden rounded-3xl bg-ink-950 px-8 py-14 text-center sm:px-12">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_120%,rgba(99,102,241,0.35),transparent)]" />
-            <p className="relative text-xs font-semibold uppercase tracking-[0.2em] text-copper-300">Get started today</p>
+          <div className="relative overflow-hidden rounded-3xl bg-royal-950 px-8 py-14 text-center sm:px-12">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_120%,rgba(242,193,75,0.28),transparent)]" />
+            <p className="relative text-xs font-semibold uppercase tracking-[0.2em] text-gold-300">Get started today</p>
             <h2 className="relative mt-3 font-display text-3xl text-white sm:text-4xl lg:text-5xl">
               First month free.
             </h2>
@@ -553,7 +553,7 @@ export default function HomePage() {
               Create your business, add products and a cashier, then sell. Rs 10,000/month after your free trial — cancel any time.
             </p>
             <div className="relative mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href={startHref} className="btn btn-copper w-full gap-2 sm:w-auto">
+              <Link href={startHref} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-gold-300 to-gold-400 px-4 py-2.5 text-sm font-semibold text-royal-950 shadow-sm w-full gap-2 sm:w-auto">
                 {startLabel} <ArrowRight size={15} />
               </Link>
               <Link href="/login" className="btn w-full border border-white/15 bg-white/8 text-white hover:bg-white/12 sm:w-auto">
@@ -565,16 +565,16 @@ export default function HomePage() {
       </main>
 
       {/* ── Footer ── */}
-      <footer className="border-t border-white/10 bg-ink-950 text-white">
+      <footer className="border-t border-white/10 bg-royal-950 text-white">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.5fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink-950">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gold-400 text-royal-950">
                 <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-                  <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#a5b4fc" />
-                  <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#a5b4fc" opacity="0.6" />
-                  <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#a5b4fc" opacity="0.6" />
-                  <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#a5b4fc" opacity="0.3" />
+                  <rect x="1" y="1" width="5" height="5" rx="1.2" fill="currentColor" />
+                  <rect x="8" y="1" width="5" height="5" rx="1.2" fill="currentColor" opacity="0.6" />
+                  <rect x="1" y="8" width="5" height="5" rx="1.2" fill="currentColor" opacity="0.6" />
+                  <rect x="8" y="8" width="5" height="5" rx="1.2" fill="currentColor" opacity="0.3" />
                 </svg>
               </div>
               <span className="font-display text-lg text-white">Universal POS</span>
@@ -588,7 +588,7 @@ export default function HomePage() {
             <ul className="space-y-2 text-sm text-white/70">
               {NAV.map((item) => (
                 <li key={item.href}>
-                  <a href={item.href} className="hover:text-copper-600 transition-colors">{item.label}</a>
+                  <a href={item.href} className="hover:text-gold-300 transition-colors">{item.label}</a>
                 </li>
               ))}
             </ul>
@@ -599,7 +599,7 @@ export default function HomePage() {
               <li>
                 <a
                   href="https://github.com/ShoaibShoukat2/Pos-Desktop/releases/latest/download/Universal-POS-Setup-1.0.0.exe"
-                  className="hover:text-copper-600 transition-colors font-medium"
+                  className="hover:text-gold-300 transition-colors font-medium"
                 >
                   Download for Windows
                 </a>
@@ -609,7 +609,7 @@ export default function HomePage() {
                   href="https://github.com/ShoaibShoukat2/Pos-Desktop/releases/latest"
                   target="_blank"
                   rel="noreferrer"
-                  className="hover:text-copper-600 transition-colors"
+                  className="hover:text-gold-300 transition-colors"
                 >
                   All releases ↗
                 </a>
@@ -617,11 +617,11 @@ export default function HomePage() {
             </ul>
             <p className="mb-3 mt-5 text-xs font-semibold uppercase tracking-wide text-white/40">Sign in</p>
             <ul className="space-y-2 text-sm text-white/70">
-              <li><Link href="/login" className="hover:text-copper-600 transition-colors">Business owner</Link></li>
-              <li><Link href="/login?role=cashier" className="hover:text-copper-600 transition-colors">Cashier</Link></li>
-              <li><Link href="/register" className="hover:text-copper-600 transition-colors">Create account</Link></li>
+              <li><Link href="/login" className="hover:text-gold-300 transition-colors">Business owner</Link></li>
+              <li><Link href="/login?role=cashier" className="hover:text-gold-300 transition-colors">Cashier</Link></li>
+              <li><Link href="/register" className="hover:text-gold-300 transition-colors">Create account</Link></li>
               <li>
-                <a href="https://senvante.com/" target="_blank" rel="noreferrer" className="hover:text-copper-600 transition-colors">
+                <a href="https://senvante.com/" target="_blank" rel="noreferrer" className="hover:text-gold-300 transition-colors">
                   senvante.com ↗
                 </a>
               </li>

@@ -47,26 +47,32 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-surface-50 px-4 py-10">
+    <div className="grid min-h-dvh bg-royal-50 lg:grid-cols-[minmax(260px,380px)_1fr]">
+      <aside className="relative hidden overflow-hidden bg-royal-950 px-8 py-10 text-white lg:flex lg:flex-col lg:justify-between">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_20%_0%,rgba(242,193,75,0.22),transparent_55%)]" />
+        <div className="relative">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gold-400 text-royal-950">
+            <Mark />
+          </div>
+          <p className="mt-8 font-display text-3xl leading-tight">Create the desk</p>
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">Retail, car showroom, or rent a car. PKR and GST are ready when you finish.</p>
+        </div>
+        <p className="relative text-xs text-white/45">Takes about 30 seconds.</p>
+      </aside>
+      <div className="flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-lg">
 
-        {/* Brand mark */}
-        <div className="mb-7 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-600 shadow-lg shadow-brand-500/25">
-            <svg width="22" height="22" viewBox="0 0 14 14" fill="none">
-              <rect x="1" y="1" width="5" height="5" rx="1.2" fill="white" />
-              <rect x="8" y="1" width="5" height="5" rx="1.2" fill="white" opacity="0.7" />
-              <rect x="1" y="8" width="5" height="5" rx="1.2" fill="white" opacity="0.7" />
-              <rect x="8" y="8" width="5" height="5" rx="1.2" fill="white" opacity="0.35" />
-            </svg>
+        <div className="mb-7 text-center lg:text-left">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gold-400 text-royal-950 shadow-card lg:mx-0">
+            <Mark />
           </div>
-          <h1 className="font-display text-2xl font-semibold text-surface-900">Set up your business</h1>
-          <p className="mt-1 text-sm text-surface-400">
-            Takes 30 seconds. PKR currency and GST 18% added automatically.
+          <h1 className="font-display text-2xl font-semibold text-slate-900">Set up your business</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Owner account, branch, PKR currency and GST 18% are added for you.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-surface-200 bg-surface-0 p-6 shadow-card">
+        <div className="rounded-2xl border border-royal-100 bg-white p-6 shadow-card">
           <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
 
             {errors.detail ? (
@@ -77,7 +83,7 @@ export default function RegisterPage() {
 
             {/* Business section */}
             <div className="sm:col-span-2 mb-1">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-surface-400">Business</p>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-royal-700">Business</p>
             </div>
 
             <Field label="Business name" error={errors.business_name}>
@@ -102,7 +108,7 @@ export default function RegisterPage() {
 
             {/* Owner section */}
             <div className="sm:col-span-2 mt-2 mb-1">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-surface-400">Owner account</p>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-royal-700">Owner account</p>
             </div>
 
             <Field label="First name" error={errors.first_name}>
@@ -122,7 +128,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full rounded-xl bg-brand-600 py-2.5 text-sm font-medium text-white shadow-sm shadow-brand-500/20 transition hover:bg-brand-700 disabled:opacity-50"
+                className="w-full rounded-xl bg-royal-900 py-2.5 text-sm font-semibold text-white transition hover:bg-royal-950 disabled:opacity-50"
               >
                 {pending ? "Creating workspace…" : "Create workspace"}
               </button>
@@ -130,13 +136,25 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        <p className="mt-5 text-center text-sm text-surface-400">
+        <p className="mt-5 text-center text-sm text-slate-500 lg:text-left">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-brand-600 hover:text-brand-700">
+          <Link href="/login" className="font-semibold text-royal-800 hover:text-royal-950">
             Sign in
           </Link>
         </p>
       </div>
+      </div>
     </div>
+  );
+}
+
+function Mark() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 14 14" fill="none" aria-hidden>
+      <rect x="1" y="1" width="5" height="5" rx="1.2" fill="currentColor" />
+      <rect x="8" y="1" width="5" height="5" rx="1.2" fill="currentColor" opacity="0.7" />
+      <rect x="1" y="8" width="5" height="5" rx="1.2" fill="currentColor" opacity="0.7" />
+      <rect x="8" y="8" width="5" height="5" rx="1.2" fill="currentColor" opacity="0.35" />
+    </svg>
   );
 }

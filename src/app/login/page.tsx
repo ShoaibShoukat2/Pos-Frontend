@@ -56,28 +56,32 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-surface-50 px-4 py-10">
+    <div className="grid min-h-dvh bg-royal-50 lg:grid-cols-[minmax(260px,380px)_1fr]">
+      <aside className="relative hidden overflow-hidden bg-royal-950 px-8 py-10 text-white lg:flex lg:flex-col lg:justify-between">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_20%_0%,rgba(242,193,75,0.22),transparent_55%)]" />
+        <div className="relative">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gold-400 text-royal-950">
+            <Mark />
+          </div>
+          <p className="mt-8 font-display text-3xl leading-tight">Universal POS</p>
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">Sales, showroom, and rent a car — one sign in for the desk.</p>
+        </div>
+        <p className="relative text-xs text-white/45">Owner, cashier, and platform admin.</p>
+      </aside>
+      <div className="flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
 
-        {/* Brand mark */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-600 shadow-lg shadow-brand-500/25">
-            <svg width="22" height="22" viewBox="0 0 14 14" fill="none">
-              <rect x="1" y="1" width="5" height="5" rx="1.2" fill="white" />
-              <rect x="8" y="1" width="5" height="5" rx="1.2" fill="white" opacity="0.7" />
-              <rect x="1" y="8" width="5" height="5" rx="1.2" fill="white" opacity="0.7" />
-              <rect x="8" y="8" width="5" height="5" rx="1.2" fill="white" opacity="0.35" />
-            </svg>
+        <div className="mb-8 text-center lg:text-left">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gold-400 text-royal-950 shadow-card lg:mx-0">
+            <Mark />
           </div>
-          <h1 className="font-display text-2xl font-semibold text-surface-900">Universal POS</h1>
-          <p className="mt-1 text-sm text-surface-400">Sign in to your workspace</p>
+          <h1 className="font-display text-2xl font-semibold text-slate-900">Sign in</h1>
+          <p className="mt-1 text-sm text-slate-500">Open your workspace</p>
         </div>
 
-        {/* Card */}
-        <div className="rounded-2xl border border-surface-200 bg-surface-0 p-6 shadow-card">
+        <div className="rounded-2xl border border-royal-100 bg-white p-6 shadow-card">
 
-          {/* Role tabs */}
-          <div className="mb-5 grid grid-cols-3 gap-1 rounded-xl bg-surface-100 p-1">
+          <div className="mb-5 grid grid-cols-3 gap-1 rounded-xl bg-royal-50 p-1">
             {ROLES.map((item) => {
               const active = role === item.id;
               const Icon = item.icon;
@@ -90,10 +94,10 @@ function LoginForm() {
                     setError("");
                     router.replace(`/login?role=${item.id}`, { scroll: false });
                   }}
-                  className={`flex flex-col items-center gap-1 rounded-lg py-2.5 text-center text-[11px] font-medium transition-all ${
+                  className={`flex flex-col items-center gap-1 rounded-lg py-2.5 text-center text-[11px] font-semibold transition-all ${
                     active
-                      ? "bg-white text-brand-600 shadow-sm"
-                      : "text-surface-400 hover:text-surface-700"
+                      ? "bg-gradient-to-r from-gold-300 to-gold-400 text-royal-950 shadow-sm"
+                      : "text-slate-500 hover:text-royal-900"
                   }`}
                 >
                   <Icon size={14} />
@@ -102,7 +106,7 @@ function LoginForm() {
               );
             })}
           </div>
-          <p className="mb-4 text-xs text-surface-400">{selected.sub}</p>
+          <p className="mb-4 text-xs text-slate-500">{selected.sub}</p>
 
           <form onSubmit={onSubmit} className="space-y-4">
             {error ? (
@@ -133,21 +137,33 @@ function LoginForm() {
             <button
               type="submit"
               disabled={pending}
-              className="w-full rounded-xl bg-brand-600 py-2.5 text-sm font-medium text-white shadow-sm shadow-brand-500/20 transition hover:bg-brand-700 disabled:opacity-50"
+              className="w-full rounded-xl bg-royal-900 py-2.5 text-sm font-semibold text-white transition hover:bg-royal-950 disabled:opacity-50"
             >
               {pending ? "Signing in…" : "Sign in"}
             </button>
           </form>
         </div>
 
-        <p className="mt-5 text-center text-sm text-surface-400">
+        <p className="mt-5 text-center text-sm text-slate-500 lg:text-left">
           No account?{" "}
-          <Link href="/register" className="font-medium text-brand-600 hover:text-brand-700">
+          <Link href="/register" className="font-semibold text-royal-800 hover:text-royal-950">
             Create a business
           </Link>
         </p>
       </div>
+      </div>
     </div>
+  );
+}
+
+function Mark() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 14 14" fill="none" aria-hidden>
+      <rect x="1" y="1" width="5" height="5" rx="1.2" fill="currentColor" />
+      <rect x="8" y="1" width="5" height="5" rx="1.2" fill="currentColor" opacity="0.7" />
+      <rect x="1" y="8" width="5" height="5" rx="1.2" fill="currentColor" opacity="0.7" />
+      <rect x="8" y="8" width="5" height="5" rx="1.2" fill="currentColor" opacity="0.35" />
+    </svg>
   );
 }
 
