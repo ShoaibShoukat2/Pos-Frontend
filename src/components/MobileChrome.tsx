@@ -93,7 +93,7 @@ export function NavDrawer({
             {meta    ? (
               <p
                 className="mt-1 text-[11px] font-semibold uppercase tracking-wider"
-                style={{ color: "var(--brand-accent, #6366f1)" }}
+                style={{ color: "var(--brand-accent, #f0c14b)" }}
               >
                 {meta}
               </p>

@@ -69,8 +69,8 @@ function cashierAllowed(pathname: string) {
 function applyBusinessTheme(user: User | null) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  const primary = user?.business_primary_color || "#1e293b";
-  const accent  = user?.business_accent_color  || "#6366f1";
+  const primary = user?.business_primary_color || "#1b0d3d";
+  const accent  = user?.business_accent_color  || "#2a1458";
   root.style.setProperty("--brand-primary", primary);
   root.style.setProperty("--brand-accent", accent);
   // derive hover shade (slightly lighter) for accent

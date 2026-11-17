@@ -28,27 +28,26 @@ const config: Config = {
           200: "#e2e8f0",   // slate-200
         },
 
-        // ── copper → indigo (ALL accent / active states) ─────────────
-        // Any page using bg-copper-500, text-copper-600 etc. now renders indigo.
+        // ── copper → royal purple (legacy accent classes) ─────────────
         copper: {
-          300: "#a5b4fc",   // indigo-300
-          400: "#818cf8",   // indigo-400
-          500: "#6366f1",   // indigo-500
-          600: "#4f46e5",   // indigo-600
-          700: "#4338ca",   // indigo-700
+          300: "#d9ceee",
+          400: "#5b35a8",
+          500: "#3d2278",
+          600: "#2a1458",
+          700: "#1b0d3d",
         },
 
-        // ── New semantic tokens (for new code) ────────────────────────
+        // ── Brand tokens used by dashboards and shared buttons ────────
         brand: {
-          50:  "#eef2ff",   // indigo-50
-          100: "#e0e7ff",   // indigo-100
-          200: "#c7d2fe",   // indigo-200
-          300: "#a5b4fc",   // indigo-300
-          400: "#818cf8",   // indigo-400
-          500: "#6366f1",   // indigo-500
-          600: "#4f46e5",   // indigo-600
-          700: "#4338ca",   // indigo-700
-          900: "#312e81",   // indigo-900
+          50:  "#f6f3fb",
+          100: "#ece6f7",
+          200: "#d9ceee",
+          300: "#c4b5e0",
+          400: "#5b35a8",
+          500: "#3d2278",
+          600: "#2a1458",
+          700: "#1b0d3d",
+          900: "#1b0d3d",
         },
         surface: {
           0:   "#ffffff",

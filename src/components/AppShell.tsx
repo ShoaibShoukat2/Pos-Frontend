@@ -63,7 +63,7 @@ function BusinessInitials({ name }: { name: string }) {
   return (
     <div
       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white"
-      style={{ background: "var(--brand-accent, #6366f1)" }}
+      style={{ background: "var(--brand-accent, #f0c14b)" }}
     >
       {letters || "B"}
     </div>
@@ -121,7 +121,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const accentStyle = {
-    "--nav-active-bg": "var(--brand-accent, #6366f1)",
+    "--nav-active-bg": "var(--brand-accent, #2a1458)",
   } as React.CSSProperties;
 
   return (
@@ -162,7 +162,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <p className="truncate text-sm font-medium text-white">{user.full_name}</p>
             <p
               className="mt-0.5 text-[11px] uppercase tracking-wider"
-              style={{ color: "var(--brand-accent, #6366f1)" }}
+              style={{ color: "var(--brand-accent, #f0c14b)" }}
             >
               {user.is_owner ? "Owner" : user.role_name || "Staff"}
             </p>
