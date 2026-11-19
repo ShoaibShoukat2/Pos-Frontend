@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Car, KeyRound, Printer, ScrollText, Share2, Wallet, X } from "lucide-react";
+import { Car, KeyRound, Pencil, Printer, ScrollText, Share2, Trash2, Wallet, X } from "lucide-react";
 
 import { DashHeader, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
+import { CarEditDialog, CarStatusDialog, RentalEditDialog, RentalUpdateDialog } from "@/components/rental/DeskDialogs";
 import { RentalInvoice } from "@/components/rental/RentalInvoice";
-import { api } from "@/lib/api";
+import { TermsDocument, TermsEditor } from "@/components/rental/TermsDocument";
+import { ApiError, api, fieldErrors } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { RENTAL_TERMS_IMAGE, invoiceFromRental, rentalMessage, whatsAppLink, type RentalInvoiceData } from "@/lib/rental";
+import { invoiceFromRental, rentalMessage, whatsAppLink, type RentalInvoiceData } from "@/lib/rental";
+import { blankTerms, type TermsSheetData } from "@/lib/rentalTerms";
 
 type RentalRow = {
   id: string;
@@ -89,6 +92,18 @@ export default function RentalDashboardPage() {
   const [toast, setToast] = useState("");
   const [filter, setFilter] = useState<DeskFilter>("open");
   const [termsOpen, setTermsOpen] = useState(false);
+  const [terms, setTerms] = useState<TermsSheetData | null>(null);
+  const [termsDraft, setTermsDraft] = useState<TermsSheetData | null>(null);
+  const [termsEditing, setTermsEditing] = useState(false);
+  const [termsSaving, setTermsSaving] = useState(false);
+  const [termsError, setTermsError] = useState("");
+  const [desk, setDesk] = useState<
+    | { kind: "rental-edit"; id: string }
+    | { kind: "rental-update"; id: string; endDate: string }
+    | { kind: "car-edit"; id: string }
+    | { kind: "car-status"; id: string; status: string; name: string }
+    | null
+  >(null);
 
   const load = useCallback(() => {
     api<Dashboard>("/api/rental/dashboard/")
@@ -100,6 +115,12 @@ export default function RentalDashboardPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    api<TermsSheetData>("/api/rental/terms/")
+      .then((row) => setTerms(row))
+      .catch(() => setTerms(blankTerms(user?.business_name || "")));
+  }, [user?.business_name]);
 
   async function openInvoice(id: string, print: boolean) {
     if (print) setPrintingId(id);
@@ -140,6 +161,60 @@ export default function RentalDashboardPage() {
     window.setTimeout(() => setToast((current) => (current === "Copy the WhatsApp link" ? "" : current)), 2400);
   }
 
+  async function saveTerms() {
+    if (!termsDraft) return;
+    setTermsSaving(true);
+    setTermsError("");
+    try {
+      const saved = await api<TermsSheetData>("/api/rental/terms/", {
+        method: "PUT",
+        body: JSON.stringify(termsDraft),
+      });
+      setTerms(saved);
+      setTermsEditing(false);
+      setToast("Terms updated");
+      window.setTimeout(() => setToast(""), 2200);
+    } catch (err) {
+      const fields = err instanceof ApiError ? fieldErrors(err.body) : {};
+      setTermsError(fields.clauses || fields.detail || "Could not update the terms.");
+    } finally {
+      setTermsSaving(false);
+    }
+  }
+
+  async function removeRental(id: string) {
+    if (!window.confirm("Delete this rental? If the car was out, it goes back to available.")) return;
+    try {
+      await api(`/api/rental/rentals/${id}/`, { method: "DELETE" });
+      setToast("Rental deleted");
+      window.setTimeout(() => setToast(""), 2200);
+      load();
+    } catch (err) {
+      const fields = err instanceof ApiError ? fieldErrors(err.body) : {};
+      setError(fields.detail || "Could not delete this rental.");
+    }
+  }
+
+  async function removeCar(id: string, name: string) {
+    if (!window.confirm(`Delete ${name}? This cannot be undone.`)) return;
+    try {
+      await api(`/api/rental/rental-cars/${id}/`, { method: "DELETE" });
+      setToast("Car deleted");
+      window.setTimeout(() => setToast(""), 2200);
+      load();
+    } catch (err) {
+      const fields = err instanceof ApiError ? fieldErrors(err.body) : {};
+      setError(fields.detail || "Could not delete this car.");
+    }
+  }
+
+  function savedDesk() {
+    setDesk(null);
+    setToast("Saved");
+    window.setTimeout(() => setToast(""), 2200);
+    load();
+  }
+
   async function markReturned(id: string) {
     if (!window.confirm("Mark this car as returned and available again?")) return;
     try {
@@ -149,6 +224,8 @@ export default function RentalDashboardPage() {
       setError("Could not close this rental.");
     }
   }
+
+  const sheet = terms || blankTerms(user?.business_name || "");
 
   const rentals = useMemo(() => {
     const rows = data?.rentals || [];
@@ -160,7 +237,11 @@ export default function RentalDashboardPage() {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-4">
       {invoice ? <RentalInvoice data={invoice} autoPrint={autoPrint} onClose={() => { setInvoice(null); setAutoPrint(false); }} /> : null}
-      {termsOpen ? <TermsSheet onClose={() => setTermsOpen(false)} /> : null}
+      {termsOpen ? <TermsSheet data={sheet} onClose={() => setTermsOpen(false)} /> : null}
+      {desk?.kind === "rental-edit" ? <RentalEditDialog id={desk.id} onClose={() => setDesk(null)} onSaved={savedDesk} /> : null}
+      {desk?.kind === "rental-update" ? <RentalUpdateDialog id={desk.id} endDate={desk.endDate} onClose={() => setDesk(null)} onSaved={savedDesk} /> : null}
+      {desk?.kind === "car-edit" ? <CarEditDialog id={desk.id} onClose={() => setDesk(null)} onSaved={savedDesk} /> : null}
+      {desk?.kind === "car-status" ? <CarStatusDialog id={desk.id} status={desk.status} name={desk.name} onClose={() => setDesk(null)} onSaved={savedDesk} /> : null}
       {toast ? <TopNotice text={toast} /> : null}
       {printingId ? <PrintBanner /> : null}
       <style>{RENTAL_MOTION}</style>
@@ -266,6 +347,9 @@ export default function RentalDashboardPage() {
                   onShare={() => shareRow(row.id)}
                   onCopy={copyLink}
                   onReturn={() => markReturned(row.id)}
+                  onEdit={() => setDesk({ kind: "rental-edit", id: row.id })}
+                  onUpdate={() => setDesk({ kind: "rental-update", id: row.id, endDate: row.end_date })}
+                  onDelete={() => removeRental(row.id)}
                 />
               ))}
             </div>
@@ -316,8 +400,11 @@ export default function RentalDashboardPage() {
                             onShare={() => wa && shareRow(row.id)}
                             onCopy={() => wa && copyLink(wa)}
                           />
-                          <div className="mt-2 flex gap-3 text-xs font-medium">
-                            <button type="button" onClick={() => openInvoice(row.id, false)} className="text-royal-800">Preview</button>
+                          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium">
+                            <button type="button" onClick={() => setDesk({ kind: "rental-edit", id: row.id })} className="text-royal-800">Edit</button>
+                            {open ? <button type="button" onClick={() => setDesk({ kind: "rental-update", id: row.id, endDate: row.end_date })} className="text-royal-800">Update</button> : null}
+                            <button type="button" onClick={() => removeRental(row.id)} className="text-red-600">Delete</button>
+                            <button type="button" onClick={() => openInvoice(row.id, false)} className="text-slate-500">Preview</button>
                             {open ? <button type="button" onClick={() => markReturned(row.id)} className="text-slate-500">Return</button> : null}
                           </div>
                         </td>
@@ -332,31 +419,49 @@ export default function RentalDashboardPage() {
       </section>
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="grid gap-0 lg:grid-cols-[minmax(220px,280px)_minmax(0,1fr)]">
-          <button type="button" onClick={() => setTermsOpen(true)} className="group relative block bg-slate-50 text-left lg:border-r lg:border-slate-100">
-            <img src={RENTAL_TERMS_IMAGE} alt="Owner terms sheet" className="mx-auto h-auto max-h-[460px] w-full object-contain p-3" />
-            <span className="absolute bottom-3 left-3 rounded-full bg-slate-950/80 px-2.5 py-1 text-[11px] font-medium text-white">Open full sheet</span>
-          </button>
-          <div className="flex flex-col justify-between gap-4 p-4 sm:p-5">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-royal-800">Owner option</p>
-              <h2 className="mt-1 font-display text-xl font-semibold text-slate-950">شرائط</h2>
-              <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-500">
-                The owner’s handwritten terms stay on the desk. Open the sheet here, or print it after the rental contract on A4.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <button type="button" onClick={() => setTermsOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-medium text-white">
-                <ScrollText size={15} />
-                View terms
-              </button>
-              <Link href="/rental/terms" className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700">
-                <Printer size={15} />
-                Print sheet
-              </Link>
-            </div>
+        <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-royal-800">Owner terms</p>
+            <h2 className="font-urdu text-2xl font-bold leading-snug text-slate-950">شرائط</h2>
+            <p className="text-xs text-slate-400">{sheet.clauses.length} lines · prints after the contract</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 sm:flex">
+            <button
+              type="button"
+              onClick={() => {
+                setTermsDraft(sheet);
+                setTermsError("");
+                setTermsEditing(true);
+              }}
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-800"
+            >
+              <Pencil size={14} />
+              Edit
+            </button>
+            <button type="button" onClick={() => setTermsOpen(true)} className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-slate-950 px-3 text-sm font-semibold text-white">
+              <ScrollText size={14} />
+              View
+            </button>
+            <Link href="/rental/terms" className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-700">
+              <Printer size={14} />
+              Print
+            </Link>
           </div>
         </div>
+        {termsEditing && termsDraft ? (
+          <TermsEditor
+            value={termsDraft}
+            saving={termsSaving}
+            error={termsError}
+            onChange={setTermsDraft}
+            onSave={() => { void saveTerms(); }}
+            onCancel={() => { setTermsEditing(false); setTermsError(""); }}
+          />
+        ) : (
+          <div className="max-h-[22rem] overflow-y-auto bg-slate-50 p-3 sm:max-h-[28rem] sm:p-5">
+            <TermsDocument data={sheet} dense />
+          </div>
+        )}
       </section>
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -381,6 +486,17 @@ export default function RentalDashboardPage() {
                   <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ring-1 ${STATUS[car.status] || STATUS.completed}`}>{label(car.status)}</span>
                 </div>
                 <p className="mt-2 text-sm font-medium text-slate-700">{money(car.daily_rate)} <span className="font-normal text-slate-400">/ day</span></p>
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  <button type="button" onClick={() => setDesk({ kind: "car-edit", id: car.id })} className="inline-flex h-9 items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800">
+                    <Pencil size={13} /> Edit
+                  </button>
+                  <button type="button" onClick={() => setDesk({ kind: "car-status", id: car.id, status: car.status, name: car.name })} className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-semibold text-royal-800">
+                    Update
+                  </button>
+                  <button type="button" onClick={() => removeCar(car.id, car.name)} className="inline-flex h-9 items-center justify-center gap-1 rounded-xl border border-red-200 bg-white text-xs font-semibold text-red-700">
+                    <Trash2 size={13} /> Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -400,6 +516,9 @@ function RentalCard({
   onShare,
   onCopy,
   onReturn,
+  onEdit,
+  onUpdate,
+  onDelete,
 }: {
   row: RentalRow;
   shop?: string;
@@ -410,6 +529,9 @@ function RentalCard({
   onShare: () => void;
   onCopy: (url: string) => void;
   onReturn: () => void;
+  onEdit: () => void;
+  onUpdate: () => void;
+  onDelete: () => void;
 }) {
   const wa = whatsAppLink(row.phone, rentalMessage({ ...row, shop }));
   const open = row.status !== "completed";
@@ -434,6 +556,19 @@ function RentalCard({
       </dl>
       <div className="mt-3">
         <RentalActions wa={wa} printing={printing} shareOpen={shareOpen} onPrint={onPrint} onShare={() => wa && onShare()} onCopy={() => wa && onCopy(wa)} />
+      </div>
+      <div className="mt-2 grid grid-cols-3 gap-2">
+        <button type="button" onClick={onEdit} className="inline-flex h-9 items-center justify-center gap-1 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800">
+          <Pencil size={13} /> Edit
+        </button>
+        {open ? (
+          <button type="button" onClick={onUpdate} className="inline-flex h-9 items-center justify-center rounded-xl border border-royal-200 text-xs font-semibold text-royal-800">
+            Update
+          </button>
+        ) : <span />}
+        <button type="button" onClick={onDelete} className="inline-flex h-9 items-center justify-center gap-1 rounded-xl border border-red-200 text-xs font-semibold text-red-700">
+          <Trash2 size={13} /> Delete
+        </button>
       </div>
       <div className="mt-2 flex items-center justify-between text-xs">
         <span className="text-slate-400">{row.invoice_number || "—"} · {row.signed ? "Signed" : "Not signed"}</span>
@@ -487,14 +622,14 @@ function RentalActions({
   );
 }
 
-function TermsSheet({ onClose }: { onClose: () => void }) {
+function TermsSheet({ data, onClose }: { data: TermsSheetData; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[70] flex flex-col bg-slate-950/75 p-3 backdrop-blur-sm sm:p-6" onClick={onClose}>
       <div className="mx-auto flex h-full min-h-0 w-full max-w-3xl flex-col" onClick={(event) => event.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between gap-3 text-white">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-gold-300">Owner terms</p>
-            <h2 className="font-display text-xl font-semibold">شرائط</h2>
+            <h2 className="font-urdu text-2xl font-bold">شرائط</h2>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <Link href="/rental/terms" className="hidden rounded-xl bg-white px-3 py-2 text-sm font-medium text-slate-900 sm:inline-flex">Print sheet</Link>
@@ -503,8 +638,8 @@ function TermsSheet({ onClose }: { onClose: () => void }) {
             </button>
           </div>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl bg-white p-2 sm:p-4">
-          <img src={RENTAL_TERMS_IMAGE} alt="Owner car rental terms" className="mx-auto w-full" />
+        <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl bg-slate-50 p-2 sm:p-4">
+          <TermsDocument data={data} />
         </div>
         <Link href="/rental/terms" className="mt-3 inline-flex items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 sm:hidden">
           Print sheet

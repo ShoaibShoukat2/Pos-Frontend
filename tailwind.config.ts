@@ -80,6 +80,7 @@ const config: Config = {
       fontFamily: {
         display: ["var(--font-fraunces)", "Georgia", "serif"],
         sans:    ["var(--font-outfit)", "system-ui", "sans-serif"],
+        urdu:    ["var(--font-nastaliq)", "Noto Nastaliq Urdu", "serif"],
       },
 
       boxShadow: {

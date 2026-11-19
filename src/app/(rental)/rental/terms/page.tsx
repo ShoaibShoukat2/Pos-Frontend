@@ -1,16 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Printer } from "lucide-react";
+import { Pencil, Printer } from "lucide-react";
 
+import { TermsDocument, TermsEditor } from "@/components/rental/TermsDocument";
 import { listOsPrinters, printToConnectedPrinter, rememberPrinter, savedPrinterName, type OsPrinter } from "@/lib/desktopPrint";
-import { RENTAL_TERMS_IMAGE } from "@/lib/rental";
+import { ApiError, api, fieldErrors } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { blankTerms, type TermsSheetData } from "@/lib/rentalTerms";
 
 export default function RentalTermsPage() {
+  const { user } = useAuth();
   const [printers, setPrinters] = useState<OsPrinter[] | null>(null);
   const [printerName, setPrinterName] = useState("");
   const [note, setNote] = useState("");
   const [printing, setPrinting] = useState(false);
+  const [sheet, setSheet] = useState<TermsSheetData | null>(null);
+  const [draft, setDraft] = useState<TermsSheetData | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let alive = true;
@@ -25,10 +34,37 @@ export default function RentalTermsPage() {
     return () => { alive = false; };
   }, []);
 
+  useEffect(() => {
+    api<TermsSheetData>("/api/rental/terms/")
+      .then(setSheet)
+      .catch(() => setSheet(blankTerms(user?.business_name || "")));
+  }, [user?.business_name]);
+
   const desktop = typeof window !== "undefined" && Boolean(window.electronAPI?.printPage);
   const activePrinter = desktop
     ? (printers?.find((row) => row.name === printerName)?.name || "")
     : "";
+  const shown = sheet || blankTerms(user?.business_name || "");
+
+  async function save() {
+    if (!draft) return;
+    setSaving(true);
+    setError("");
+    try {
+      const saved = await api<TermsSheetData>("/api/rental/terms/", {
+        method: "PUT",
+        body: JSON.stringify(draft),
+      });
+      setSheet(saved);
+      setEditing(false);
+      setNote("Terms updated.");
+    } catch (err) {
+      const fields = err instanceof ApiError ? fieldErrors(err.body) : {};
+      setError(fields.clauses || fields.detail || "Could not update the terms.");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function printTerms() {
     setPrinting(true);
@@ -72,18 +108,28 @@ export default function RentalTermsPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-royal-800">Owner terms</p>
-          <h1 className="font-display text-2xl font-semibold text-slate-950">شرائط</h1>
-          <p className="mt-0.5 text-sm text-slate-500">The owner’s sheet. It also prints after the rental contract on A4.</p>
+          <h1 className="font-urdu text-3xl font-bold text-slate-950">شرائط</h1>
+          <p className="mt-0.5 text-sm text-slate-500">Edit a line, delete it, or update the sheet. It prints after the rental contract.</p>
         </div>
-        <button
-          type="button"
-          onClick={() => { void printTerms(); }}
-          disabled={printing || (desktop && !activePrinter)}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-royal-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-40 sm:w-auto"
-        >
-          <Printer size={15} />
-          {printing ? "Printing…" : "Print terms"}
-        </button>
+        <div className="grid grid-cols-2 gap-2 sm:flex">
+          <button
+            type="button"
+            onClick={() => { setDraft(shown); setError(""); setEditing(true); }}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800"
+          >
+            <Pencil size={15} />
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => { void printTerms(); }}
+            disabled={printing || editing || (desktop && !activePrinter)}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-royal-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-40"
+          >
+            <Printer size={15} />
+            {printing ? "Printing…" : "Print terms"}
+          </button>
+        </div>
       </div>
 
       {desktop && printers ? (
@@ -99,9 +145,22 @@ export default function RentalTermsPage() {
       ) : null}
       {note ? <p className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">{note}</p> : null}
 
-      <div id="car-invoice-print-root" className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-sm sm:p-4">
-        <img src={RENTAL_TERMS_IMAGE} alt="Car rental terms" className="mx-auto w-full" />
-      </div>
+      {editing && draft ? (
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <TermsEditor
+            value={draft}
+            saving={saving}
+            error={error}
+            onChange={setDraft}
+            onSave={() => { void save(); }}
+            onCancel={() => { setEditing(false); setError(""); }}
+          />
+        </div>
+      ) : (
+        <div id="car-invoice-print-root" className="rounded-2xl bg-white p-2 shadow-sm sm:p-4">
+          <TermsDocument data={shown} />
+        </div>
+      )}
     </div>
   );
 }

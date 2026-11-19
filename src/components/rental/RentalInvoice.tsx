@@ -6,7 +6,9 @@ import { ContractEvidence, type ContractEvidenceValues } from "@/components/cont
 import { ApiError, api, apiBase, fieldErrors } from "@/lib/api";
 import { listOsPrinters, printToConnectedPrinter, rememberPrinter, savedPrinterName, type OsPrinter } from "@/lib/desktopPrint";
 import { useHardware } from "@/lib/hardware";
-import { RENTAL_TERMS_IMAGE, rentalMessage, whatsAppLink, type RentalInvoiceData } from "@/lib/rental";
+import { TermsDocument } from "@/components/rental/TermsDocument";
+import { rentalMessage, whatsAppLink, type RentalInvoiceData } from "@/lib/rental";
+import { blankTerms, type TermsSheetData } from "@/lib/rentalTerms";
 import { readShowroomPaper, saveShowroomPaper, type ShowroomPaper } from "@/lib/showroomInvoice";
 
 function rs(v: number) {
@@ -59,8 +61,15 @@ export function RentalInvoice({
   const [printers, setPrinters] = useState<OsPrinter[] | null>(null);
   const [printerName, setPrinterName] = useState("");
   const [shop, setShop] = useState({ phone: "", address: "", logo: "" });
+  const [termsSheet, setTermsSheet] = useState<TermsSheetData>(blankTerms(data.shop_name));
 
   useEffect(() => { setPaper(readShowroomPaper()); }, []);
+
+  useEffect(() => {
+    api<TermsSheetData>("/api/rental/terms/")
+      .then((row) => setTermsSheet(row.title ? row : { ...row, title: data.shop_name }))
+      .catch(() => setTermsSheet(blankTerms(data.shop_name)));
+  }, [data.shop_name]);
 
   useEffect(() => {
     api<{ phone?: string; address?: string; city?: string; logo?: string | null }>("/api/business/")
@@ -351,8 +360,8 @@ export function RentalInvoice({
             Rental agreement from {data.shop_name}. {data.cashier_name ? `Prepared by ${data.cashier_name}.` : ""}
           </div>
           {includeTerms && paper === "a4" ? (
-            <div className="rental-terms-sheet bg-white px-4 py-4">
-              <img src={RENTAL_TERMS_IMAGE} alt="شرائط" className="mx-auto w-full max-w-[190mm]" />
+            <div className="rental-terms-sheet bg-white px-3 py-4 sm:px-6">
+              <TermsDocument data={termsSheet} />
             </div>
           ) : null}
         </div>
