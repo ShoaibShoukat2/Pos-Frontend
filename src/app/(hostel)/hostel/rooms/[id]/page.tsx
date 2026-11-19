@@ -16,7 +16,7 @@ export default function RoomDetailPage() {
 
   useEffect(() => {
     api(`/api/hostel/rooms/${params.id}/`).then(setRoom).catch((err) => setError(errText(err)));
-    api(`/api/hostel/reservations/?`).then((data) => setPayments(asList(data))).catch(() => undefined);
+    api(`/api/hostel/reservations/?room=${params.id}&page_size=100`).then((data) => setPayments(asList(data))).catch(() => undefined);
   }, [params.id]);
 
   const stays = payments.filter((row) => row.room === params.id);
