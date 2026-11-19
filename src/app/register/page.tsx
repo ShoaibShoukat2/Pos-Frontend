@@ -17,6 +17,7 @@ const TYPES = [
   { value: "pizza",        label: "Pizza shop" },
   { value: "car_showroom", label: "Car Showroom" },
   { value: "rent_a_car",   label: "Rent a Car" },
+  { value: "hostel",       label: "Hostel" },
 ];
 
 export default function RegisterPage() {
@@ -55,7 +56,7 @@ export default function RegisterPage() {
             <Mark />
           </div>
           <p className="mt-8 font-display text-3xl leading-tight">Create the desk</p>
-          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">Retail, car showroom, or rent a car. PKR and GST are ready when you finish.</p>
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">Retail, car showroom, rent a car, or hostel. PKR and GST are ready when you finish.</p>
         </div>
         <p className="relative text-xs text-white/45">Takes about 30 seconds.</p>
       </aside>

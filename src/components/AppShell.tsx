@@ -27,7 +27,7 @@ import {
 import { ASIDE, MAIN, NAV_ACTIVE, NAV_IDLE } from "@/components/dashboard/kit";
 import { FounderCredit } from "@/components/FounderCredit";
 import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
-import { isCarShowroom, isCashier, isPharmacy, isRentACar, useAuth } from "@/lib/auth";
+import { isCarShowroom, isCashier, isHostel, isPharmacy, isRentACar, useAuth } from "@/lib/auth";
 
 const CASHIER_LINKS = new Set(["/cashier", "/pos", "/customers", "/cash", "/returns"]);
 
@@ -118,6 +118,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return (
       <div className="grid min-h-dvh place-items-center text-sm text-surface-400">
         Opening rent a car…
+      </div>
+    );
+  }
+  if (isHostel(user)) {
+    if (typeof window !== "undefined" && !window.location.pathname.startsWith("/hostel")) {
+      window.location.replace("/hostel");
+    }
+    return (
+      <div className="grid min-h-dvh place-items-center text-sm text-surface-400">
+        Opening hostel…
       </div>
     );
   }

@@ -64,7 +64,7 @@ function LoginForm() {
             <Mark />
           </div>
           <p className="mt-8 font-display text-3xl leading-tight">Universal POS</p>
-          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">Sales, showroom, and rent a car — one sign in for the desk.</p>
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">Sales, showroom, rent a car, and hostel — one sign in for the desk.</p>
         </div>
         <p className="relative text-xs text-white/45">Owner, cashier, and platform admin.</p>
       </aside>

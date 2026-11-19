@@ -25,6 +25,11 @@ export function isRentACar(user: User | null | undefined) {
   return type === "rent_a_car";
 }
 
+export function isHostel(user: User | null | undefined) {
+  const type = (user?.business_type || "").toLowerCase().replace(/\s+/g, "_");
+  return type === "hostel";
+}
+
 export function isPharmacy(user: User | null | undefined) {
   const type = (user?.business_type || "").toLowerCase().replace(/\s+/g, "_");
   return type === "pharmacy";
@@ -35,6 +40,7 @@ export function homeFor(user: User) {
   if (isCashier(user)) return "/cashier";
   if (isCarShowroom(user)) return "/showroom";
   if (isRentACar(user)) return "/rental";
+  if (isHostel(user)) return "/hostel";
   return "/dashboard";
 }
 
@@ -161,7 +167,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isPlatformRoute = pathname === "/platform" || pathname.startsWith("/platform/");
     const isShowroomRoute = pathname === "/showroom" || pathname.startsWith("/showroom/");
     const isRentalRoute = pathname === "/rental" || pathname.startsWith("/rental/");
+    const isHostelRoute = pathname === "/hostel" || pathname.startsWith("/hostel/");
+    const isHostelInvite = pathname.startsWith("/hostel/invite");
     const isCashierLogin = pathname === "/cashier/login";
+    if (isHostelInvite) return;
     if (!user && !isPublic) {
       router.replace(isPlatformRoute ? "/platform/login" : pathname.startsWith("/cashier") ? "/cashier/login" : "/login");
       return;
@@ -192,6 +201,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isRentACar(user)) {
       const publicStay = pathname === "/" || pathname.startsWith("/scan") || pathname.startsWith("/check");
       if (!isRentalRoute && !publicStay) goHome(user);
+      return;
+    }
+    if (isHostel(user)) {
+      const publicStay = pathname === "/" || pathname.startsWith("/scan") || pathname.startsWith("/check");
+      if (!isHostelRoute && !publicStay) goHome(user);
+      return;
+    }
+    if (isHostelRoute) {
+      goHome(user);
       return;
     }
     if (pathname === "/login" || pathname === "/register" || pathname === "/platform/login" || isCashierLogin) {
