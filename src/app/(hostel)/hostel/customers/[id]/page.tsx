@@ -107,17 +107,6 @@ export default function CustomerDetailPage() {
     }
   }
 
-  async function checkOut() {
-    if (!window.confirm("Check this guest out and release the seat?")) return;
-    try {
-      await api(`/api/hostel/customers/${params.id}/check-out/`, { method: "POST", body: JSON.stringify({}) });
-      setMessage("Checked out. The seat is free.");
-      load();
-    } catch (err) {
-      setError(errText(err));
-    }
-  }
-
   function summary(kind: "balance" | "reminder" | "details") {
     const text = paymentSummary({
       hostel: session?.hostel_name || "Hostel",
@@ -179,9 +168,8 @@ export default function CustomerDetailPage() {
             <a className="btn btn-ghost" target="_blank" rel="noreferrer" href={waLink(row.whatsapp || row.mobile, summary("reminder"))}>Rent reminder</a>
             <button className="btn btn-ghost" onClick={() => setEditing(true)}>Edit</button>
             <button className="btn btn-ghost" onClick={() => setPayOpen(true)}>Record payment</button>
-            <button className="btn btn-ghost" disabled={!stay} onClick={() => setExtendOpen(true)}>Extend stay</button>
+            <button className="btn btn-ghost" disabled={!stay} onClick={() => setExtendOpen(true)}>Change leaving date</button>
             <button className="btn btn-ghost" disabled={!stay} onClick={loadBeds}>Change room</button>
-            <button className="btn btn-ghost" disabled={!stay} onClick={checkOut}>Check out</button>
           </div>
           <div className="grid gap-3 sm:grid-cols-4">
             <Money label="Payable" value={finance?.total_payable} />
@@ -206,7 +194,7 @@ export default function CustomerDetailPage() {
           <p>Branch: {row.branch_name || "—"}</p>
           <p>Room: {row.room_number || row.reservations?.[0]?.room_number || "—"} · Floor {row.floor || row.reservations?.[0]?.floor || "—"} · Seat {row.seat || row.reservations?.[0]?.seat || "—"}</p>
           <p>Admission: {row.admission_date || "—"}</p>
-          <p>Check-in: {row.check_in_date || "—"} · Checkout: {row.checkout_date || row.expected_checkout || "—"}</p>
+          <p>Joining: {row.check_in_date || "—"} · Leaving: {row.checkout_date || row.expected_checkout || "—"}</p>
           <p>Rent {pkr(row.monthly_rent)} · Deposit {pkr(row.security_deposit)}</p>
         </Card>
       </div>
@@ -231,15 +219,15 @@ export default function CustomerDetailPage() {
           </div>
         ))}
       </Card>
-      <Card title="Reservations and stays">
+      <Card title="Reservations">
         {(row.reservations || []).map((item: any) => (
           <div key={item.id} className="flex items-center justify-between py-2 text-sm">
             <p>{item.number} · Room {item.room_number} seat {item.seat} · {item.check_in_date} to {item.expected_checkout}</p>
             <StatusPill value={item.status} />
           </div>
         ))}
-        {(row.checkins || []).map((item: any) => <p key={item.id} className="text-xs text-slate-500">Checked in {String(item.at).slice(0, 16)} by {item.by || "staff"} · room {item.room}</p>)}
-        {(row.checkouts || []).map((item: any) => <p key={item.id} className="text-xs text-slate-500">Checked out {String(item.at).slice(0, 16)} · {item.notes || "room " + item.room}</p>)}
+        {(row.checkins || []).map((item: any) => <p key={item.id} className="text-xs text-slate-500">Joined {String(item.at).slice(0, 16)} by {item.by || "staff"} · room {item.room}</p>)}
+        {(row.checkouts || []).map((item: any) => <p key={item.id} className="text-xs text-slate-500">Left {String(item.at).slice(0, 16)} · {item.notes || "room " + item.room}</p>)}
       </Card>
       <Card title="Documents">
         <div className="flex flex-wrap gap-2">

@@ -46,7 +46,7 @@ export default function NewCustomerPage() {
     event.preventDefault();
     setError("");
     try {
-      const body: Record<string, unknown> = { check_in_now: Boolean(form.check_in_now) };
+      const body: Record<string, unknown> = { check_in_now: Boolean(form.bed_id) };
       for (const [key, value] of Object.entries(form)) {
         if (key === "check_in_now" || key === "room" || value === "" || value === false) continue;
         body[key] = value;
@@ -88,13 +88,12 @@ export default function NewCustomerPage() {
         <Field label="Branch"><select className="field w-full" value={String(form.branch)} onChange={(event) => set("branch", event.target.value)} required><option value="">Choose</option>{branches.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field>
         <Field label="Room"><select className="field w-full" value={String(form.room)} onChange={(event) => set("room", event.target.value)}><option value="">Any</option>{rooms.map((item) => <option key={item.id} value={item.id}>Floor {item.floor} · {item.number}</option>)}</select></Field>
         <Field label="Admission"><input type="date" className="field w-full" value={String(form.admission_date)} onChange={(event) => set("admission_date", event.target.value)} /></Field>
-        <Field label="Check-in"><input type="date" className="field w-full" value={String(form.check_in_date)} onChange={(event) => set("check_in_date", event.target.value)} /></Field>
-        <Field label="Expected checkout"><input type="date" className="field w-full" value={String(form.expected_checkout)} onChange={(event) => set("expected_checkout", event.target.value)} /></Field>
+        <Field label="Joining date"><input type="date" className="field w-full" value={String(form.check_in_date)} onChange={(event) => set("check_in_date", event.target.value)} /></Field>
+        <Field label="Stay until"><input type="date" className="field w-full" value={String(form.expected_checkout)} onChange={(event) => set("expected_checkout", event.target.value)} /></Field>
         <Field label="Available seat"><select className="field w-full" value={String(form.bed_id)} onChange={(event) => set("bed_id", event.target.value)}><option value="">Assign later</option>{beds.map((bed) => <option key={bed.id} value={bed.id}>Room {bed.room_number} · {bed.code}</option>)}</select></Field>
         <Field label="Monthly rent"><input className="field w-full" value={String(form.monthly_rent)} onChange={(event) => set("monthly_rent", event.target.value)} /></Field>
         <Field label="Security deposit"><input className="field w-full" value={String(form.security_deposit)} onChange={(event) => set("security_deposit", event.target.value)} /></Field>
         <Field label="Registration fee"><input className="field w-full" value={String(form.registration_fee)} onChange={(event) => set("registration_fee", event.target.value)} /></Field>
-        <label className="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={Boolean(form.check_in_now)} onChange={(event) => set("check_in_now", event.target.checked)} /> Check in now if the date is today or earlier</label>
       </section>
       <button className="btn btn-primary" type="submit">Save customer</button>
     </form>

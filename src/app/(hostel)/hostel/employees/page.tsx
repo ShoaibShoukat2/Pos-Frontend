@@ -75,14 +75,12 @@ export default function EmployeesPage() {
                   <h2 className="font-display text-xl">{row.full_name}</h2>
                   <p className="text-sm text-slate-500">{row.designation || row.role} · {row.email} · {row.phone}</p>
                 </div>
-                <div className="text-right"><p className="font-semibold">{pkr(row.collected)}</p><p className="text-xs text-slate-400">{row.transactions} payments</p></div>
+                <div className="text-right"><p className="font-semibold">{pkr(row.collected)}</p><p className="text-xs text-slate-400">{row.transactions} payments this month</p></div>
               </div>
               {session?.role === "owner" ? (
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   <select className="field" value={row.role} onChange={(event) => setRows(rows.map((item) => item.id === row.id ? { ...item, role: event.target.value } : item))}><option value="employee">Employee</option><option value="manager">Manager</option></select>
-                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={row.can_view_reports} onChange={(event) => setRows(rows.map((item) => item.id === row.id ? { ...item, can_view_reports: event.target.checked } : item))} /> Branch reports</label>
-                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={row.can_approve_expenses} onChange={(event) => setRows(rows.map((item) => item.id === row.id ? { ...item, can_approve_expenses: event.target.checked } : item))} /> Approve expenses</label>
-                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={row.can_manage_staff} onChange={(event) => setRows(rows.map((item) => item.id === row.id ? { ...item, can_manage_staff: event.target.checked } : item))} /> Manage staff</label>
+                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={row.can_manage_staff} onChange={(event) => setRows(rows.map((item) => item.id === row.id ? { ...item, can_manage_staff: event.target.checked } : item))} /> Can add desk staff</label>
                   <button className="btn btn-primary" onClick={() => saveAccess(row)}>Save access</button>
                   <button className="btn btn-ghost" onClick={() => deactivate(row.id)}>Deactivate</button>
                 </div>
@@ -109,11 +107,10 @@ export default function EmployeesPage() {
           {session?.role === "owner" ? <select className="field" value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}><option value="employee">Employee</option><option value="manager">Branch manager</option></select> : null}
           <UploadField label="Photo" onPick={(photo) => setForm({ ...form, photo })} />
           {session?.role === "owner" && form.role === "manager" ? (
-            <div className="sm:col-span-2 flex flex-wrap gap-4 text-sm">
-              <label className="flex items-center gap-2"><input type="checkbox" checked={form.can_view_reports} onChange={(event) => setForm({ ...form, can_view_reports: event.target.checked })} /> Branch reports</label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={form.can_approve_expenses} onChange={(event) => setForm({ ...form, can_approve_expenses: event.target.checked })} /> Approve expenses</label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={form.can_manage_staff} onChange={(event) => setForm({ ...form, can_manage_staff: event.target.checked })} /> Manage staff</label>
-            </div>
+            <p className="sm:col-span-2 text-sm text-slate-500">A branch manager registers customers, checks their CNIC and details, collects rent, and sees this month&apos;s payments, dues, and reports for their hostel. They cannot open other branches, change hostel settings, or delete a payment.</p>
+          ) : null}
+          {session?.role === "owner" && form.role === "manager" ? (
+            <label className="sm:col-span-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={form.can_manage_staff} onChange={(event) => setForm({ ...form, can_manage_staff: event.target.checked })} /> Can add desk staff at this branch</label>
           ) : null}
           <button className="btn btn-primary sm:col-span-2" type="submit">Create login</button>
         </form>

@@ -72,7 +72,11 @@ export default function ReservationsPage() {
         <h1 className="font-display text-3xl text-slate-900">Reservations</h1>
         <select className="field" value={status} onChange={(event) => { setPage(1); setStatus(event.target.value); }}>
           <option value="">All statuses</option>
-          {["pending", "confirmed", "checked_in", "cancelled", "completed"].map((item) => <option key={item} value={item}>{item.replaceAll("_", " ")}</option>)}
+          <option value="pending">Pending</option>
+          <option value="confirmed">Seat booked</option>
+          <option value="checked_in">Living here</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="completed">Left</option>
         </select>
         <Notice text={message} />
         <Notice tone="bad" text={error} />
@@ -102,9 +106,9 @@ export default function ReservationsPage() {
         <select className="field w-full" value={form.customer} onChange={(event) => setForm({ ...form, customer: event.target.value })} required><option value="">Customer</option>{customers.map((item) => <option key={item.id} value={item.id}>{item.full_name}</option>)}</select>
         <select className="field w-full" value={form.branch} onChange={(event) => setForm({ ...form, branch: event.target.value })} required><option value="">Branch</option>{branches.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
         <select className="field w-full" value={form.room} onChange={(event) => setForm({ ...form, room: event.target.value })}><option value="">Any room</option>{rooms.map((item) => <option key={item.id} value={item.id}>Floor {item.floor} · {item.number}</option>)}</select>
-        <input type="date" className="field w-full" value={form.reservation_date} onChange={(event) => setForm({ ...form, reservation_date: event.target.value })} required />
-        <input type="date" className="field w-full" value={form.check_in_date} onChange={(event) => setForm({ ...form, check_in_date: event.target.value })} required />
-        <input type="date" className="field w-full" value={form.expected_checkout} onChange={(event) => setForm({ ...form, expected_checkout: event.target.value })} required />
+        <label className="block text-xs font-medium uppercase tracking-wide text-slate-500">Booking date<input type="date" className="field mt-1 w-full" value={form.reservation_date} onChange={(event) => setForm({ ...form, reservation_date: event.target.value })} required /></label>
+        <label className="block text-xs font-medium uppercase tracking-wide text-slate-500">Joining date<input type="date" className="field mt-1 w-full" value={form.check_in_date} onChange={(event) => setForm({ ...form, check_in_date: event.target.value })} required /></label>
+        <label className="block text-xs font-medium uppercase tracking-wide text-slate-500">Stay until<input type="date" className="field mt-1 w-full" value={form.expected_checkout} onChange={(event) => setForm({ ...form, expected_checkout: event.target.value })} required /></label>
         <select className="field w-full" value={form.bed} onChange={(event) => setForm({ ...form, bed: event.target.value })} required><option value="">Free seat</option>{beds.map((bed) => <option key={bed.id} value={bed.id}>Room {bed.room_number} · {bed.code}</option>)}</select>
         <input className="field w-full" placeholder="Monthly rent" value={form.monthly_rent} onChange={(event) => setForm({ ...form, monthly_rent: event.target.value })} />
         <input className="field w-full" placeholder="Security deposit" value={form.security_deposit} onChange={(event) => setForm({ ...form, security_deposit: event.target.value })} />

@@ -38,7 +38,7 @@ export function StatusPill({ value }: { value: string }) {
     maintenance: "bg-slate-100 text-slate-600",
     in_progress: "bg-amber-50 text-amber-800",
   };
-  const label = value.replaceAll("_", " ");
+  const label = value === "checked_in" ? "Living here" : value.replaceAll("_", " ");
   return <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${tone[value] || "bg-slate-100 text-slate-600"}`}>{label}</span>;
 }
 

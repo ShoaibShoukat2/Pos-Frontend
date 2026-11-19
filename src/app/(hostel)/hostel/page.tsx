@@ -82,7 +82,7 @@ export default function HostelDashboardPage() {
             {branches.map((branch) => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
           </select>
         ) : null}
-        {session?.role === "owner" ? (
+        {session?.role !== "employee" ? (
           <select className="field" value={filters.employee} onChange={(event) => setFilters({ ...filters, employee: event.target.value })}>
             <option value="">All employees</option>
             {staff.map((person) => <option key={person.id} value={person.id}>{person.full_name}</option>)}
@@ -102,7 +102,7 @@ export default function HostelDashboardPage() {
         <StatCard icon={BedDouble} label="Rooms" value={String(stats?.rooms ?? "—")} href="/hostel/rooms" />
         <StatCard icon={BedDouble} label="Seats" value={String(stats?.seats ?? "—")} hint={`${stats?.available ?? 0} free`} href="/hostel/seats" tone="hero" />
         <StatCard icon={Users} label="Customers" value={String(stats?.active_customers ?? "—")} hint={`${stats?.customers ?? 0} total`} href="/hostel/customers" />
-        <StatCard icon={Wallet} label="Collected in period" value={stats ? pkr(stats.month_revenue) : "—"} href="/hostel/payments/history" />
+        <StatCard icon={Wallet} label={filters.month ? "Collected in period" : "Collected this month"} value={stats ? pkr(stats.month_revenue) : "—"} href="/hostel/payments/history" />
         <StatCard icon={CircleDollarSign} label="All collected" value={stats ? pkr(stats.collected) : "—"} />
         <StatCard icon={Wallet} label="Pending dues" value={stats ? pkr(stats.pending) : "—"} href="/hostel/payments" />
         <StatCard icon={Wallet} label="Overdue" value={stats ? pkr(stats.overdue) : "—"} />
