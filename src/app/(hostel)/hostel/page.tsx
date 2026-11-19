@@ -98,7 +98,7 @@ export default function HostelDashboardPage() {
       </DashHeader>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <StatGrid cols="xl:grid-cols-5">
-        <StatCard icon={Building2} label="Branches" value={String(stats?.branches ?? "—")} href="/hostel/branches" />
+        {session?.role === "owner" ? <StatCard icon={Building2} label="Branches" value={String(stats?.branches ?? "—")} href="/hostel/branches" /> : null}
         <StatCard icon={BedDouble} label="Rooms" value={String(stats?.rooms ?? "—")} href="/hostel/rooms" />
         <StatCard icon={BedDouble} label="Seats" value={String(stats?.seats ?? "—")} hint={`${stats?.available ?? 0} free`} href="/hostel/seats" tone="hero" />
         <StatCard icon={Users} label="Customers" value={String(stats?.active_customers ?? "—")} hint={`${stats?.customers ?? 0} total`} href="/hostel/customers" />

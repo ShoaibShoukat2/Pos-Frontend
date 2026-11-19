@@ -29,7 +29,7 @@ import type { HostelSession } from "@/lib/hostel";
 
 const NAV: { href: string; label: string; icon: typeof LayoutDashboard; show: (session: HostelSession) => boolean }[] = [
   { href: "/hostel", label: "Overview", icon: LayoutDashboard, show: () => true },
-  { href: "/hostel/branches", label: "Branches", icon: Building2, show: (session) => session.role !== "employee" },
+  { href: "/hostel/branches", label: "Branches", icon: Building2, show: (session) => session.role === "owner" },
   { href: "/hostel/rooms", label: "Rooms", icon: BedDouble, show: () => true },
   { href: "/hostel/seats", label: "Beds & seats", icon: BedDouble, show: () => true },
   { href: "/hostel/customers", label: "Customers", icon: Users, show: () => true },

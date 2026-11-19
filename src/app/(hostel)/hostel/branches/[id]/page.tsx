@@ -1,22 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
+import { useHostel } from "@/components/hostel/session";
 import { api } from "@/lib/api";
 import { errText, pkr } from "@/lib/hostel";
 import { BedDouble, Users, Wallet } from "lucide-react";
 
 export default function BranchDashboardPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const { session } = useHostel();
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (session && session.role !== "owner") router.replace("/hostel");
+  }, [session, router]);
+  useEffect(() => {
+    if (session && session.role !== "owner") return;
     api(`/api/hostel/dashboard/?branch=${params.id}`).then(setData).catch((err) => setError(errText(err)));
-  }, [params.id]);
+  }, [params.id, session]);
 
   const stats = data?.stats;
   const branch = data?.charts?.branches?.find((row: { id: string }) => row.id === params.id);

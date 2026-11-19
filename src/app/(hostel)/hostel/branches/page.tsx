@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
 import { EmptyState, Modal, Notice, UploadField } from "@/components/hostel/bits";
@@ -37,6 +38,7 @@ const blank = {
 
 export default function BranchesPage() {
   const { session } = useHostel();
+  const router = useRouter();
   const [rows, setRows] = useState<Branch[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
@@ -49,6 +51,9 @@ export default function BranchesPage() {
     api("/api/hostel/branches/").then((data) => setRows(listOf(data))).catch((err) => setError(errText(err)));
   }
   useEffect(() => { load(); }, []);
+  useEffect(() => {
+    if (session && session.role !== "owner") router.replace("/hostel");
+  }, [session, router]);
 
   function edit(row: Branch) {
     setEditing(row.id);

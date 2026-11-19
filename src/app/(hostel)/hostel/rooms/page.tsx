@@ -65,10 +65,12 @@ function RoomsBody() {
           <p className="text-sm text-slate-500">Green is free, red is occupied, orange is reserved, gray is maintenance.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <select className="field" value={branch} onChange={(event) => setBranch(event.target.value)}>
-            <option value="">All branches</option>
-            {branches.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-          </select>
+          {session?.role === "owner" ? (
+            <select className="field" value={branch} onChange={(event) => setBranch(event.target.value)}>
+              <option value="">All branches</option>
+              {branches.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+            </select>
+          ) : null}
           <input className="field w-24" placeholder="Floor" value={floor} onChange={(event) => setFloor(event.target.value)} />
           {can(session, "rooms.manage") ? <button className="btn btn-primary" onClick={() => { setForm({ ...blank, branch: branch || branches[0]?.id || "" }); setOpen(true); }}>Add room</button> : null}
         </div>
@@ -97,7 +99,7 @@ function RoomsBody() {
       {open ? (
         <Modal title="New room" onClose={() => setOpen(false)}>
           <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-2">
-            <label className="text-xs font-medium uppercase text-slate-500">Branch<select className="field mt-1 w-full normal-case" value={form.branch} onChange={(event) => setForm({ ...form, branch: event.target.value })} required>{branches.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+            {session?.role === "owner" ? <label className="text-xs font-medium uppercase text-slate-500">Branch<select className="field mt-1 w-full normal-case" value={form.branch} onChange={(event) => setForm({ ...form, branch: event.target.value })} required>{branches.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : null}
             <label className="text-xs font-medium uppercase text-slate-500">Room number<input className="field mt-1 w-full normal-case" value={form.number} onChange={(event) => setForm({ ...form, number: event.target.value })} required /></label>
             <label className="text-xs font-medium uppercase text-slate-500">Floor<input className="field mt-1 w-full normal-case" value={form.floor} onChange={(event) => setForm({ ...form, floor: event.target.value })} /></label>
             <label className="text-xs font-medium uppercase text-slate-500">Type<select className="field mt-1 w-full normal-case" value={form.room_type} onChange={(event) => setForm({ ...form, room_type: event.target.value })}><option value="single">Single sharing</option><option value="double">Double sharing</option><option value="triple">Triple sharing</option><option value="four">Four sharing</option><option value="six">Six sharing</option><option value="custom">Custom capacity</option></select></label>
