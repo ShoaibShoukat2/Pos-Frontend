@@ -108,16 +108,16 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
     <>
       {/* ── Titlebar ── */}
       <div
-        className="flex h-8 shrink-0 select-none items-center bg-ink-950 border-b border-white/[0.06]"
+        className="flex h-8 shrink-0 select-none items-center border-b border-white/[0.06] bg-royal-950"
         style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
       >
         {/* Left — identity */}
         <div className="flex items-center gap-2 pl-3">
           <svg width="13" height="13" viewBox="0 0 14 14" fill="none" className="shrink-0">
-            <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#d4892a" />
-            <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.55" />
-            <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.55" />
-            <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#d4892a" opacity="0.25" />
+            <rect x="1" y="1" width="5" height="5" rx="1.2" fill="#f0c14b" />
+            <rect x="8" y="1" width="5" height="5" rx="1.2" fill="#f0c14b" opacity="0.55" />
+            <rect x="1" y="8" width="5" height="5" rx="1.2" fill="#f0c14b" opacity="0.55" />
+            <rect x="8" y="8" width="5" height="5" rx="1.2" fill="#f0c14b" opacity="0.25" />
           </svg>
           <span className="text-[11px] font-medium tracking-wide text-white/40">{title}</span>
           {version ? (
@@ -146,7 +146,7 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
           >
             <div className="h-1 w-20 overflow-hidden rounded-full bg-white/10">
               <div
-                className="h-full rounded-full bg-copper-400 transition-all duration-300"
+                className="h-full rounded-full bg-gold-400 transition-all duration-300"
                 style={{ width: `${update.percent}%` }}
               />
             </div>
@@ -164,7 +164,7 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
           >
             <span
               className={`h-1.5 w-1.5 rounded-full ${
-                update.stage === "downloaded" ? "bg-emerald-400" : "animate-pulse bg-copper-400"
+                update.stage === "downloaded" ? "bg-gold-400" : "animate-pulse bg-gold-400"
               }`}
             />
             <span className="text-[10px] text-white/30">
@@ -216,7 +216,7 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
 
       {serverOpen ? (
         <form
-          className="flex items-center gap-2 border-b border-white/10 bg-ink-950 px-3 py-2"
+          className="flex items-center gap-2 border-b border-white/10 bg-royal-950 px-3 py-2"
           onSubmit={(e) => {
             e.preventDefault();
             const url = apiUrl.trim().replace(/\/$/, "");
@@ -232,11 +232,11 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
           <input
             value={apiUrl}
             onChange={(e) => setApiUrl(e.target.value)}
-            className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-white outline-none focus:border-copper-400"
+            className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-white outline-none focus:border-gold-400"
             placeholder="https://your-server.com"
             spellCheck={false}
           />
-          <button type="submit" className="rounded-md bg-copper-500 px-2 py-1 text-[11px] font-medium text-ink-950">
+          <button type="submit" className="rounded-md bg-gold-400 px-2 py-1 text-[11px] font-medium text-royal-950">
             Save
           </button>
           {apiError ? <span className="text-[10px] text-red-300">{apiError}</span> : null}
@@ -245,12 +245,12 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
 
       {/* ── Update toast — bottom right ── */}
       {showToast ? (
-        <div className="fixed bottom-5 right-5 z-[999] w-[300px] overflow-hidden rounded-xl border border-white/10 bg-ink-950 shadow-2xl">
+        <div className="fixed bottom-5 right-5 z-[999] w-[300px] overflow-hidden rounded-xl border border-white/10 bg-royal-950 shadow-2xl">
           {/* Progress bar at top */}
           {update.stage === "downloading" ? (
             <div className="h-0.5 bg-white/10">
               <div
-                className="h-full bg-copper-400 transition-all duration-300"
+                className="h-full bg-gold-400 transition-all duration-300"
                 style={{ width: `${update.percent}%` }}
               />
             </div>
@@ -260,15 +260,15 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
             {/* Status icon */}
             <div className="mt-0.5 shrink-0">
               {update.stage === "downloaded" ? (
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/15">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gold-400/15">
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M2 6l3 3 5-5" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M2 6l3 3 5-5" stroke="#f0c14b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
               ) : (
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-copper-500/15">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gold-400/15">
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M6 2v5M6 9v1" stroke="#d4892a" strokeWidth="1.5" strokeLinecap="round" />
+                    <path d="M6 2v5M6 9v1" stroke="#f0c14b" strokeWidth="1.5" strokeLinecap="round" />
                   </svg>
                 </div>
               )}
@@ -305,7 +305,7 @@ export function TitleBar({ title = "Universal POS" }: { title?: string }) {
                   </p>
                   <button
                     onClick={() => window.electronAPI!.installUpdate()}
-                    className="mt-3 w-full rounded-lg bg-copper-500 py-1.5 text-xs font-medium text-ink-950 transition-colors hover:bg-copper-400"
+                    className="mt-3 w-full rounded-lg bg-gold-400 py-1.5 text-xs font-medium text-royal-950 transition-colors hover:bg-gold-300"
                   >
                     Restart and install
                   </button>

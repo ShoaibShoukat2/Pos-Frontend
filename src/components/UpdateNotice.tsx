@@ -44,9 +44,9 @@ export function UpdateNotice() {
   if (!release || dismissed) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-[80] flex w-[320px] items-start gap-3 rounded-xl border border-copper-500/25 bg-ink-950 p-4 shadow-2xl">
+    <div className="fixed bottom-5 right-5 z-[80] flex w-[320px] items-start gap-3 rounded-xl border border-gold-400/30 bg-royal-950 p-4 shadow-2xl">
       {/* Accent dot */}
-      <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-copper-400" />
+      <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-gold-400" />
 
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-paper-50">
@@ -60,7 +60,7 @@ export function UpdateNotice() {
             href={release.downloadUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center rounded-lg bg-copper-500 px-3 py-1.5 text-xs font-medium text-ink-950 hover:bg-copper-400 transition-colors"
+            className="mt-3 inline-flex items-center rounded-lg bg-gold-400 px-3 py-1.5 text-xs font-medium text-royal-950 transition-colors hover:bg-gold-300"
           >
             Download update
           </a>
