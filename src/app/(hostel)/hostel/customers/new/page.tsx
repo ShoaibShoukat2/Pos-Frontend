@@ -46,7 +46,15 @@ export default function NewCustomerPage() {
     event.preventDefault();
     setError("");
     try {
-      const body = { ...form, bed_id: form.bed_id || null, monthly_rent: form.monthly_rent || "0", security_deposit: form.security_deposit || "0", registration_fee: form.registration_fee || "0" };
+      const body: Record<string, unknown> = { check_in_now: Boolean(form.check_in_now) };
+      for (const [key, value] of Object.entries(form)) {
+        if (key === "check_in_now" || key === "room" || value === "" || value === false) continue;
+        body[key] = value;
+      }
+      body.monthly_rent = form.monthly_rent || "0";
+      body.security_deposit = form.security_deposit || "0";
+      body.registration_fee = form.registration_fee || "0";
+      if (!body.bed_id) delete body.bed_id;
       const saved = await api<{ id: string }>("/api/hostel/customers/", { method: "POST", body: JSON.stringify(body) });
       router.push(`/hostel/customers/${saved.id}`);
     } catch (err) {
