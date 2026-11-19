@@ -22,15 +22,17 @@ export default function EmployeesPage() {
     api("/api/hostel/audit/?page_size=20").then((data) => setActivity(pageOf<any>(data).results)).catch(() => undefined);
     api("/api/hostel/branches/").then((data) => setBranches(listOf(data))).catch(() => undefined);
   }
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    if (session?.branch_id) setForm((current) => ({ ...current, branch: session.branch_id || "" }));
+  }, [session?.branch_id]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError("");
     try {
-      const saved = await api<any>("/api/hostel/employees/", { method: "POST", body: JSON.stringify({ ...form, salary: form.salary || "0" }) });
+      const saved = await api<any>("/api/hostel/employees/", { method: "POST", body: JSON.stringify({ ...form, branch: session?.role === "owner" ? form.branch : session?.branch_id, salary: form.salary || "0" }) });
       setInvite(saved.invite_path ? `${window.location.origin}${saved.invite_path}` : "");
-      setMessage(saved.invite_path ? "Account created. Share the password setup link once. They sign in from the Staff tab." : "Employee can sign in from the Staff tab with this email and password.");
+      setMessage(saved.invite_path ? "Account created. Share the password setup link once. They sign in from the Staff tab." : saved.email ? "Employee can sign in from the Staff tab with this email and password." : `Saved on ${session?.branch_name || "this branch"}. This person has no sign-in.`);
       setForm({ ...form, full_name: "", email: "", phone: "", password: "", photo: "" });
       load();
     } catch (err) {
@@ -80,10 +82,11 @@ export default function EmployeesPage() {
               {session?.role === "owner" ? (
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   <select className="field" value={row.role} onChange={(event) => setRows(rows.map((item) => item.id === row.id ? { ...item, role: event.target.value } : item))}><option value="employee">Employee</option><option value="manager">Manager</option></select>
-                  <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={row.can_manage_staff} onChange={(event) => setRows(rows.map((item) => item.id === row.id ? { ...item, can_manage_staff: event.target.checked } : item))} /> Can add desk staff</label>
-                  <button className="btn btn-primary" onClick={() => saveAccess(row)}>Save access</button>
+                  <button className="btn btn-primary" onClick={() => saveAccess(row)}>Save role</button>
                   <button className="btn btn-ghost" onClick={() => deactivate(row.id)}>Deactivate</button>
                 </div>
+              ) : session?.role === "manager" && row.role !== "manager" ? (
+                <button className="btn btn-ghost mt-3" onClick={() => deactivate(row.id)}>Remove</button>
               ) : null}
             </article>
           ))}
@@ -96,21 +99,25 @@ export default function EmployeesPage() {
       {can(session, "staff.manage") ? (
         <form onSubmit={onSubmit} className="grid gap-3 rounded-2xl border border-royal-100 bg-white p-4 shadow-card sm:grid-cols-2">
           <h2 className="sm:col-span-2 font-semibold">Add employee</h2>
+          {session?.role === "owner" ? (
+            <select className="field" value={form.branch} onChange={(event) => setForm({ ...form, branch: event.target.value })} required><option value="">Branch</option>{branches.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
+          ) : (
+            <p className="field flex items-center bg-royal-50 text-sm text-royal-950">Branch: {session?.branch_name || "Your branch"}</p>
+          )}
           <input className="field" placeholder="Full name" value={form.full_name} onChange={(event) => setForm({ ...form, full_name: event.target.value })} required />
-          <input className="field" placeholder="Email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required />
           <input className="field" placeholder="Phone" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
-          <input className="field" placeholder="Password, or leave blank for an invite link" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} />
-          <select className="field" value={form.branch} onChange={(event) => setForm({ ...form, branch: event.target.value })} required><option value="">Branch</option>{branches.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
-          <input className="field" placeholder="Designation" value={form.designation} onChange={(event) => setForm({ ...form, designation: event.target.value })} />
+          <input className="field" placeholder="Designation, for example maid" value={form.designation} onChange={(event) => setForm({ ...form, designation: event.target.value })} />
           <input className="field" placeholder="Salary" value={form.salary} onChange={(event) => setForm({ ...form, salary: event.target.value })} />
           <input type="date" className="field" value={form.joining_date} onChange={(event) => setForm({ ...form, joining_date: event.target.value })} />
+          <input className="field" placeholder="Email, only if they will sign in" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
+          <input className="field" placeholder="Password, only if they will sign in" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} />
           {session?.role === "owner" ? <select className="field" value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}><option value="employee">Employee</option><option value="manager">Branch manager</option></select> : null}
           <UploadField label="Photo" onPick={(photo) => setForm({ ...form, photo })} />
           {session?.role === "owner" && form.role === "manager" ? (
-            <p className="sm:col-span-2 text-sm text-slate-500">A branch manager registers customers, checks their CNIC and details, collects rent, and sees this month&apos;s payments, dues, and reports for their hostel. They cannot open other branches, change hostel settings, or delete a payment.</p>
+            <p className="sm:col-span-2 text-sm text-slate-500">This manager stays on the branch you choose. They can hire staff there, such as a maid or cook, and save their name, phone, salary, and photo. They cannot see any other branch.</p>
           ) : null}
-          {session?.role === "owner" && form.role === "manager" ? (
-            <label className="sm:col-span-2 flex items-center gap-2 text-sm"><input type="checkbox" checked={form.can_manage_staff} onChange={(event) => setForm({ ...form, can_manage_staff: event.target.checked })} /> Can add desk staff at this branch</label>
+          {session?.role !== "owner" ? (
+            <p className="sm:col-span-2 text-sm text-slate-500">This person is saved only on {session?.branch_name || "your branch"}. Leave email empty for a maid or cook who will not sign in.</p>
           ) : null}
           <button className="btn btn-primary sm:col-span-2" type="submit">Create login</button>
         </form>
