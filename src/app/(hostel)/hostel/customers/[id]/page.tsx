@@ -45,7 +45,7 @@ export default function CustomerDetailPage() {
   }
   useEffect(() => { load(); }, [params.id]);
 
-  const stay = row?.reservations?.find((item: any) => item.status === "checked_in");
+  const stay = row?.reservations?.find((item: any) => item.status === "checked_in" || item.status === "confirmed" || item.status === "pending");
   const finance: Finance | undefined = row?.finance;
 
   async function saveEdit(event: FormEvent) {
@@ -88,9 +88,15 @@ export default function CustomerDetailPage() {
   }
 
   async function loadBeds() {
-    if (!row?.branch || !row?.expected_checkout) return;
     const start = new Date().toISOString().slice(0, 10);
-    const data = await api(`/api/hostel/beds/open/?branch=${row.branch}&check_in=${start}&check_out=${extendDate || row.expected_checkout}`);
+    let checkOut = extendDate || row?.expected_checkout || "";
+    if (!checkOut || checkOut <= start) {
+      const later = new Date();
+      later.setDate(later.getDate() + 30);
+      checkOut = later.toISOString().slice(0, 10);
+    }
+    const branch = row?.branch || session?.branch_id || "";
+    const data = await api(`/api/hostel/beds/open/?branch=${branch}&check_in=${start}&check_out=${checkOut}`);
     setBeds(listOf(data));
     setMoveOpen(true);
   }
@@ -169,7 +175,7 @@ export default function CustomerDetailPage() {
             <button className="btn btn-ghost" onClick={() => setEditing(true)}>Edit</button>
             <button className="btn btn-ghost" onClick={() => setPayOpen(true)}>Record payment</button>
             <button className="btn btn-ghost" disabled={!stay} onClick={() => setExtendOpen(true)}>Change leaving date</button>
-            <button className="btn btn-ghost" disabled={!stay} onClick={loadBeds}>Change room</button>
+            <button className="btn btn-ghost" disabled={!stay} onClick={loadBeds}>Shift room</button>
           </div>
           <div className="grid gap-3 sm:grid-cols-4">
             <Money label="Payable" value={finance?.total_payable} />
@@ -275,13 +281,13 @@ export default function CustomerDetailPage() {
         </Modal>
       ) : null}
       {moveOpen ? (
-        <Modal title="Change room" onClose={() => setMoveOpen(false)}>
+        <Modal title="Shift room" onClose={() => setMoveOpen(false)}>
           <form onSubmit={moveRoom} className="space-y-3">
             <select className="field w-full" value={nextBed} onChange={(event) => setNextBed(event.target.value)} required>
               <option value="">Choose a free seat</option>
-              {beds.map((bed) => <option key={bed.id} value={bed.id}>Room {bed.room_number} · {bed.code}</option>)}
+              {beds.map((bed) => <option key={bed.id} value={bed.id}>Room {bed.room_number} · seat {bed.code}</option>)}
             </select>
-            <button className="btn btn-primary" type="submit">Move guest</button>
+            <button className="btn btn-primary" type="submit">Shift member</button>
           </form>
         </Modal>
       ) : null}

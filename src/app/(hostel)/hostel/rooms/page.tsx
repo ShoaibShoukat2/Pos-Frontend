@@ -9,7 +9,7 @@ import { useHostel } from "@/components/hostel/session";
 import { api } from "@/lib/api";
 import { can, errText, pkr, listOf } from "@/lib/hostel";
 
-type Bed = { id: string; code: string; status: string };
+type Bed = { id: string; code: string; status: string; occupant?: { id: string; name: string } | null };
 type Room = {
   id: string; branch: string; branch_name: string; number: string; floor: number; room_type: string;
   capacity: number; monthly_rent: string; security_deposit: string; attached_bathroom: boolean;
@@ -31,6 +31,8 @@ function RoomsBody() {
   const [form, setForm] = useState(blank);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [shift, setShift] = useState<{ customerId: string; name: string; from: string } | null>(null);
+  const [nextBed, setNextBed] = useState("");
 
   useEffect(() => {
     api("/api/hostel/branches/").then((data) => setBranches(listOf(data))).catch(() => undefined);
@@ -44,11 +46,28 @@ function RoomsBody() {
   }
   useEffect(() => { load(); }, [branch, floor]);
 
+  const freeSeats = rooms.flatMap((room) => room.beds.filter((bed) => bed.status === "available").map((bed) => ({ ...bed, roomNumber: room.number })));
+
+  async function shiftMember(event: FormEvent) {
+    event.preventDefault();
+    if (!shift) return;
+    setError("");
+    try {
+      await api(`/api/hostel/customers/${shift.customerId}/change-room/`, { method: "POST", body: JSON.stringify({ bed: nextBed }) });
+      setMessage(`${shift.name} shifted.`);
+      setShift(null);
+      setNextBed("");
+      load();
+    } catch (err) {
+      setError(errText(err));
+    }
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError("");
     try {
-      await api("/api/hostel/rooms/", { method: "POST", body: JSON.stringify({ ...form, floor: Number(form.floor), capacity: Number(form.capacity || 1), monthly_rent: form.monthly_rent || "0", security_deposit: form.security_deposit || "0" }) });
+      await api("/api/hostel/rooms/", { method: "POST", body: JSON.stringify({ ...form, branch: form.branch || session?.branch_id || "", floor: Number(form.floor), capacity: Number(form.capacity || 1), monthly_rent: form.monthly_rent || "0", security_deposit: form.security_deposit || "0" }) });
       setOpen(false);
       setMessage("Room and seats created.");
       load();
@@ -62,7 +81,7 @@ function RoomsBody() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl text-slate-900">Rooms</h1>
-          <p className="text-sm text-slate-500">Green is free, red is occupied, orange is reserved, gray is maintenance.</p>
+          <p className="text-sm text-slate-500">{session?.role === "owner" ? "Every branch" : session?.branch_name || "Your branch"} · room number with its seats. Green is free, red is taken.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {session?.role === "owner" ? (
@@ -79,23 +98,48 @@ function RoomsBody() {
       <Notice tone="bad" text={error} />
       {rooms.length === 0 ? <EmptyState title="No rooms on this floor" text="Add a room and the seats are created with it." /> : (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {rooms.map((room) => (
-            <Link key={room.id} href={`/hostel/rooms/${room.id}`} className="rounded-2xl border border-royal-100 bg-white p-4 shadow-card transition hover:-translate-y-0.5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-royal-700">{room.branch_name} · Floor {room.floor}</p>
-                  <h2 className="font-display text-2xl text-slate-900">Room {room.number}</h2>
-                </div>
-                <p className="text-xs text-slate-500">{room.available_beds} free / {room.beds.length}</p>
+          {rooms.map((room) => {
+            const taken = room.beds.length - room.available_beds;
+            return (
+            <div key={room.id} className="rounded-2xl border border-royal-100 bg-white p-4 shadow-card">
+              <Link href={`/hostel/rooms/${room.id}`}>
+                <p className="text-xs uppercase tracking-wide text-royal-700">{room.branch_name} · Floor {room.floor}</p>
+                <h2 className="font-display text-2xl text-slate-900">Room {room.number}</h2>
+                <p className="mt-1 text-sm text-slate-600">Available {room.available_beds} · Not available {taken} · Total seats {room.beds.length}</p>
+              </Link>
+              <div className="mt-3 space-y-2">
+                {room.beds.map((bed) => (
+                  <div key={bed.id} className="flex items-center justify-between gap-2 rounded-xl bg-royal-50 px-2 py-1.5">
+                    <div className="flex items-center gap-2">
+                      <SeatDot status={bed.status} label={bed.code} />
+                      <div>
+                        <p className="text-sm font-medium text-slate-900">Room {room.number} · seat {bed.code}</p>
+                        <p className="text-xs text-slate-500">{bed.occupant?.name || "Available"}</p>
+                      </div>
+                    </div>
+                    {bed.occupant && can(session, "stays.manage") ? (
+                      <button type="button" className="text-xs font-semibold text-royal-800" onClick={() => { setShift({ customerId: bed.occupant!.id, name: bed.occupant!.name, from: `Room ${room.number} · ${bed.code}` }); setNextBed(""); }}>Shift</button>
+                    ) : null}
+                  </div>
+                ))}
               </div>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {room.beds.map((bed) => <SeatDot key={bed.id} status={bed.status} label={bed.code} />)}
-              </div>
-              <p className="mt-3 text-xs text-slate-500">{room.room_type.replaceAll("_", " ")} · {pkr(room.monthly_rent)} / seat {room.ac ? "· AC" : ""} {room.wifi ? "· Wi-Fi" : ""}</p>
-            </Link>
-          ))}
+            </div>
+            );
+          })}
         </div>
       )}
+      {shift ? (
+        <Modal title={`Shift ${shift.name}`} onClose={() => setShift(null)}>
+          <form onSubmit={shiftMember} className="space-y-3">
+            <p className="text-sm text-slate-500">Now in {shift.from}. Choose a free seat in this branch.</p>
+            <select className="field w-full" value={nextBed} onChange={(event) => setNextBed(event.target.value)} required>
+              <option value="">Room and seat</option>
+              {freeSeats.map((bed) => <option key={bed.id} value={bed.id}>Room {bed.roomNumber} · seat {bed.code}</option>)}
+            </select>
+            <button className="btn btn-primary" type="submit">Shift member</button>
+          </form>
+        </Modal>
+      ) : null}
       {open ? (
         <Modal title="New room" onClose={() => setOpen(false)}>
           <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-2">

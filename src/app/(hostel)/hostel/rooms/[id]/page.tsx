@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import { SeatDot, StatusPill } from "@/components/hostel/bits";
 import { api } from "@/lib/api";
-import { errText, pkr, listOf } from "@/lib/hostel";
+import { errText, listOf } from "@/lib/hostel";
 
 export default function RoomDetailPage() {
   const params = useParams<{ id: string }>();
@@ -28,14 +28,14 @@ export default function RoomDetailPage() {
       <div className="rounded-2xl border border-royal-100 bg-white p-5 shadow-card">
         <p className="text-xs uppercase tracking-wide text-royal-700">{room.branch_name} · Floor {room.floor}</p>
         <h1 className="font-display text-3xl text-slate-900">Room {room.number}</h1>
-        <p className="mt-1 text-sm text-slate-500">{room.room_type} · {pkr(room.monthly_rent)} per bed · deposit {pkr(room.security_deposit)} · {room.available_beds} seats free</p>
+        <p className="mt-1 text-sm text-slate-500">Available {room.available_beds} · Not available {room.beds.length - room.available_beds} · Total seats {room.beds.length}</p>
         <p className="mt-2 text-sm text-slate-600">{[room.attached_bathroom ? "Attached bathroom" : "Shared bathroom", room.ac ? "AC" : "Non-AC", room.wifi ? "Wi-Fi" : "No Wi-Fi", room.facilities].filter(Boolean).join(" · ")}</p>
         {room.image ? <img src={room.image} alt="" className="mt-4 h-40 w-full rounded-xl object-cover" /> : null}
         <div className="mt-4 flex flex-wrap gap-2">
           {room.beds.map((bed: any) => (
             <div key={bed.id} className="rounded-xl border border-slate-100 px-3 py-2">
               <SeatDot status={bed.status} label={bed.code} />
-              <p className="mt-1 text-xs text-slate-500">{bed.occupant ? bed.occupant.name : bed.status}</p>
+              <p className="mt-1 text-xs text-slate-500">{bed.occupant ? `${bed.occupant.name} · seat ${bed.code}` : `Available · seat ${bed.code}`}</p>
             </div>
           ))}
         </div>
