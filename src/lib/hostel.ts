@@ -90,14 +90,14 @@ export function printNow() {
   window.setTimeout(() => document.body.classList.remove("printing-hostel"), 300);
 }
 
-export function listOf<T>(data: unknown): T[] {
+export function listOf<T = any>(data: unknown): T[] {
   if (!data) return [];
   if (Array.isArray(data)) return data as T[];
   const record = data as { results?: T[] };
   return record.results || [];
 }
 
-export function pageOf<T>(data: unknown): { results: T[]; count: number } {
+export function pageOf<T = any>(data: unknown): { results: T[]; count: number } {
   if (!data) return { results: [], count: 0 };
   if (Array.isArray(data)) return { results: data as T[], count: data.length };
   const record = data as { results?: T[]; count?: number };
