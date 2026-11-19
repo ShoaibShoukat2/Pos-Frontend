@@ -44,11 +44,11 @@ function CustomersBody() {
           <h1 className="font-display text-3xl text-slate-900">Customers</h1>
           <p className="text-sm text-slate-500">{count} records. Search by name, phone, CNIC, room, or seat.</p>
         </div>
-        <Link href="/hostel/customers/new" className="btn btn-primary">Register customer</Link>
+        <Link href="/hostel/customers/new" className="btn btn-primary w-full sm:w-auto">New admission</Link>
       </div>
       <div className="flex flex-wrap gap-2">
-        <input className="field min-w-56" placeholder="Search" value={search} onChange={(event) => { setPage(1); setSearch(event.target.value); }} />
-        <select className="field" value={status} onChange={(event) => { setPage(1); setStatus(event.target.value); }}>
+        <input className="field w-full sm:min-w-56" placeholder="Search" value={search} onChange={(event) => { setPage(1); setSearch(event.target.value); }} />
+        <select className="field w-full sm:w-auto" value={status} onChange={(event) => { setPage(1); setStatus(event.target.value); }}>
           <option value="">Any status</option>
           <option value="active">Active</option>
           <option value="reserved">Reserved</option>
@@ -57,8 +57,24 @@ function CustomersBody() {
         </select>
       </div>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      {rows.length === 0 ? <EmptyState title="No customers" text="Register a student or guest to start a stay." /> : (
-        <div className="overflow-x-auto rounded-2xl border border-royal-100 bg-white shadow-card">
+      {rows.length === 0 ? <EmptyState title="No customers" text="Take details and assign a room seat on one page." /> : (
+        <>
+          <div className="space-y-3 md:hidden">
+            {rows.map((row) => (
+              <Link key={row.id} href={`/hostel/customers/${row.id}`} className="block rounded-2xl border border-royal-100 bg-white p-4 shadow-card">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-slate-900">{row.full_name}</p>
+                    <p className="text-sm text-slate-500">{row.mobile || "No phone"}</p>
+                    <p className="mt-1 text-sm text-royal-800">{row.room_number ? `Room ${row.room_number} · seat ${row.seat || "—"}` : "No seat yet"}</p>
+                  </div>
+                  <StatusPill value={row.status} />
+                </div>
+                <p className="mt-2 text-xs text-slate-400">Balance {pkr(row.balance)} · rent {pkr(row.monthly_rent)}</p>
+              </Link>
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto rounded-2xl border border-royal-100 bg-white shadow-card md:block">
           <table className="w-full text-sm">
             <thead className="text-left text-xs uppercase tracking-wide text-slate-400"><tr><th className="px-3 py-2">Name</th><th>Phone</th><th>Branch</th><th>Room</th><th>Rent</th><th>Balance</th><th>Status</th><th></th></tr></thead>
             <tbody>
@@ -76,7 +92,8 @@ function CustomersBody() {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )}
       <div className="flex items-center justify-between text-sm">
         <button className="btn btn-ghost" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>Previous</button>

@@ -175,7 +175,6 @@ export default function CustomerDetailPage() {
             <button className="btn btn-ghost" onClick={() => setEditing(true)}>Edit</button>
             <button className="btn btn-ghost" onClick={() => setPayOpen(true)}>Record payment</button>
             <button className="btn btn-ghost" disabled={!stay} onClick={() => setExtendOpen(true)}>Change leaving date</button>
-            <button className="btn btn-ghost" disabled={!stay} onClick={loadBeds}>Shift room</button>
           </div>
           <div className="grid gap-3 sm:grid-cols-4">
             <Money label="Payable" value={finance?.total_payable} />
@@ -202,6 +201,7 @@ export default function CustomerDetailPage() {
           <p>Admission: {row.admission_date || "—"}</p>
           <p>Joining: {row.check_in_date || "—"} · Leaving: {row.checkout_date || row.expected_checkout || "—"}</p>
           <p>Rent {pkr(row.monthly_rent)} · Deposit {pkr(row.security_deposit)}</p>
+          <button type="button" className="btn btn-primary mt-3 w-full" disabled={!stay} onClick={loadBeds}>Change room or seat</button>
         </Card>
       </div>
       <Card title="Monthly dues">
@@ -281,7 +281,7 @@ export default function CustomerDetailPage() {
         </Modal>
       ) : null}
       {moveOpen ? (
-        <Modal title="Shift room" onClose={() => setMoveOpen(false)}>
+        <Modal title="Change room or seat" onClose={() => setMoveOpen(false)}>
           <form onSubmit={moveRoom} className="space-y-3">
             <select className="field w-full" value={nextBed} onChange={(event) => setNextBed(event.target.value)} required>
               <option value="">Choose a free seat</option>
