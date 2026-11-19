@@ -269,6 +269,11 @@ export type Product = {
   tax_rate: string | null;
   sku: string;
   barcode: string;
+  generic_name?: string;
+  strength?: string;
+  dosage_form?: string;
+  batch_no?: string;
+  expiry_date?: string | null;
   cost_price: string;
   selling_price: string;
   min_stock: string;

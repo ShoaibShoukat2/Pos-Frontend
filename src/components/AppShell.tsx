@@ -27,7 +27,7 @@ import {
 import { ASIDE, MAIN, NAV_ACTIVE, NAV_IDLE } from "@/components/dashboard/kit";
 import { FounderCredit } from "@/components/FounderCredit";
 import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
-import { isCarShowroom, isCashier, isRentACar, useAuth } from "@/lib/auth";
+import { isCarShowroom, isCashier, isPharmacy, isRentACar, useAuth } from "@/lib/auth";
 
 const CASHIER_LINKS = new Set(["/cashier", "/pos", "/customers", "/cash", "/returns"]);
 
@@ -78,13 +78,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     .map((item) => ({
       ...item,
       href: item.href === "/dashboard" && isCashier(user) ? "/cashier" : item.href,
+      label: isPharmacy(user) && item.href === "/products" ? "Inventory" : item.label,
     }))
+    .map((item) => (
+      isPharmacy(user) && item.href === "/products" ? { ...item, href: "/pharmacy" } : item
+    ))
     .filter((item) => !isCashier(user) || CASHIER_LINKS.has(item.href));
 
   const bottomItems = [
     links.find((item) => item.href === "/dashboard" || item.href === "/cashier"),
     links.find((item) => item.href === "/pos"),
-    links.find((item) => item.href === "/products"),
+    links.find((item) => item.href === "/products" || item.href === "/pharmacy"),
     links.find((item) => item.href === "/reports"),
   ].filter(Boolean) as typeof links;
 

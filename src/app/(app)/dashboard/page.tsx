@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Package, ShoppingBag, UserPlus, Users, Wallet } from "lucide-react";
 
 import { AreaChart, DashHeader, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
+import { PharmacyDesk } from "@/app/(app)/pharmacy/page";
 import { Badge } from "@/components/ui";
 import { api } from "@/lib/api";
 import { isCarShowroom, useAuth } from "@/lib/auth";
@@ -130,6 +131,7 @@ export default function DashboardPage() {
       </DashHeader>
 
       {user?.business_type === "pizza" ? <PizzaBoard data={data} period={period} /> : null}
+      {user?.business_type === "pharmacy" ? <PharmacyDesk /> : null}
 
       <Link
         href="/settings/cashiers"

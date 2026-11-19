@@ -85,6 +85,7 @@ export default function ProductsPage() {
 
   useEffect(() => {
     if (isCashier(user)) router.replace("/cashier/lookup");
+    else if ((user?.business_type || "").toLowerCase() === "pharmacy") router.replace("/pharmacy");
   }, [user, router]);
 
   useEffect(() => {
