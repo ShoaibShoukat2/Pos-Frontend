@@ -24,7 +24,7 @@ import {
 
 import { ASIDE, MAIN, NAV_ACTIVE, NAV_IDLE } from "@/components/dashboard/kit";
 import { useHostel } from "@/components/hostel/session";
-import { api, asList } from "@/lib/api";
+import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { HostelSession } from "@/lib/hostel";
 
@@ -137,8 +137,4 @@ export function HostelShell({ children }: { children: React.ReactNode }) {
       </div>
     </div>
   );
-}
-
-export function rowsOf<T>(data: unknown): T[] {
-  return asList<T>(data as T[]);
 }

@@ -4,8 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { EmptyState, Notice, StatusPill } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
-import { api, asPage } from "@/lib/api";
-import { errText, monthName, pkr } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { errText, monthName, pkr, pageOf } from "@/lib/hostel";
 
 export default function MonthlyPaymentsPage() {
   const { session } = useHostel();
@@ -21,7 +21,7 @@ export default function MonthlyPaymentsPage() {
   function load() {
     const query = new URLSearchParams({ year, month, page_size: "100" });
     if (status) query.set("status", status);
-    api(`/api/hostel/monthly/?${query.toString()}`).then((data) => setRows(asPage<any>(data).results)).catch((err) => setError(errText(err)));
+    api(`/api/hostel/monthly/?${query.toString()}`).then((data) => setRows(pageOf<any>(data).results)).catch((err) => setError(errText(err)));
   }
   useEffect(() => { load(); }, [year, month, status]);
 

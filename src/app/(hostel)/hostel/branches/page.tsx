@@ -5,8 +5,8 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { EmptyState, Modal, Notice, UploadField } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
-import { api, asList } from "@/lib/api";
-import { can, errText, pkr } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { can, errText, pkr, listOf } from "@/lib/hostel";
 
 type Branch = {
   id: string;
@@ -46,7 +46,7 @@ export default function BranchesPage() {
   const owner = can(session, "branches.manage");
 
   function load() {
-    api("/api/hostel/branches/").then((data) => setRows(asList(data))).catch((err) => setError(errText(err)));
+    api("/api/hostel/branches/").then((data) => setRows(listOf(data))).catch((err) => setError(errText(err)));
   }
   useEffect(() => { load(); }, []);
 

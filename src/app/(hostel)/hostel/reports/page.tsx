@@ -4,8 +4,8 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 import { useHostel } from "@/components/hostel/session";
-import { api, asList } from "@/lib/api";
-import { errText, pkr, printNow, waLink } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { errText, pkr, printNow, waLink, listOf } from "@/lib/hostel";
 
 const TYPES = [
   ["occupancy", "Branch occupancy"],
@@ -28,7 +28,7 @@ function ReportsBody() {
   const [report, setReport] = useState<any>(null);
   const [error, setError] = useState("");
 
-  useEffect(() => { api("/api/hostel/branches/").then((data) => setBranches(asList(data))).catch(() => undefined); }, []);
+  useEffect(() => { api("/api/hostel/branches/").then((data) => setBranches(listOf(data))).catch(() => undefined); }, []);
   useEffect(() => {
     const query = new URLSearchParams({ type: kind });
     if (branch) query.set("branch", branch);

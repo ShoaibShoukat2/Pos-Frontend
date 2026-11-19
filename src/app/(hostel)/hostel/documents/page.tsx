@@ -4,8 +4,8 @@ import { useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useEffect, useState } from "react";
 
 import { EmptyState, Notice, UploadField } from "@/components/hostel/bits";
-import { api, asList, asPage } from "@/lib/api";
-import { errText } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { errText, pageOf } from "@/lib/hostel";
 
 function DocumentsBody() {
   const params = useSearchParams();
@@ -20,10 +20,10 @@ function DocumentsBody() {
   function load() {
     const query = new URLSearchParams({ page_size: "50" });
     if (form.customer) query.set("customer", form.customer);
-    api(`/api/hostel/documents/?${query.toString()}`).then((data) => setRows(asPage<any>(data).results)).catch((err) => setError(errText(err)));
+    api(`/api/hostel/documents/?${query.toString()}`).then((data) => setRows(pageOf<any>(data).results)).catch((err) => setError(errText(err)));
   }
   useEffect(() => { load(); }, [form.customer]);
-  useEffect(() => { api("/api/hostel/customers/?page_size=100").then((data) => setCustomers(asPage<any>(data).results)).catch(() => undefined); }, []);
+  useEffect(() => { api("/api/hostel/customers/?page_size=100").then((data) => setCustomers(pageOf<any>(data).results)).catch(() => undefined); }, []);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();

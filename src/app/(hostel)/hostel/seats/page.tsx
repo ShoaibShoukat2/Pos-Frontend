@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 
 import { EmptyState, Notice, SeatDot } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
-import { api, asList } from "@/lib/api";
-import { can, errText } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { can, errText, listOf } from "@/lib/hostel";
 
 type Bed = { id: string; code: string; status: string; room: string; room_number: string; floor: number; branch_name: string; occupant: { name: string } | null; monthly_rent: string };
 
@@ -21,7 +21,7 @@ export default function SeatsPage() {
     const query = new URLSearchParams();
     if (status) query.set("status", status);
     if (floor) query.set("floor", floor);
-    api(`/api/hostel/beds/?${query.toString()}`).then((data) => setRows(asList(data))).catch((err) => setError(errText(err)));
+    api(`/api/hostel/beds/?${query.toString()}`).then((data) => setRows(listOf(data))).catch((err) => setError(errText(err)));
   }
   useEffect(() => { load(); }, [status, floor]);
 

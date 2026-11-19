@@ -6,8 +6,8 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { Modal, Notice, StatusPill, UploadField } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
-import { api, asList } from "@/lib/api";
-import { errText, paymentSummary, pkr, printNow, waLink } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { errText, paymentSummary, pkr, printNow, waLink, listOf } from "@/lib/hostel";
 
 type Finance = {
   total_payable: string; total_paid: string; remaining: string; credit: string;
@@ -91,7 +91,7 @@ export default function CustomerDetailPage() {
     if (!row?.branch || !row?.expected_checkout) return;
     const start = new Date().toISOString().slice(0, 10);
     const data = await api(`/api/hostel/beds/open/?branch=${row.branch}&check_in=${start}&check_out=${extendDate || row.expected_checkout}`);
-    setBeds(asList(data));
+    setBeds(listOf(data));
     setMoveOpen(true);
   }
 

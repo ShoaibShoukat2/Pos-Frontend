@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
 import { Notice, UploadField } from "@/components/hostel/bits";
-import { api, asList } from "@/lib/api";
-import { errText } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { errText, listOf } from "@/lib/hostel";
 
 type Branch = { id: string; name: string };
 type Room = { id: string; number: string; branch: string; floor: number };
@@ -30,16 +30,16 @@ export default function NewCustomerPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  useEffect(() => { api("/api/hostel/branches/").then((data) => setBranches(asList(data))).catch(() => undefined); }, []);
+  useEffect(() => { api("/api/hostel/branches/").then((data) => setBranches(listOf(data))).catch(() => undefined); }, []);
   useEffect(() => {
     if (!form.branch) return;
-    api(`/api/hostel/rooms/?branch=${form.branch}`).then((data) => setRooms(asList(data))).catch(() => undefined);
+    api(`/api/hostel/rooms/?branch=${form.branch}`).then((data) => setRooms(listOf(data))).catch(() => undefined);
   }, [form.branch]);
   useEffect(() => {
     if (!form.branch || !form.check_in_date || !form.expected_checkout) return;
     const query = new URLSearchParams({ branch: String(form.branch), check_in: String(form.check_in_date), check_out: String(form.expected_checkout) });
     if (form.room) query.set("room", String(form.room));
-    api(`/api/hostel/beds/open/?${query.toString()}`).then((data) => setBeds(asList(data))).catch(() => setBeds([]));
+    api(`/api/hostel/beds/open/?${query.toString()}`).then((data) => setBeds(listOf(data))).catch(() => setBeds([]));
   }, [form.branch, form.room, form.check_in_date, form.expected_checkout]);
 
   async function onSubmit(event: FormEvent) {

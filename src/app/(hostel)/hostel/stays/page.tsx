@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 
 import { EmptyState, Notice, StatusPill } from "@/components/hostel/bits";
-import { api, asPage } from "@/lib/api";
-import { errText } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { errText, pageOf } from "@/lib/hostel";
 
 export default function StaysPage() {
   const [rows, setRows] = useState<any[]>([]);
@@ -13,7 +13,7 @@ export default function StaysPage() {
   const [mode, setMode] = useState("checked_in");
 
   function load() {
-    api(`/api/hostel/reservations/?status=${mode}&page_size=50`).then((data) => setRows(asPage<any>(data).results)).catch((err) => setError(errText(err)));
+    api(`/api/hostel/reservations/?status=${mode}&page_size=50`).then((data) => setRows(pageOf<any>(data).results)).catch((err) => setError(errText(err)));
   }
   useEffect(() => { load(); }, [mode]);
 

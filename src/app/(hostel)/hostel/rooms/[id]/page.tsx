@@ -5,8 +5,8 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { SeatDot, StatusPill } from "@/components/hostel/bits";
-import { api, asList } from "@/lib/api";
-import { errText, pkr } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { errText, pkr, listOf } from "@/lib/hostel";
 
 export default function RoomDetailPage() {
   const params = useParams<{ id: string }>();
@@ -16,7 +16,7 @@ export default function RoomDetailPage() {
 
   useEffect(() => {
     api(`/api/hostel/rooms/${params.id}/`).then(setRoom).catch((err) => setError(errText(err)));
-    api(`/api/hostel/reservations/?room=${params.id}&page_size=100`).then((data) => setPayments(asList(data))).catch(() => undefined);
+    api(`/api/hostel/reservations/?room=${params.id}&page_size=100`).then((data) => setPayments(listOf(data))).catch(() => undefined);
   }, [params.id]);
 
   const stays = payments.filter((row) => row.room === params.id);

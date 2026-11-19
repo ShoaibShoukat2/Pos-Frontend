@@ -4,8 +4,8 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 
 import { EmptyState, Notice, StatusPill, UploadField } from "@/components/hostel/bits";
-import { api, asList, asPage } from "@/lib/api";
-import { errText, pkr, waLink } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { errText, pkr, waLink, listOf, pageOf } from "@/lib/hostel";
 import { useHostel } from "@/components/hostel/session";
 
 export default function ReservationsPage() {
@@ -25,22 +25,22 @@ export default function ReservationsPage() {
   function load() {
     const query = new URLSearchParams({ page: String(page), page_size: "25" });
     if (status) query.set("status", status);
-    api(`/api/hostel/reservations/?${query.toString()}`).then((data) => { const list = asPage<any>(data); setRows(list.results); setCount(list.count); }).catch((err) => setError(errText(err)));
+    api(`/api/hostel/reservations/?${query.toString()}`).then((data) => { const list = pageOf<any>(data); setRows(list.results); setCount(list.count); }).catch((err) => setError(errText(err)));
   }
   useEffect(() => { load(); }, [page, status]);
   useEffect(() => {
-    api("/api/hostel/customers/?page_size=100").then((data) => setCustomers(asPage<any>(data).results)).catch(() => undefined);
-    api("/api/hostel/branches/").then((data) => setBranches(asList(data))).catch(() => undefined);
+    api("/api/hostel/customers/?page_size=100").then((data) => setCustomers(pageOf<any>(data).results)).catch(() => undefined);
+    api("/api/hostel/branches/").then((data) => setBranches(listOf(data))).catch(() => undefined);
   }, []);
   useEffect(() => {
     if (!form.branch) return;
-    api(`/api/hostel/rooms/?branch=${form.branch}`).then((data) => setRooms(asList(data))).catch(() => undefined);
+    api(`/api/hostel/rooms/?branch=${form.branch}`).then((data) => setRooms(listOf(data))).catch(() => undefined);
   }, [form.branch]);
   useEffect(() => {
     if (!form.branch || !form.check_in_date || !form.expected_checkout) return;
     const query = new URLSearchParams({ branch: form.branch, check_in: form.check_in_date, check_out: form.expected_checkout });
     if (form.room) query.set("room", form.room);
-    api(`/api/hostel/beds/open/?${query.toString()}`).then((data) => setBeds(asList(data))).catch(() => setBeds([]));
+    api(`/api/hostel/beds/open/?${query.toString()}`).then((data) => setBeds(listOf(data))).catch(() => setBeds([]));
   }, [form.branch, form.room, form.check_in_date, form.expected_checkout]);
 
   async function onSubmit(event: FormEvent) {

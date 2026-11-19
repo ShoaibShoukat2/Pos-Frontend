@@ -4,8 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { EmptyState, Notice, StatusPill, UploadField } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
-import { api, asList, asPage } from "@/lib/api";
-import { can, errText, pkr } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { can, errText, pkr, listOf, pageOf } from "@/lib/hostel";
 
 const CATEGORIES = ["electricity", "gas", "water", "internet", "salary", "cleaning", "repairs", "furniture", "maintenance", "security", "food", "other"];
 
@@ -22,14 +22,14 @@ export default function ExpensesPage() {
   const [job, setJob] = useState({ branch: "", room: "", title: "", description: "", priority: "medium", estimated_cost: "", assigned_worker: "", images: [] as string[] });
 
   function load() {
-    api("/api/hostel/expenses/?page_size=50").then((data) => setExpenses(asPage<any>(data).results)).catch((err) => setError(errText(err)));
-    api("/api/hostel/maintenance/?page_size=50").then((data) => setJobs(asPage<any>(data).results)).catch(() => undefined);
-    api("/api/hostel/branches/").then((data) => setBranches(asList(data))).catch(() => undefined);
+    api("/api/hostel/expenses/?page_size=50").then((data) => setExpenses(pageOf<any>(data).results)).catch((err) => setError(errText(err)));
+    api("/api/hostel/maintenance/?page_size=50").then((data) => setJobs(pageOf<any>(data).results)).catch(() => undefined);
+    api("/api/hostel/branches/").then((data) => setBranches(listOf(data))).catch(() => undefined);
   }
   useEffect(() => { load(); }, []);
   useEffect(() => {
     if (!job.branch) return;
-    api(`/api/hostel/rooms/?branch=${job.branch}`).then((data) => setRooms(asList(data))).catch(() => undefined);
+    api(`/api/hostel/rooms/?branch=${job.branch}`).then((data) => setRooms(listOf(data))).catch(() => undefined);
   }, [job.branch]);
 
   async function saveExpense(event: FormEvent) {

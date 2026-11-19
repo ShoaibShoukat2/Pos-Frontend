@@ -6,8 +6,8 @@ import { FormEvent, Suspense, useEffect, useState } from "react";
 
 import { EmptyState, Modal, Notice, SeatDot, UploadField } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
-import { api, asList } from "@/lib/api";
-import { can, errText, pkr } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { can, errText, pkr, listOf } from "@/lib/hostel";
 
 type Bed = { id: string; code: string; status: string };
 type Room = {
@@ -33,14 +33,14 @@ function RoomsBody() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    api("/api/hostel/branches/").then((data) => setBranches(asList(data))).catch(() => undefined);
+    api("/api/hostel/branches/").then((data) => setBranches(listOf(data))).catch(() => undefined);
   }, []);
 
   function load(nextBranch = branch, nextFloor = floor) {
     const query = new URLSearchParams();
     if (nextBranch) query.set("branch", nextBranch);
     if (nextFloor) query.set("floor", nextFloor);
-    api(`/api/hostel/rooms/?${query.toString()}`).then((data) => setRooms(asList(data))).catch((err) => setError(errText(err)));
+    api(`/api/hostel/rooms/?${query.toString()}`).then((data) => setRooms(listOf(data))).catch((err) => setError(errText(err)));
   }
   useEffect(() => { load(); }, [branch, floor]);
 

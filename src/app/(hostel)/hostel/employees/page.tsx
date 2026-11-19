@@ -4,8 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { EmptyState, Notice, UploadField } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
-import { api, asList, asPage } from "@/lib/api";
-import { can, errText, pkr } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { can, errText, pkr, listOf, pageOf } from "@/lib/hostel";
 
 export default function EmployeesPage() {
   const { session } = useHostel();
@@ -18,9 +18,9 @@ export default function EmployeesPage() {
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", password: "", branch: "", designation: "", salary: "", joining_date: "", role: "employee", can_manage_staff: false, can_approve_expenses: false, can_view_reports: false, photo: "" });
 
   function load() {
-    api("/api/hostel/employees/").then((data) => setRows(asList(data))).catch((err) => setError(errText(err)));
-    api("/api/hostel/audit/?page_size=20").then((data) => setActivity(asPage<any>(data).results)).catch(() => undefined);
-    api("/api/hostel/branches/").then((data) => setBranches(asList(data))).catch(() => undefined);
+    api("/api/hostel/employees/").then((data) => setRows(listOf(data))).catch((err) => setError(errText(err)));
+    api("/api/hostel/audit/?page_size=20").then((data) => setActivity(pageOf<any>(data).results)).catch(() => undefined);
+    api("/api/hostel/branches/").then((data) => setBranches(listOf(data))).catch(() => undefined);
   }
   useEffect(() => { load(); }, []);
 

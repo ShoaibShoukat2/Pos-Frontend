@@ -5,8 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 import { EmptyState, StatusPill } from "@/components/hostel/bits";
-import { api, asPage } from "@/lib/api";
-import { errText, pkr } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { errText, pkr, pageOf } from "@/lib/hostel";
 
 type Row = {
   id: string; full_name: string; mobile: string; cnic: string; branch_name: string;
@@ -30,7 +30,7 @@ function CustomersBody() {
     if (branch) query.set("branch", branch);
     api(`/api/hostel/customers/?${query.toString()}`)
       .then((data) => {
-        const list = asPage<Row>(data);
+        const list = pageOf<Row>(data);
         setRows(list.results);
         setCount(list.count);
       })

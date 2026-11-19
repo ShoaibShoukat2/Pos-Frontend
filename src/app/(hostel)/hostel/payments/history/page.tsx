@@ -5,8 +5,8 @@ import { Suspense, useEffect, useState } from "react";
 
 import { EmptyState, Notice } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
-import { api, asPage } from "@/lib/api";
-import { errText, paymentSummary, pkr, printNow, waLink } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { errText, paymentSummary, pkr, printNow, waLink, pageOf } from "@/lib/hostel";
 
 function HistoryBody() {
   const params = useSearchParams();
@@ -26,7 +26,7 @@ function HistoryBody() {
     if (method) query.set("method", method);
     if (kind) query.set("payment_type", kind);
     api(`/api/hostel/payments/?${query.toString()}`).then((data) => {
-      const list = asPage<any>(data);
+      const list = pageOf<any>(data);
       setRows(list.results);
       setCount(list.count);
     }).catch((err) => setError(errText(err)));

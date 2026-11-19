@@ -6,8 +6,8 @@ import { BedDouble, Building2, CircleDollarSign, Users, Wallet } from "lucide-re
 
 import { AreaChart, DashHeader, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
 import { useHostel } from "@/components/hostel/session";
-import { api, asList } from "@/lib/api";
-import { errText, pkr } from "@/lib/hostel";
+import { api } from "@/lib/api";
+import { errText, pkr, listOf } from "@/lib/hostel";
 
 type Dash = {
   role: string;
@@ -36,9 +36,9 @@ export default function HostelDashboardPage() {
   const [filters, setFilters] = useState({ branch: "", month: "", employee: "", payment_status: "" });
 
   useEffect(() => {
-    api("/api/hostel/branches/").then((rows) => setBranches(asList(rows))).catch(() => setBranches([]));
+    api("/api/hostel/branches/").then((rows) => setBranches(listOf(rows))).catch(() => setBranches([]));
     if (session?.role !== "employee") {
-      api("/api/hostel/employees/").then((rows) => setStaff(asList(rows))).catch(() => setStaff([]));
+      api("/api/hostel/employees/").then((rows) => setStaff(listOf(rows))).catch(() => setStaff([]));
     }
   }, [session?.role]);
 
