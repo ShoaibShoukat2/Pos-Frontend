@@ -32,7 +32,7 @@ export default function CustomerDetailPage() {
   const [draft, setDraft] = useState<Record<string, string>>({});
 
   function load() {
-    api(`/api/hostel/customers/${params.id}/`).then((data) => {
+    api(`/api/hostel/customers/${params.id}/`).then((data: any) => {
       setRow(data);
       setDraft({
         full_name: data.full_name || "", mobile: data.mobile || "", whatsapp: data.whatsapp || "",
@@ -141,7 +141,7 @@ export default function CustomerDetailPage() {
 
   return (
     <div className="space-y-4">
-      <div id="hostel-print-root">
+      <div id="hostel-print-root" className="hostel-print-only">
         <article className="hostel-sheet p-6">
           <p className="text-xs uppercase tracking-[0.2em] text-royal-700">{session?.hostel_name}</p>
           <h1>{row.full_name}</h1>

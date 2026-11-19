@@ -2,15 +2,19 @@ import type { AuthPayload, Paginated } from "./types";
 
 type ListPayload<T> = T[] | Paginated<T> | { results?: T[]; count?: number } | undefined | null;
 
-export function asList<T>(data: ListPayload<T>): T[] {
+export function asList<T>(data: unknown): T[] {
   if (!data) return [];
-  return Array.isArray(data) ? data : data.results || [];
+  if (Array.isArray(data)) return data as T[];
+  const record = data as { results?: T[] };
+  return record.results || [];
 }
 
-export function asPage<T>(data: ListPayload<T>): { results: T[]; count: number } {
+export function asPage<T>(data: unknown): { results: T[]; count: number } {
   if (!data) return { results: [], count: 0 };
-  if (Array.isArray(data)) return { results: data, count: data.length };
-  return { results: data.results || [], count: data.count ?? (data.results || []).length };
+  if (Array.isArray(data)) return { results: data as T[], count: data.length };
+  const record = data as { results?: T[]; count?: number };
+  const results = record.results || [];
+  return { results, count: record.count ?? results.length };
 }
 
 const lookupCache = new Map<string, { at: number; data: unknown }>();

@@ -312,7 +312,8 @@ th, td { overflow-wrap: break-word; }
   }
 }
 
-#hostel-print-root { display: none; }
+#hostel-print-root { }
+.hostel-print-only { display: none; }
 .hostel-sheet { width: 190mm; max-width: 100%; margin: 0 auto; color: #1e1b2e; background: white; }
 .hostel-sheet h1 { font-size: 22px; margin: 0; }
 .hostel-sheet table { width: 100%; border-collapse: collapse; font-size: 12px; }
