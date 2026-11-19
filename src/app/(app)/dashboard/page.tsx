@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Package, ShoppingBag, UserPlus, Users, Wallet } from "lucide-react";
 
 import { AreaChart, DashHeader, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
-import { PharmacyDesk } from "@/app/(app)/pharmacy/page";
+import { PharmacyDesk } from "@/components/pharmacy/PharmacyDesk";
 import { Badge } from "@/components/ui";
 import { api } from "@/lib/api";
 import { isCarShowroom, useAuth } from "@/lib/auth";
