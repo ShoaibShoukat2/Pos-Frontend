@@ -3,22 +3,23 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useMemo, useState } from "react";
-import { Building2, Monitor, Shield } from "lucide-react";
+import { BedDouble, Building2, Monitor, Shield } from "lucide-react";
 
 import { Alert, Button, Field, Input } from "@/components/ui";
 import { ApiError, fieldErrors } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
-type RoleId = "owner" | "cashier" | "platform";
+type RoleId = "owner" | "staff" | "cashier" | "platform";
 
 const ROLES: {
   id: RoleId;
-  portal: "tenant" | "cashier" | "platform";
+  portal: "tenant" | "hostel" | "cashier" | "platform";
   title: string;
   sub: string;
   icon: typeof Building2;
 }[] = [
   { id: "owner",    portal: "tenant",   title: "Owner",   sub: "Dashboard & reports", icon: Building2 },
+  { id: "staff",    portal: "hostel",   title: "Staff",   sub: "Hostel branch desk",  icon: BedDouble },
   { id: "cashier",  portal: "cashier",  title: "Cashier", sub: "POS counter only",    icon: Monitor   },
   { id: "platform", portal: "platform", title: "Admin",   sub: "Platform access",     icon: Shield    },
 ];
@@ -64,9 +65,9 @@ function LoginForm() {
             <Mark />
           </div>
           <p className="mt-8 font-display text-3xl leading-tight">Universal POS</p>
-          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">Sales, showroom, rent a car, and hostel — one sign in for the desk.</p>
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">Sales, showroom, rent a car, and hostel — pick the desk that matches your role.</p>
         </div>
-        <p className="relative text-xs text-white/45">Owner, cashier, and platform admin.</p>
+        <p className="relative text-xs text-white/45">Owner, hostel staff, cashier, and platform admin.</p>
       </aside>
       <div className="flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm">
@@ -81,7 +82,7 @@ function LoginForm() {
 
         <div className="rounded-2xl border border-royal-100 bg-white p-6 shadow-card">
 
-          <div className="mb-5 grid grid-cols-3 gap-1 rounded-xl bg-royal-50 p-1">
+          <div className="mb-5 grid grid-cols-4 gap-1 rounded-xl bg-royal-50 p-1">
             {ROLES.map((item) => {
               const active = role === item.id;
               const Icon = item.icon;

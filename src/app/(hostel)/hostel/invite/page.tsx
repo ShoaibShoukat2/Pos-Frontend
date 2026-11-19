@@ -35,7 +35,7 @@ function InviteBody() {
         <Notice tone="bad" text={error} />
         <input type="password" className="field w-full" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="New password" required />
         <button className="btn btn-primary w-full" type="submit">Save password</button>
-        <Link href="/login" className="block text-center text-sm font-semibold text-royal-800">Go to sign in</Link>
+        <Link href="/login?role=staff" className="block text-center text-sm font-semibold text-royal-800">Go to staff sign in</Link>
       </form>
     </main>
   );

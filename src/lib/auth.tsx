@@ -96,7 +96,7 @@ function cacheUser(user: User | null) {
 type AuthContextValue = {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string, portal?: "tenant" | "platform" | "cashier") => Promise<void>;
+  login: (email: string, password: string, portal?: "tenant" | "platform" | "cashier" | "hostel") => Promise<void>;
   register: (payload: Record<string, string>) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -229,7 +229,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             ? "/api/auth/platform/login/"
             : portal === "cashier"
               ? "/api/auth/cashier/login/"
-              : "/api/auth/owner/login/";
+              : portal === "hostel"
+                ? "/api/auth/hostel/login/"
+                : "/api/auth/owner/login/";
         const data = await api<AuthPayload>(path, {
           method: "POST",
           body: JSON.stringify({ email, password }),
@@ -257,7 +259,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         goHome(next);
       },
       logout() {
-        const dest = user?.is_platform_admin ? "/platform/login" : isCashier(user) ? "/cashier/login" : "/login";
+        const dest = user?.is_platform_admin
+          ? "/platform/login"
+          : isCashier(user)
+            ? "/cashier/login"
+            : isHostel(user) && !user?.is_owner
+              ? "/login?role=staff"
+              : "/login";
         clearTokens();
         cacheUser(null);
         applyBusinessTheme(null);

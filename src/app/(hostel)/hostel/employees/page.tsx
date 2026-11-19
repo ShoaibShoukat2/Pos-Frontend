@@ -30,7 +30,7 @@ export default function EmployeesPage() {
     try {
       const saved = await api<any>("/api/hostel/employees/", { method: "POST", body: JSON.stringify({ ...form, salary: form.salary || "0" }) });
       setInvite(saved.invite_path ? `${window.location.origin}${saved.invite_path}` : "");
-      setMessage(saved.invite_path ? "Account created. Share the password setup link once." : "Employee can sign in with the password you set.");
+      setMessage(saved.invite_path ? "Account created. Share the password setup link once. They sign in from the Staff tab." : "Employee can sign in from the Staff tab with this email and password.");
       setForm({ ...form, full_name: "", email: "", phone: "", password: "", photo: "" });
       load();
     } catch (err) {

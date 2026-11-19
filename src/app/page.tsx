@@ -618,6 +618,7 @@ export default function HomePage() {
             <p className="mb-3 mt-5 text-xs font-semibold uppercase tracking-wide text-white/40">Sign in</p>
             <ul className="space-y-2 text-sm text-white/70">
               <li><Link href="/login" className="hover:text-gold-300 transition-colors">Business owner</Link></li>
+              <li><Link href="/login?role=staff" className="hover:text-gold-300 transition-colors">Hostel staff</Link></li>
               <li><Link href="/login?role=cashier" className="hover:text-gold-300 transition-colors">Cashier</Link></li>
               <li><Link href="/register" className="hover:text-gold-300 transition-colors">Create account</Link></li>
               <li>
