@@ -352,6 +352,9 @@ th, td { overflow-wrap: break-word; }
   body.printing-room-qr #room-qr-print {
     page: room-qr;
   }
+  body.printing-room-qr #room-profile-print {
+    display: none !important;
+  }
   body.printing-room-qr .room-qr-grid {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
@@ -362,5 +365,32 @@ th, td { overflow-wrap: break-word; }
     page-break-inside: avoid;
     border: 1px solid #111 !important;
     box-shadow: none !important;
+  }
+  @page room-sheet { size: A4 portrait; margin: 10mm; }
+  body.printing-room-sheet { background: white !important; }
+  body.printing-room-sheet aside,
+  body.printing-room-sheet header,
+  body.printing-room-sheet .no-sheet-print {
+    display: none !important;
+  }
+  body.printing-room-sheet main {
+    overflow: visible !important;
+    height: auto !important;
+    padding: 0 !important;
+  }
+  body.printing-room-sheet #room-profile-print,
+  body.printing-room-sheet #room-profile-print * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body.printing-room-sheet #room-profile-print {
+    page: room-sheet;
+    max-width: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  body.printing-room-sheet .seat-profile {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }

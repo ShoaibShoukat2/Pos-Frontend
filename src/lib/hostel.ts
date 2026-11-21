@@ -120,6 +120,12 @@ export function printRoomQr() {
   window.setTimeout(() => document.body.classList.remove("printing-room-qr"), 400);
 }
 
+export function printRoomSheet() {
+  document.body.classList.add("printing-room-sheet");
+  window.print();
+  window.setTimeout(() => document.body.classList.remove("printing-room-sheet"), 400);
+}
+
 export function printNow() {
   document.body.classList.add("printing-hostel");
   window.print();

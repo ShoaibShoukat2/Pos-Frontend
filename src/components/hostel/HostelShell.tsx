@@ -112,10 +112,15 @@ export function HostelShell({ children }: { children: React.ReactNode }) {
           <button type="button" onClick={() => setOpen(false)} className="text-white/60"><X size={18} /></button>
         </div>
         <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-3 py-3"><NavLinks close={() => setOpen(false)} /></nav>
+        <div className="safe-bottom shrink-0 border-t border-white/8 px-4 py-4">
+          <p className="truncate px-3 pb-1 text-xs text-white/70">{session.full_name}</p>
+          <p className="truncate px-3 pb-2 text-[10px] uppercase tracking-wide text-gold-300">{session.role}{session.branch_name ? ` · ${session.branch_name}` : ""}</p>
+          <button type="button" onClick={logout} className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-white"><LogOut size={16} /> Sign out</button>
+        </div>
       </aside>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex items-center gap-2 border-b border-slate-200 bg-white/95 px-3 py-3 backdrop-blur">
-          <button type="button" className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={18} /></button>
+          <button type="button" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-slate-200 lg:hidden" onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={18} /></button>
           <form onSubmit={onSearch} className="relative min-w-0 flex-1">
             <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, phone, CNIC, room, seat, receipt" className="field w-full pl-9" />
@@ -130,6 +135,7 @@ export function HostelShell({ children }: { children: React.ReactNode }) {
               </div>
             ) : null}
           </form>
+          <button type="button" onClick={logout} className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 px-3 text-sm font-medium text-slate-700 lg:hidden" aria-label="Sign out"><LogOut size={16} /> Sign out</button>
         </header>
         <main className={`min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-5 sm:py-5 ${MAIN}`}>{children}</main>
       </div>
