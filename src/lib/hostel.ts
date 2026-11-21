@@ -102,6 +102,17 @@ export function paymentSummary(input: {
   ].join("\n");
 }
 
+export function roomScanUrl(id: string) {
+  if (typeof window === "undefined") return `/hostel/rooms/${id}`;
+  return `${window.location.origin}/hostel/rooms/${id}`;
+}
+
+export function printRoomQr() {
+  document.body.classList.add("printing-room-qr");
+  window.print();
+  window.setTimeout(() => document.body.classList.remove("printing-room-qr"), 400);
+}
+
 export function printNow() {
   document.body.classList.add("printing-hostel");
   window.print();

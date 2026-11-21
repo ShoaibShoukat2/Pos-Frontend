@@ -337,4 +337,30 @@ th, td { overflow-wrap: break-word; }
     background: white !important;
     page: hostel-a4;
   }
+  @page room-qr { size: A4 portrait; margin: 10mm; }
+  body.printing-room-qr { background: white !important; }
+  body.printing-room-qr aside,
+  body.printing-room-qr header,
+  body.printing-room-qr .no-qr-print {
+    display: none !important;
+  }
+  body.printing-room-qr main {
+    overflow: visible !important;
+    height: auto !important;
+    padding: 0 !important;
+  }
+  body.printing-room-qr #room-qr-print {
+    page: room-qr;
+  }
+  body.printing-room-qr .room-qr-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6mm !important;
+  }
+  body.printing-room-qr .room-qr-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #111 !important;
+    box-shadow: none !important;
+  }
 }

@@ -44,6 +44,13 @@ export function homeFor(user: User) {
   return "/dashboard";
 }
 
+function hostelReturnPath() {
+  if (typeof window === "undefined") return "";
+  const next = new URLSearchParams(window.location.search).get("next") || "";
+  if (!next.startsWith("/hostel/") || next.startsWith("//") || next.includes("://") || next.includes("\\")) return "";
+  return next;
+}
+
 function goHome(user: User) {
   const dest = homeFor(user);
   if (typeof window === "undefined") return;
@@ -172,6 +179,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isCashierLogin = pathname === "/cashier/login";
     if (isHostelInvite) return;
     if (!user && !isPublic) {
+      if (isHostelRoute) {
+        router.replace(`/login?role=staff&next=${encodeURIComponent(pathname)}`);
+        return;
+      }
       router.replace(isPlatformRoute ? "/platform/login" : pathname.startsWith("/cashier") ? "/cashier/login" : "/login");
       return;
     }
@@ -205,6 +216,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     if (isHostel(user)) {
       const publicStay = pathname === "/" || pathname.startsWith("/scan") || pathname.startsWith("/check");
+      const back = hostelReturnPath();
+      if (back && !isHostelRoute) {
+        window.location.assign(back);
+        return;
+      }
       if (!isHostelRoute && !publicStay) goHome(user);
       return;
     }
@@ -241,6 +257,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(next);
         cacheUser(next);
         applyBusinessTheme(next);
+        const back = hostelReturnPath();
+        if (back && isHostel(next)) {
+          window.location.assign(back);
+          return;
+        }
         goHome(next);
       },
       async register(payload) {

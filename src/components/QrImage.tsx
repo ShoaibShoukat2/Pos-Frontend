@@ -1,35 +1,40 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export function QrImage({ value }: { value: string }) {
+export function QrImage({ value, alt = "QR code", size = 240, onReady }: { value: string; alt?: string; size?: number; onReady?: () => void }) {
   const [src, setSrc] = useState("");
+  const readyRef = useRef(onReady);
+  readyRef.current = onReady;
 
   useEffect(() => {
     let alive = true;
     import("qrcode")
-      .then((mod) => mod.toDataURL(value, { width: 240, margin: 1, color: { dark: "#14110e", light: "#ffffff" } }))
+      .then((mod) => mod.toDataURL(value, { width: size, margin: 1, color: { dark: "#14110e", light: "#ffffff" } }))
       .then((url) => {
-        if (alive) setSrc(url);
+        if (!alive) return;
+        setSrc(url);
+        readyRef.current?.();
       })
       .catch(() => {
-        if (alive) {
-          setSrc(`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(value)}`);
-        }
+        if (!alive) return;
+        setSrc(`https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}`);
+        readyRef.current?.();
       });
     return () => {
       alive = false;
     };
-  }, [value]);
+  }, [value, size]);
 
-  if (!src) return <div className="mx-auto aspect-square w-full max-w-[240px] animate-pulse rounded-xl bg-paper-100" />;
+  if (!src) return <div className="mx-auto aspect-square w-full animate-pulse rounded-xl bg-slate-100" style={{ maxWidth: size }} />;
   return (
     <img
       src={src}
-      alt="Scanner QR"
-      width={240}
-      height={240}
-      className="mx-auto h-auto w-full max-w-[240px] rounded-xl bg-white p-2"
+      alt={alt}
+      width={size}
+      height={size}
+      className="mx-auto h-auto w-full rounded-xl bg-white p-2"
+      style={{ maxWidth: size }}
     />
   );
 }

@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
+import { QrImage } from "@/components/QrImage";
 import { Notice, SeatDot, StatusPill } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
 import { api } from "@/lib/api";
-import { can, errText, listOf, pkr, seatKind, seatMix } from "@/lib/hostel";
+import { can, errText, listOf, pkr, printRoomQr, roomScanUrl, seatKind, seatMix } from "@/lib/hostel";
 
 export default function RoomDetailPage() {
   const params = useParams<{ id: string }>();
@@ -75,20 +76,55 @@ export default function RoomDetailPage() {
         <p className="mt-1 text-sm text-slate-600">{seatMix(room)}</p>
         <p className="mt-2 text-sm text-slate-600">{[room.attached_bathroom ? "Attached bathroom" : "Shared bathroom", room.ac ? "AC" : "Non-AC", room.wifi ? "Wi-Fi" : "No Wi-Fi", room.facilities].filter(Boolean).join(" · ")}</p>
         {room.image ? <img src={room.image} alt="" className="mt-4 h-40 w-full rounded-xl object-cover" /> : null}
-        <div className="mt-4 flex flex-wrap gap-2">
-          {room.beds.map((bed: any) => (
-            <div key={bed.id} className="rounded-xl border border-slate-100 px-3 py-2">
-              <SeatDot status={bed.status} label={bed.code} />
-              <p className="mt-1 text-xs text-slate-500">{bed.occupant ? bed.occupant.name : "Available"} · {seatKind(bed.furnishing)} · {pkr(bed.monthly_rent)}</p>
-              {!bed.occupant && can(session, "seats.manage") ? (
-                <select className="field mt-2" value={bed.furnishing || "bed"} onChange={(event) => setFurnishing(bed.id, event.target.value)}>
-                  <option value="bed">Bed</option>
-                  <option value="mattress">Mattress</option>
-                </select>
-              ) : null}
-            </div>
-          ))}
+        <div className="mt-4 space-y-3">
+          {room.beds.map((bed: any) => {
+            const person = bed.occupant;
+            return (
+              <article key={bed.id} className="rounded-2xl border border-slate-100 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <SeatDot status={bed.status} label={bed.code} />
+                      <p className="font-semibold text-slate-900">Seat {bed.code} · {seatKind(bed.furnishing)}</p>
+                    </div>
+                    <p className="mt-1 text-xs text-slate-500">{pkr(bed.monthly_rent)} / month</p>
+                  </div>
+                  {person ? <StatusPill value={person.status || bed.status} /> : <StatusPill value={bed.status} />}
+                </div>
+                {person ? (
+                  <div className="mt-3 grid gap-1 text-sm text-slate-700">
+                    <Link href={`/hostel/customers/${person.id}`} className="font-semibold text-royal-800">{person.name}</Link>
+                    {person.father_name ? <p>Father: {person.father_name}</p> : null}
+                    {person.phone ? <p>Phone: <a className="font-medium text-royal-800" href={`tel:${person.phone}`}>{person.phone}</a></p> : null}
+                    {person.whatsapp ? <p>WhatsApp: {person.whatsapp}</p> : null}
+                    {person.cnic ? <p>CNIC: {person.cnic}</p> : null}
+                    {person.guardian_name ? <p>Guardian: {person.guardian_name}{person.guardian_contact ? ` · ${person.guardian_contact}` : ""}</p> : null}
+                    <p>Stay: {person.check_in_date || "—"} to {person.expected_checkout || "—"}</p>
+                    <p>Rent: {pkr(person.monthly_rent)}</p>
+                  </div>
+                ) : <p className="mt-3 text-sm text-emerald-700">This seat is empty.</p>}
+                {!person && can(session, "seats.manage") ? (
+                  <select className="field mt-3" value={bed.furnishing || "bed"} onChange={(event) => setFurnishing(bed.id, event.target.value)}>
+                    <option value="bed">Bed</option>
+                    <option value="mattress">Mattress</option>
+                  </select>
+                ) : null}
+              </article>
+            );
+          })}
         </div>
+        {can(session, "rooms.manage") ? (
+          <div id="room-qr-print" className="room-qr-card mt-5 max-w-xs rounded-2xl border border-royal-100 p-4 text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-royal-700">{session?.hostel_name || room.branch_name}</p>
+            <div className="mt-2"><QrImage value={roomScanUrl(room.id)} alt={`QR code for room ${room.number}`} size={220} /></div>
+            <p className="mt-2 font-display text-3xl text-slate-900">Room {room.number}</p>
+            <p className="text-sm text-slate-500">{room.branch_name} · Floor {room.floor}</p>
+            <div className="no-qr-print mt-3 flex flex-wrap justify-center gap-2">
+              <button className="btn btn-ghost" type="button" onClick={printRoomQr}>Print this QR</button>
+              <Link className="btn btn-ghost" href={`/hostel/rooms/qr?branch=${room.branch}`}>Print all</Link>
+            </div>
+          </div>
+        ) : null}
         {can(session, "rooms.manage") ? (
           <div className="mt-5 grid gap-4 border-t border-slate-100 pt-4 lg:grid-cols-2">
             <form onSubmit={savePrices} className="grid gap-2 sm:grid-cols-2">

@@ -135,6 +135,7 @@ function RoomsBody() {
             </select>
           ) : null}
           <input className="field w-24" placeholder="Floor" value={floor} onChange={(event) => setFloor(event.target.value)} />
+          {can(session, "rooms.manage") ? <Link className="btn btn-ghost" href={`/hostel/rooms/qr?${new URLSearchParams({ ...(branch ? { branch } : {}), ...(floor ? { floor } : {}) }).toString()}`}>Print QR codes</Link> : null}
           {can(session, "rooms.manage") ? <button className="btn btn-primary" onClick={() => { setForm({ ...blank, branch: branch || branches[0]?.id || "" }); setOpen(true); }}>Add room</button> : null}
         </div>
       </div>
