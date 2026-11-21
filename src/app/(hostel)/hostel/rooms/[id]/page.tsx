@@ -9,7 +9,7 @@ import { Notice, StatusPill } from "@/components/hostel/bits";
 import { RoomSheet } from "@/components/hostel/RoomSheet";
 import { useHostel } from "@/components/hostel/session";
 import { api } from "@/lib/api";
-import { can, errText, listOf, printRoomQr, printRoomSheet, roomScanUrl } from "@/lib/hostel";
+import { can, errText, listOf, printRoomQr, printRoomSheet, roomScanUrl, seatKind } from "@/lib/hostel";
 
 export default function RoomDetailPage() {
   const params = useParams<{ id: string }>();

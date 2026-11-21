@@ -50,7 +50,7 @@ export function errText(error: unknown) {
   return "Could not connect. Check the server and try again.";
 }
 
-export function can(session: HostelSession | null, code: string) {
+export function can(session: HostelSession | null | undefined, code: string) {
   if (!session) return false;
   if (session.role === "owner") return true;
   return session.permissions.includes(code);
