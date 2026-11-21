@@ -14,24 +14,27 @@ type Room = { id: string; number: string; floor: number; branch_name: string };
 
 function QrSheet() {
   const params = useSearchParams();
-  const { session } = useHostel();
+  const { session, loading } = useHostel();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [error, setError] = useState("");
-  const [ready, setReady] = useState(0);
   const branch = params.get("branch") || "";
   const floor = params.get("floor") || "";
+  const onlyRoom = params.get("room") || "";
 
   useEffect(() => {
     const query = new URLSearchParams();
     if (branch) query.set("branch", branch);
     if (floor) query.set("floor", floor);
-    setReady(0);
     api(`/api/hostel/rooms/?${query.toString()}`)
-      .then((data) => setRooms(listOf(data)))
+      .then((data) => {
+        const rows = listOf<Room>(data);
+        setRooms(onlyRoom ? rows.filter((room) => room.id === onlyRoom) : rows);
+      })
       .catch((err) => setError(errText(err)));
-  }, [branch, floor]);
+  }, [branch, floor, onlyRoom]);
 
   const allowed = can(session, "rooms.manage");
+  if (loading) return <p className="text-sm text-slate-400">Preparing QR codes…</p>;
 
   return (
     <div className="space-y-4">
@@ -41,7 +44,7 @@ function QrSheet() {
           <h1 className="font-display text-3xl text-slate-900">Room QR codes</h1>
           <p className="text-sm text-slate-500">Stick one code on each door. The room number is printed under the code. A phone scan opens that room, its seats, and who is staying.</p>
         </div>
-        <button className="btn btn-primary" type="button" onClick={printRoomQr} disabled={!rooms.length || ready < rooms.length}>Print all</button>
+        <button className="btn btn-primary" type="button" onClick={printRoomQr} disabled={!rooms.length}>Print all</button>
       </div>
       <Notice tone="bad" text={error} />
       {!allowed ? <p className="text-sm text-slate-500">Only a branch manager can print these codes.</p> : null}
@@ -52,7 +55,7 @@ function QrSheet() {
             <article key={room.id} className="room-qr-card rounded-2xl border border-royal-100 bg-white p-4 text-center shadow-card">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-royal-700">{session?.hostel_name || room.branch_name}</p>
               <div className="mt-2">
-                <QrImage value={roomScanUrl(room.id)} alt={`QR code for room ${room.number}`} size={220} onReady={() => setReady((count) => count + 1)} />
+                <QrImage value={roomScanUrl(room.id)} alt={`QR code for room ${room.number}`} size={220} />
               </div>
               <p className="mt-2 font-display text-3xl text-slate-900">Room {room.number}</p>
               <p className="text-sm text-slate-500">{room.branch_name} · Floor {room.floor}</p>

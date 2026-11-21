@@ -66,10 +66,12 @@ export default function RoomDetailPage() {
   if (!room) return <p className="text-sm text-slate-400">Loading room…</p>;
   return (
     <div className="space-y-4">
-      <Link href="/hostel/rooms" className="text-xs font-semibold uppercase tracking-wide text-royal-700">All rooms</Link>
+      <Link href="/hostel/rooms" className="no-qr-print text-xs font-semibold uppercase tracking-wide text-royal-700">All rooms</Link>
+      <div className="no-qr-print space-y-4">
       <Notice text={message} />
       <Notice tone="bad" text={error} />
-      <div className="rounded-2xl border border-royal-100 bg-white p-5 shadow-card">
+      </div>
+      <div className="no-qr-print rounded-2xl border border-royal-100 bg-white p-5 shadow-card">
         <p className="text-xs uppercase tracking-wide text-royal-700">{room.branch_name} · Floor {room.floor}</p>
         <h1 className="font-display text-3xl text-slate-900">Room {room.number}</h1>
         <p className="mt-1 text-sm text-slate-500">Available {room.available_beds} · Not available {room.beds.length - room.available_beds} · Total seats {room.beds.length}</p>
@@ -114,18 +116,6 @@ export default function RoomDetailPage() {
           })}
         </div>
         {can(session, "rooms.manage") ? (
-          <div id="room-qr-print" className="room-qr-card mt-5 max-w-xs rounded-2xl border border-royal-100 p-4 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-royal-700">{session?.hostel_name || room.branch_name}</p>
-            <div className="mt-2"><QrImage value={roomScanUrl(room.id)} alt={`QR code for room ${room.number}`} size={220} /></div>
-            <p className="mt-2 font-display text-3xl text-slate-900">Room {room.number}</p>
-            <p className="text-sm text-slate-500">{room.branch_name} · Floor {room.floor}</p>
-            <div className="no-qr-print mt-3 flex flex-wrap justify-center gap-2">
-              <button className="btn btn-ghost" type="button" onClick={printRoomQr}>Print this QR</button>
-              <Link className="btn btn-ghost" href={`/hostel/rooms/qr?branch=${room.branch}`}>Print all</Link>
-            </div>
-          </div>
-        ) : null}
-        {can(session, "rooms.manage") ? (
           <div className="mt-5 grid gap-4 border-t border-slate-100 pt-4 lg:grid-cols-2">
             <form onSubmit={savePrices} className="grid gap-2 sm:grid-cols-2">
               <label className="text-xs font-medium uppercase text-slate-500">Bed rent<input className="field mt-1 w-full normal-case" value={room.monthly_rent || ""} onChange={(event) => setRoom({ ...room, monthly_rent: event.target.value })} /></label>
@@ -140,7 +130,19 @@ export default function RoomDetailPage() {
           </div>
         ) : null}
       </div>
-      <div className="rounded-2xl border border-royal-100 bg-white p-5 shadow-card">
+      {can(session, "rooms.manage") ? (
+        <div id="room-qr-print" className="room-qr-card max-w-xs rounded-2xl border border-royal-100 bg-white p-4 text-center shadow-card">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-royal-700">{session?.hostel_name || room.branch_name}</p>
+          <div className="mt-2"><QrImage value={roomScanUrl(room.id)} alt={`QR code for room ${room.number}`} size={220} /></div>
+          <p className="mt-2 font-display text-3xl text-slate-900">Room {room.number}</p>
+          <p className="text-sm text-slate-500">{room.branch_name} · Floor {room.floor}</p>
+          <div className="no-qr-print mt-3 flex flex-wrap justify-center gap-2">
+            <button className="btn btn-ghost" type="button" onClick={printRoomQr}>Print this QR</button>
+            <Link className="btn btn-ghost" href={`/hostel/rooms/qr?branch=${room.branch}`}>Print all</Link>
+          </div>
+        </div>
+      ) : null}
+      <div className="no-qr-print rounded-2xl border border-royal-100 bg-white p-5 shadow-card">
         <h2 className="font-semibold text-slate-900">Reservations</h2>
         {stays.length === 0 ? <p className="mt-2 text-sm text-slate-400">No reservations loaded for this room.</p> : stays.map((row) => (
           <div key={row.id} className="mt-3 flex items-center justify-between gap-3 text-sm">
