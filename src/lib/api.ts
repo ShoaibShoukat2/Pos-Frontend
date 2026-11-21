@@ -163,6 +163,19 @@ export async function api<T>(path: string, init: RequestInit = {}, retry = true)
     throw new NetworkError();
   }
 
+  if (res.status === 401) {
+    const peek = await res.clone().json().catch(() => ({}));
+    const detail = peek && typeof peek === "object" ? (peek as { detail?: unknown }).detail : "";
+    const text = typeof detail === "string" ? detail : Array.isArray(detail) ? String(detail[0] ?? "") : "";
+    if (text.toLowerCase().includes("subscription has expired")) {
+      clearTokens();
+      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+        window.location.assign("/login?role=owner&expired=1");
+      }
+      throw new ApiError(res.status, peek);
+    }
+  }
+
   if (res.status === 401 && retry && localStorage.getItem(REFRESH_KEY)) {
     const next = await refreshAccess();
     if (next) return api<T>(path, init, false);

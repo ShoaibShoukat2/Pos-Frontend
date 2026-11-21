@@ -41,6 +41,7 @@ function LoginForm() {
   const [error, setError]     = useState("");
   const [pending, setPending] = useState(false);
   const selected = useMemo(() => ROLES.find((r) => r.id === role)!, [role]);
+  const expiredNote = search.get("expired") === "1" ? "Your subscription has expired. Ask the administrator to activate it again." : "";
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -110,9 +111,9 @@ function LoginForm() {
           <p className="mb-4 text-xs text-slate-500">{selected.sub}</p>
 
           <form onSubmit={onSubmit} className="space-y-4">
-            {error ? (
+            {error || expiredNote ? (
               <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                {error}
+                {error || expiredNote}
               </div>
             ) : null}
             <Field label="Email">

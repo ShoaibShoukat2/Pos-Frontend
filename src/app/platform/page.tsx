@@ -101,7 +101,7 @@ export default function PlatformOverviewPage() {
                         {row.city ? ` · ${row.city}` : ""}
                       </p>
                     </div>
-                    <Pill tone={row.is_active ? "green" : "gold"}>{row.is_active ? "Active" : "Disabled"}</Pill>
+                    <Pill tone={row.is_active ? "green" : "gold"}>{row.is_active ? "Active" : "Expired"}</Pill>
                   </li>
                 ))}
               </ul>

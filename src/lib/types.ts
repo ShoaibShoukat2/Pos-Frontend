@@ -47,6 +47,7 @@ export type PlatformOverview = {
     business_type: string;
     city: string;
     is_active: boolean;
+    subscription_ends_on?: string | null;
     created_at: string;
   }[];
 };
@@ -61,6 +62,9 @@ export type PlatformBusiness = {
   country: string;
   business_type: string;
   is_active: boolean;
+  subscription_ends_on: string | null;
+  subscription_status: "active" | "expired";
+  days_left: number | null;
   user_count: number;
   branch_count: number;
   product_count: number;
