@@ -7,9 +7,11 @@ type DetectorResult = { rawValue: string };
 export function CameraScan({
   onCode,
   onClose,
+  hintText = "Point the camera at a product QR or barcode.",
 }: {
   onCode: (code: string) => void;
   onClose: () => void;
+  hintText?: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hint, setHint] = useState("Starting camera…");
@@ -44,7 +46,7 @@ export function CameraScan({
       const detector = new Detector({
         formats: ["qr_code", "ean_13", "ean_8", "code_128", "code_39", "upc_a", "upc_e", "codabar"],
       });
-      setHint("Point the camera at a product QR or barcode.");
+      setHint(hintText);
       timer = window.setInterval(async () => {
         if (video.readyState < 2) return;
         try {

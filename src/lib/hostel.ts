@@ -109,9 +109,25 @@ export function paymentSummary(input: {
   ].join("\n");
 }
 
+const ROOM_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function roomScanUrl(id: string) {
-  if (typeof window === "undefined") return `/hostel/rooms/${id}`;
-  return `${window.location.origin}/hostel/rooms/${id}`;
+  if (typeof window === "undefined") return `/hostel/scan/${id}`;
+  return `${window.location.origin}/hostel/scan/${id}`;
+}
+
+export function roomIdFromScan(value: string) {
+  const text = value.trim();
+  if (ROOM_UUID.test(text)) return text;
+  try {
+    const url = new URL(text, typeof window === "undefined" ? "http://localhost" : window.location.origin);
+    if (typeof window !== "undefined" && url.origin !== window.location.origin) return "";
+    const match = url.pathname.match(/^\/hostel\/(?:scan|rooms)\/([0-9a-f-]{36})\/?$/i);
+    if (!match || !ROOM_UUID.test(match[1])) return "";
+    return match[1];
+  } catch {
+    return "";
+  }
 }
 
 export function printRoomQr() {

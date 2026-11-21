@@ -1,13 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { BedDouble, Building2, CircleDollarSign, Users, Wallet } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { BedDouble, Building2, CircleDollarSign, ScanLine, Users, Wallet } from "lucide-react";
 
+import { CameraScan } from "@/components/CameraScan";
 import { AreaChart, DashHeader, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
+import { Modal } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
 import { api } from "@/lib/api";
-import { errText, pkr, listOf } from "@/lib/hostel";
+import { errText, pkr, listOf, roomIdFromScan } from "@/lib/hostel";
 
 type Dash = {
   role: string;
@@ -29,8 +32,11 @@ type Person = { id: string; full_name: string };
 
 export default function HostelDashboardPage() {
   const { session } = useHostel();
+  const router = useRouter();
   const [data, setData] = useState<Dash | null>(null);
   const [error, setError] = useState("");
+  const [scanOpen, setScanOpen] = useState(false);
+  const [scanError, setScanError] = useState("");
   const [branches, setBranches] = useState<Branch[]>([]);
   const [staff, setStaff] = useState<Person[]>([]);
   const [filters, setFilters] = useState({ branch: "", month: "", employee: "", payment_status: "" });
@@ -57,9 +63,34 @@ export default function HostelDashboardPage() {
       .catch((err) => setError(errText(err)));
   }, [filters]);
 
+  const onScan = useCallback((value: string) => {
+    const roomId = roomIdFromScan(value);
+    if (!roomId) {
+      setScanError("This is not a room QR for this hostel.");
+      return;
+    }
+    setScanOpen(false);
+    router.push(`/hostel/scan/${roomId}`);
+  }, [router]);
+
   const stats = data?.stats;
   return (
     <div className="space-y-5">
+      {session?.role === "manager" ? (
+        <button type="button" onClick={() => { setScanError(""); setScanOpen(true); }} className="flex w-full items-center justify-between gap-4 rounded-2xl bg-royal-950 px-5 py-4 text-left text-white shadow-card">
+          <span>
+            <span className="block font-display text-2xl">Scan room QR</span>
+            <span className="mt-1 block text-sm text-white/70">Open the camera, scan the room code, and see who is staying. Other people cannot open this.</span>
+          </span>
+          <ScanLine size={28} className="shrink-0 text-gold-300" />
+        </button>
+      ) : null}
+      {scanOpen ? (
+        <Modal title="Scan room QR" onClose={() => setScanOpen(false)}>
+          <CameraScan onCode={onScan} onClose={() => setScanOpen(false)} hintText="Point the camera at the room QR code." />
+          {scanError ? <p className="mt-3 text-sm text-red-600">{scanError}</p> : null}
+        </Modal>
+      ) : null}
       <DashHeader name={session?.full_name || ""} subtitle={`${session?.hostel_name || "Hostel"} · ${session?.role || ""}`}>
         <select className="field" value={filters.month} onChange={(event) => setFilters({ ...filters, month: event.target.value })}>
           <option value="">This month</option>
