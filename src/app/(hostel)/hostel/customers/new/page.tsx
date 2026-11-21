@@ -6,7 +6,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Notice, UploadField } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
 import { api } from "@/lib/api";
-import { errText, listOf, pkr, seatKind, seatMix } from "@/lib/hostel";
+import { errText, formatCnic, listOf, pkr, seatKind, seatMix } from "@/lib/hostel";
 
 type Branch = { id: string; name: string };
 type Seat = { id: string; code: string; status: string; furnishing?: string; monthly_rent?: string; occupant?: { name: string } | null };
@@ -125,7 +125,7 @@ export default function NewCustomerPage() {
           <Field label="Father name"><input className="field w-full" value={form.father_name} onChange={(event) => set("father_name", event.target.value)} /></Field>
           <Field label="Mobile"><input className="field w-full" inputMode="tel" value={form.mobile} onChange={(event) => set("mobile", event.target.value)} required /></Field>
           <Field label="WhatsApp"><input className="field w-full" inputMode="tel" value={form.whatsapp} onChange={(event) => set("whatsapp", event.target.value)} /></Field>
-          <Field label="CNIC"><input className="field w-full" value={form.cnic} onChange={(event) => set("cnic", event.target.value)} /></Field>
+          <Field label="CNIC, optional"><input className="field w-full" inputMode="numeric" autoComplete="off" placeholder="35301-3263281-7" maxLength={15} value={form.cnic} onChange={(event) => set("cnic", formatCnic(event.target.value))} /></Field>
           <Field label="Gender">
             <select className="field w-full" value={form.gender} onChange={(event) => set("gender", event.target.value)}>
               <option value="male">Male</option>
@@ -138,8 +138,8 @@ export default function NewCustomerPage() {
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           <UploadField label="Photo" onPick={(value) => set("photo", value)} />
-          <UploadField label="CNIC front" onPick={(value) => set("cnic_front", value)} />
-          <UploadField label="CNIC back" onPick={(value) => set("cnic_back", value)} />
+          <UploadField label="CNIC front, optional" onPick={(value) => set("cnic_front", value)} />
+          <UploadField label="CNIC back, optional" onPick={(value) => set("cnic_back", value)} />
         </div>
         <details className="rounded-xl bg-royal-50 px-3 py-2 text-sm text-slate-600">
           <summary className="cursor-pointer font-medium text-royal-900">More details</summary>

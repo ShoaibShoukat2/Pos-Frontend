@@ -7,7 +7,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { Modal, Notice, StatusPill, UploadField } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
 import { api } from "@/lib/api";
-import { errText, paymentSummary, pkr, printNow, seatKind, waLink, listOf } from "@/lib/hostel";
+import { errText, formatCnic, paymentSummary, pkr, printNow, seatKind, waLink, listOf } from "@/lib/hostel";
 
 type Finance = {
   total_payable: string; total_paid: string; remaining: string; credit: string;
@@ -39,7 +39,7 @@ export default function CustomerDetailPage() {
       setRow(data);
       setDraft({
         full_name: data.full_name || "", mobile: data.mobile || "", whatsapp: data.whatsapp || "",
-        email: data.email || "", cnic: data.cnic || "", father_name: data.father_name || "",
+        email: data.email || "", cnic: formatCnic(data.cnic || ""), father_name: data.father_name || "",
         guardian_name: data.guardian_name || "", guardian_contact: data.guardian_contact || "",
         permanent_address: data.permanent_address || "", monthly_rent: data.monthly_rent || "",
         notes: data.notes || "",
@@ -274,7 +274,7 @@ export default function CustomerDetailPage() {
         <Modal title="Edit customer" onClose={() => setEditing(false)}>
           <form onSubmit={saveEdit} className="grid gap-3 sm:grid-cols-2">
             {Object.entries(draft).map(([key, value]) => (
-              <label key={key} className="text-xs uppercase text-slate-500">{key.replaceAll("_", " ")}<input className="field mt-1 w-full normal-case" value={value} onChange={(event) => setDraft({ ...draft, [key]: event.target.value })} /></label>
+              <label key={key} className="text-xs uppercase text-slate-500">{key === "cnic" ? "CNIC, optional" : key.replaceAll("_", " ")}<input className="field mt-1 w-full normal-case" inputMode={key === "cnic" ? "numeric" : undefined} placeholder={key === "cnic" ? "35301-3263281-7" : undefined} maxLength={key === "cnic" ? 15 : undefined} value={value} onChange={(event) => setDraft({ ...draft, [key]: key === "cnic" ? formatCnic(event.target.value) : event.target.value })} /></label>
             ))}
             <button className="btn btn-primary sm:col-span-2" type="submit">Save</button>
           </form>
