@@ -9,7 +9,7 @@ import { useHostel } from "@/components/hostel/session";
 import { api } from "@/lib/api";
 import { can, errText, pkr, seatKind, seatMix, listOf } from "@/lib/hostel";
 
-type Bed = { id: string; code: string; status: string; furnishing?: string; monthly_rent?: string; occupant?: { id: string; name: string } | null };
+type Bed = { id: string; code: string; status: string; furnishing?: string; monthly_rent?: string; occupant?: { id: string; name: string; notice_leave_on?: string | null } | null };
 type Room = {
   id: string; branch: string; branch_name: string; number: string; floor: number; room_type: string;
   capacity: number; monthly_rent: string; mattress_rent?: string; security_deposit: string; attached_bathroom: boolean;
@@ -161,6 +161,7 @@ function RoomsBody() {
                       <div>
                         <p className="text-sm font-medium text-slate-900">Room {room.number} · seat {bed.code}</p>
                         <p className="text-xs text-slate-500">{bed.occupant?.name || "Available"} · {seatKind(bed.furnishing)} · {pkr(bed.monthly_rent)}</p>
+                        {bed.occupant?.notice_leave_on ? <p className="text-xs font-semibold text-amber-800">Notice · leaves {bed.occupant.notice_leave_on}</p> : null}
                       </div>
                     </div>
                     {!bed.occupant && can(session, "seats.manage") ? (

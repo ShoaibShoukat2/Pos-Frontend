@@ -28,6 +28,9 @@ export default function CustomerDetailPage() {
   const [beds, setBeds] = useState<any[]>([]);
   const [pay, setPay] = useState({ amount: "", payment_type: "rent", method: "cash", payment_date: "", period_year: "", period_month: "", transaction_id: "", notes: "", screenshot: "" });
   const [extendDate, setExtendDate] = useState("");
+  const [noticeOpen, setNoticeOpen] = useState(false);
+  const [noticeDate, setNoticeDate] = useState("");
+  const [noticeNote, setNoticeNote] = useState("");
   const [nextBed, setNextBed] = useState("");
   const [draft, setDraft] = useState<Record<string, string>>({});
 
@@ -68,6 +71,30 @@ export default function CustomerDetailPage() {
       await api("/api/hostel/payments/", { method: "POST", body: JSON.stringify({ ...pay, customer: params.id, amount: pay.amount, period_year: pay.period_year || undefined, period_month: pay.period_month || undefined }) });
       setPayOpen(false);
       setMessage("Payment recorded.");
+      load();
+    } catch (err) {
+      setError(errText(err));
+    }
+  }
+
+  async function saveNotice(event: FormEvent) {
+    event.preventDefault();
+    setError("");
+    try {
+      await api(`/api/hostel/customers/${params.id}/notice/`, { method: "POST", body: JSON.stringify({ given_on: noticeDate, note: noticeNote }) });
+      setNoticeOpen(false);
+      setMessage("Notice recorded. They leave the seat one month after this date.");
+      load();
+    } catch (err) {
+      setError(errText(err));
+    }
+  }
+
+  async function cancelNotice() {
+    setError("");
+    try {
+      await api(`/api/hostel/customers/${params.id}/notice/`, { method: "POST", body: JSON.stringify({ cancel: true }) });
+      setMessage("Notice cancelled. They are staying.");
       load();
     } catch (err) {
       setError(errText(err));
@@ -175,6 +202,8 @@ export default function CustomerDetailPage() {
             <button className="btn btn-ghost" onClick={() => setEditing(true)}>Edit</button>
             <button className="btn btn-ghost" onClick={() => setPayOpen(true)}>Record payment</button>
             <button className="btn btn-ghost" disabled={!stay} onClick={() => setExtendOpen(true)}>Change leaving date</button>
+            {stay?.status === "checked_in" && !row.notice_given_on ? <button className="btn btn-ghost" onClick={() => { setNoticeDate(todayIso()); setNoticeNote(""); setNoticeOpen(true); }}>Give notice</button> : null}
+            {row.notice_given_on ? <button className="btn btn-ghost" onClick={cancelNotice}>Cancel notice</button> : null}
           </div>
           <div className="grid gap-3 sm:grid-cols-4">
             <Money label="Payable" value={finance?.total_payable} />
@@ -200,6 +229,7 @@ export default function CustomerDetailPage() {
           <p>Room: {row.room_number || row.reservations?.[0]?.room_number || "—"} · Floor {row.floor || row.reservations?.[0]?.floor || "—"} · Seat {row.seat || row.reservations?.[0]?.seat || "—"}</p>
           <p>Admission: {row.admission_date || "—"}</p>
           <p>Joining: {row.check_in_date || "—"} · Leaving: {row.checkout_date || row.expected_checkout || "—"}</p>
+          {row.notice_leave_on ? <p className="font-semibold text-amber-800">Notice given {row.notice_given_on}. Leaves this seat on {row.notice_leave_on}.{row.notice_note ? ` ${row.notice_note}` : ""}</p> : <p>No notice yet. A full leaving needs one month notice.</p>}
           <p>Rent {pkr(row.monthly_rent)} · Deposit {pkr(row.security_deposit)}</p>
           <button type="button" className="btn btn-primary mt-3 w-full" disabled={!stay} onClick={loadBeds}>Change room or seat</button>
         </Card>
@@ -280,6 +310,17 @@ export default function CustomerDetailPage() {
           </form>
         </Modal>
       ) : null}
+      {noticeOpen ? (
+        <Modal title="One month notice" onClose={() => setNoticeOpen(false)}>
+          <form onSubmit={saveNotice} className="space-y-3">
+            <p className="text-sm text-slate-500">Notice is given one month before they leave the seat or room completely. They stay until the leaving date.</p>
+            <label className="block text-xs font-medium uppercase text-slate-500">Notice given on<input type="date" className="field mt-1 w-full normal-case" value={noticeDate} onChange={(event) => setNoticeDate(event.target.value)} required /></label>
+            <p className="text-sm font-semibold text-slate-800">Leaves on {noticeDate ? monthLater(noticeDate) : "—"}</p>
+            <textarea className="field w-full" placeholder="Note, optional" value={noticeNote} onChange={(event) => setNoticeNote(event.target.value)} />
+            <button className="btn btn-primary" type="submit">Save notice</button>
+          </form>
+        </Modal>
+      ) : null}
       {moveOpen ? (
         <Modal title="Change room or seat" onClose={() => setMoveOpen(false)}>
           <form onSubmit={moveRoom} className="space-y-3">
@@ -293,6 +334,22 @@ export default function CustomerDetailPage() {
       ) : null}
     </div>
   );
+}
+
+function todayIso() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+function monthLater(iso: string) {
+  const [yearText, monthText, dayText] = iso.split("-");
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const nextYear = month === 12 ? year + 1 : year;
+  const last = new Date(nextYear, nextMonth, 0).getDate();
+  return `${nextYear}-${String(nextMonth).padStart(2, "0")}-${String(Math.min(day, last)).padStart(2, "0")}`;
 }
 
 function Money({ label, value, plain = false }: { label: string; value?: string | null; plain?: boolean }) {

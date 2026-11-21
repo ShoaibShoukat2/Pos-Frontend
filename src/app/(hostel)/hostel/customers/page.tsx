@@ -11,6 +11,7 @@ import { errText, pkr, pageOf } from "@/lib/hostel";
 type Row = {
   id: string; full_name: string; mobile: string; cnic: string; branch_name: string;
   room_number: string; seat: string; status: string; monthly_rent: string; balance: string;
+  notice_given_on?: string | null; notice_leave_on?: string | null;
 };
 
 function CustomersBody() {
@@ -20,6 +21,7 @@ function CustomersBody() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
+  const [notice, setNotice] = useState(params.get("notice") || "");
   const [error, setError] = useState("");
   const branch = params.get("branch") || "";
 
@@ -27,6 +29,7 @@ function CustomersBody() {
     const query = new URLSearchParams({ page: String(page), page_size: "25" });
     if (search) query.set("search", search);
     if (status) query.set("status", status);
+    if (notice) query.set("notice", notice);
     if (branch) query.set("branch", branch);
     api(`/api/hostel/customers/?${query.toString()}`)
       .then((data) => {
@@ -35,7 +38,7 @@ function CustomersBody() {
         setCount(list.count);
       })
       .catch((err) => setError(errText(err)));
-  }, [page, search, status, branch]);
+  }, [page, search, status, notice, branch]);
 
   return (
     <div className="space-y-4">
@@ -55,6 +58,10 @@ function CustomersBody() {
           <option value="checked_out">Checked out</option>
           <option value="inactive">Inactive</option>
         </select>
+        <select className="field w-full sm:w-auto" value={notice} onChange={(event) => { setPage(1); setNotice(event.target.value); }}>
+          <option value="">Any notice</option>
+          <option value="1">Notice given</option>
+        </select>
       </div>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {rows.length === 0 ? <EmptyState title="No customers" text="Take details and assign a room seat on one page." /> : (
@@ -71,6 +78,7 @@ function CustomersBody() {
                   <StatusPill value={row.status} />
                 </div>
                 <p className="mt-2 text-xs text-slate-400">Balance {pkr(row.balance)} · rent {pkr(row.monthly_rent)}</p>
+                {row.notice_leave_on ? <p className="mt-1 text-xs font-semibold text-amber-800">Notice given · leaves {row.notice_leave_on}</p> : null}
               </Link>
             ))}
           </div>
@@ -80,7 +88,7 @@ function CustomersBody() {
             <tbody>
               {rows.map((row) => (
                 <tr key={row.id} className="border-t border-slate-100">
-                  <td className="px-3 py-2 font-medium">{row.full_name}<p className="text-xs text-slate-400">{row.cnic}</p></td>
+                  <td className="px-3 py-2 font-medium">{row.full_name}<p className="text-xs text-slate-400">{row.cnic}</p>{row.notice_leave_on ? <p className="text-xs font-semibold text-amber-800">Notice · leaves {row.notice_leave_on}</p> : null}</td>
                   <td>{row.mobile || "—"}</td>
                   <td>{row.branch_name || "—"}</td>
                   <td>{row.room_number ? `${row.room_number} / ${row.seat || "—"}` : "—"}</td>

@@ -102,6 +102,7 @@ export default function RoomDetailPage() {
                     {person.cnic ? <p>CNIC: {person.cnic}</p> : null}
                     {person.guardian_name ? <p>Guardian: {person.guardian_name}{person.guardian_contact ? ` · ${person.guardian_contact}` : ""}</p> : null}
                     <p>Stay: {person.check_in_date || "—"} to {person.expected_checkout || "—"}</p>
+                    {person.notice_leave_on ? <p className="font-semibold text-amber-800">Notice given {person.notice_given_on} · leaves this seat {person.notice_leave_on}{person.notice_note ? ` · ${person.notice_note}` : ""}</p> : null}
                     <p>Rent: {pkr(person.monthly_rent)}</p>
                   </div>
                 ) : <p className="mt-3 text-sm text-emerald-700">This seat is empty.</p>}
