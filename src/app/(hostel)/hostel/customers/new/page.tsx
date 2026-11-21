@@ -6,16 +6,19 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Notice, UploadField } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
 import { api } from "@/lib/api";
-import { errText, listOf } from "@/lib/hostel";
+import { errText, listOf, pkr, seatKind, seatMix } from "@/lib/hostel";
 
 type Branch = { id: string; name: string };
-type Seat = { id: string; code: string; status: string; occupant?: { name: string } | null };
+type Seat = { id: string; code: string; status: string; furnishing?: string; monthly_rent?: string; occupant?: { name: string } | null };
 type Room = {
   id: string;
   number: string;
   floor: number;
   monthly_rent: string;
+  mattress_rent?: string;
   security_deposit: string;
+  bed_count?: number;
+  mattress_count?: number;
   beds: Seat[];
 };
 
@@ -74,7 +77,7 @@ export default function NewCustomerPage() {
       ...prev,
       room: room.id,
       bed_id: seat.id,
-      monthly_rent: prev.monthly_rent || room.monthly_rent || "",
+      monthly_rent: seat.monthly_rent || room.monthly_rent || "",
       security_deposit: prev.security_deposit || room.security_deposit || "",
     }));
   }
@@ -155,9 +158,9 @@ export default function NewCustomerPage() {
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
             <h2 className="font-semibold text-slate-900">Room and seat</h2>
-            <p className="text-sm text-slate-500">Tap a green seat. Taken seats stay locked.</p>
+            <p className="text-sm text-slate-500">Tap a free seat. Bed and mattress prices are different, so the rent fills in from the seat you pick.</p>
           </div>
-          {picked ? <p className="rounded-full bg-gold-300 px-3 py-1 text-sm font-semibold text-royal-950">Room {picked.room.number} · seat {picked.seat.code}</p> : null}
+          {picked ? <p className="rounded-full bg-gold-300 px-3 py-1 text-sm font-semibold text-royal-950">Room {picked.room.number} · seat {picked.seat.code} · {seatKind(picked.seat.furnishing)} · {pkr(picked.seat.monthly_rent)}</p> : null}
         </div>
         {session?.role === "owner" ? (
           <Field label="Branch">
@@ -180,7 +183,7 @@ export default function NewCustomerPage() {
                 <div key={room.id} className="rounded-2xl border border-slate-100 p-3">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <p className="font-semibold text-slate-900">Room {room.number}</p>
-                    <p className="text-xs text-slate-500">Floor {room.floor} · {free} free · {room.beds.length - free} taken</p>
+                    <p className="text-xs text-slate-500">Floor {room.floor} · {free} free · {seatMix(room)}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {room.beds.map((seat) => {
@@ -192,9 +195,10 @@ export default function NewCustomerPage() {
                           type="button"
                           disabled={!open}
                           onClick={() => chooseSeat(room, seat)}
-                          className={`min-h-12 min-w-16 rounded-xl px-3 text-sm font-semibold ${selected ? "bg-gold-400 text-royal-950" : open ? "border border-emerald-200 bg-emerald-50 text-emerald-800" : "bg-slate-100 text-slate-400"}`}
+                          className={`min-h-16 min-w-24 rounded-xl px-3 py-1 text-sm font-semibold ${selected ? "bg-gold-400 text-royal-950" : open ? "border border-emerald-200 bg-emerald-50 text-emerald-800" : "bg-slate-100 text-slate-400"}`}
                         >
                           <span className="block">{seat.code}</span>
+                          <span className="block text-[10px] font-medium">{seatKind(seat.furnishing)} · {pkr(seat.monthly_rent)}</span>
                           <span className="block text-[10px] font-medium">{selected ? "Selected" : open ? "Free" : seat.occupant?.name || "Taken"}</span>
                         </button>
                       );
@@ -215,7 +219,7 @@ export default function NewCustomerPage() {
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-royal-100 bg-white/95 p-3 backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0">
         <div className="mx-auto flex max-w-3xl items-center gap-3">
-          <p className="hidden min-w-0 flex-1 truncate text-sm text-slate-500 sm:block">{picked ? `Room ${picked.room.number} · seat ${picked.seat.code}` : "Pick a free seat"}</p>
+          <p className="hidden min-w-0 flex-1 truncate text-sm text-slate-500 sm:block">{picked ? `Room ${picked.room.number} · seat ${picked.seat.code} · ${seatKind(picked.seat.furnishing)} · ${pkr(form.monthly_rent)}` : "Pick a free seat"}</p>
           <button className="btn btn-primary w-full sm:w-auto" type="submit">Save customer and seat</button>
         </div>
       </div>

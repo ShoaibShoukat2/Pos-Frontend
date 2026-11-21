@@ -114,7 +114,7 @@ export default function EmployeesPage() {
           {session?.role === "owner" ? <select className="field" value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}><option value="employee">Employee</option><option value="manager">Branch manager</option></select> : null}
           <UploadField label="Photo" onPick={(photo) => setForm({ ...form, photo })} />
           {session?.role === "owner" && form.role === "manager" ? (
-            <p className="sm:col-span-2 text-sm text-slate-500">This manager stays on the branch you choose. They can hire staff there, such as a maid or cook, and save their name, phone, salary, and photo. They cannot see any other branch.</p>
+            <p className="sm:col-span-2 text-sm text-slate-500">Create the manager here, then use Hand over on the branch if you want to move them onto a different hostel. They only see the branch they are handed. They can hire staff there, such as a maid or cook.</p>
           ) : null}
           {session?.role !== "owner" ? (
             <p className="sm:col-span-2 text-sm text-slate-500">This person is saved only on {session?.branch_name || "your branch"}. Leave email empty for a maid or cook who will not sign in.</p>

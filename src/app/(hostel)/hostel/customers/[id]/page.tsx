@@ -7,7 +7,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { Modal, Notice, StatusPill, UploadField } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
 import { api } from "@/lib/api";
-import { errText, paymentSummary, pkr, printNow, waLink, listOf } from "@/lib/hostel";
+import { errText, paymentSummary, pkr, printNow, seatKind, waLink, listOf } from "@/lib/hostel";
 
 type Finance = {
   total_payable: string; total_paid: string; remaining: string; credit: string;
@@ -285,7 +285,7 @@ export default function CustomerDetailPage() {
           <form onSubmit={moveRoom} className="space-y-3">
             <select className="field w-full" value={nextBed} onChange={(event) => setNextBed(event.target.value)} required>
               <option value="">Choose a free seat</option>
-              {beds.map((bed) => <option key={bed.id} value={bed.id}>Room {bed.room_number} · seat {bed.code}</option>)}
+              {beds.map((bed) => <option key={bed.id} value={bed.id}>Room {bed.room_number} · seat {bed.code} · {seatKind(bed.furnishing)} · {pkr(bed.monthly_rent)}</option>)}
             </select>
             <button className="btn btn-primary" type="submit">Shift member</button>
           </form>

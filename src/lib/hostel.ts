@@ -11,6 +11,24 @@ export type HostelSession = {
   logo: string;
 };
 
+export function seatKind(furnishing?: string | null) {
+  return furnishing === "mattress" ? "Mattress" : "Bed";
+}
+
+export function seatMix(room: {
+  bed_count?: number;
+  mattress_count?: number;
+  beds?: { furnishing?: string | null }[];
+  monthly_rent?: string | number | null;
+  mattress_rent?: string | number | null;
+}) {
+  const beds = room.bed_count ?? (room.beds || []).filter((bed) => bed.furnishing !== "mattress").length;
+  const mattresses = room.mattress_count ?? Math.max(0, (room.beds || []).length - beds);
+  const bedLabel = beds === 1 ? "bed seat" : "bed seats";
+  const mattressLabel = mattresses === 1 ? "mattress seat" : "mattress seats";
+  return `${beds} ${bedLabel} · ${pkr(room.monthly_rent)} · ${mattresses} ${mattressLabel} · ${pkr(room.mattress_rent)}`;
+}
+
 export function pkr(value: string | number | null | undefined) {
   const amount = Number(value || 0);
   return `Rs ${amount.toLocaleString("en-PK", { maximumFractionDigits: 0 })}`;
