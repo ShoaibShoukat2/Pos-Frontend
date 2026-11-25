@@ -254,6 +254,11 @@ export type ProductVariant = {
   pack_quantity: string;
   pack_price: string;
   pack_barcode: string;
+  carton_quantity?: string;
+  carton_price?: string;
+  carton_barcode?: string;
+  size?: string;
+  garment_type?: string;
   is_default: boolean;
   is_active: boolean;
   total_stock?: string | null;
@@ -287,6 +292,14 @@ export type Product = {
   duration_minutes?: number;
   warranty_days?: number;
   is_active: boolean;
+  size?: string;
+  garment_type?: string;
+  pack_quantity?: string;
+  pack_price?: string;
+  pack_barcode?: string;
+  carton_quantity?: string;
+  carton_price?: string;
+  carton_barcode?: string;
   variant_count?: number | null;
   total_stock?: string | null;
   variants?: ProductVariant[];
@@ -708,6 +721,11 @@ export type PosCatalogItem = {
   pack_quantity: string;
   pack_price: string;
   pack_barcode: string;
+  carton_quantity?: string;
+  carton_price?: string;
+  carton_barcode?: string;
+  size?: string;
+  garment_type?: string;
 };
 
 export type PosCustomer = Customer;
@@ -746,7 +764,7 @@ export type PosSalePayload = {
   manual_discount_value?: string;
   notes?: string;
   sold_at?: string;
-  lines: { variant: string; quantity: string }[];
+  lines: { variant: string; quantity: string; sale_unit?: "piece" | "pack" | "carton" }[];
   payments: { method: string; amount: string }[];
 };
 

@@ -27,7 +27,7 @@ import {
 import { ASIDE, MAIN, NAV_ACTIVE, NAV_IDLE } from "@/components/dashboard/kit";
 import { FounderCredit } from "@/components/FounderCredit";
 import { BottomNav, MenuButton, NavDrawer } from "@/components/MobileChrome";
-import { isCarShowroom, isCashier, isHostel, isPharmacy, isRentACar, useAuth } from "@/lib/auth";
+import { isCarShowroom, isCashier, isGeneralRetail, isHostel, isPharmacy, isRentACar, useAuth } from "@/lib/auth";
 
 const CASHIER_LINKS = new Set(["/cashier", "/pos", "/customers", "/cash", "/returns"]);
 
@@ -78,7 +78,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     .map((item) => ({
       ...item,
       href: item.href === "/dashboard" && isCashier(user) ? "/cashier" : item.href,
-      label: isPharmacy(user) && item.href === "/products" ? "Inventory" : item.label,
+      label: item.href === "/products" && (isPharmacy(user) || isGeneralRetail(user)) ? "Inventory" : item.label,
     }))
     .map((item) => (
       isPharmacy(user) && item.href === "/products" ? { ...item, href: "/pharmacy" } : item

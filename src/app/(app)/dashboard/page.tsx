@@ -8,7 +8,7 @@ import { AreaChart, DashHeader, Donut, Panel, StatCard, StatGrid } from "@/compo
 import { PharmacyDesk } from "@/components/pharmacy/PharmacyDesk";
 import { Badge } from "@/components/ui";
 import { api } from "@/lib/api";
-import { isCarShowroom, useAuth } from "@/lib/auth";
+import { isCarShowroom, isGeneralRetail, useAuth } from "@/lib/auth";
 import { num, rs } from "@/lib/money";
 import type { LiveProduct, OwnerOverview } from "@/lib/types";
 
@@ -99,6 +99,7 @@ export default function DashboardPage() {
   const selected = visible.find((row) => row.id === selectedId) || visible[0] || products[0] || null;
   const counts = data?.live_counts;
 
+  const retail = isGeneralRetail(user);
   const firstName = user?.first_name || user?.full_name?.split(" ")[0] || "";
   const trend = (data?.daily || []).slice(-8).map((row) => ({ label: shortDate(row.date), value: num(row.total) }));
 
@@ -109,6 +110,8 @@ export default function DashboardPage() {
         subtitle={
           user?.business_type === "pizza"
             ? "Menu, counter, today’s pizzas, cash and staff."
+            : retail
+              ? "Inventory, piece / pack / carton prices, and today’s counter."
             : data
               ? `${data.from} → ${data.to}`
               : "Live sales, cash, people and catalog activity."
@@ -132,6 +135,7 @@ export default function DashboardPage() {
 
       {user?.business_type === "pizza" ? <PizzaBoard data={data} period={period} /> : null}
       {user?.business_type === "pharmacy" ? <PharmacyDesk /> : null}
+      {retail ? <RetailShortcuts /> : null}
 
       <Link
         href="/settings/cashiers"
@@ -169,7 +173,7 @@ export default function DashboardPage() {
           <StatCard icon={Wallet} tone="hero" label={period === "today" ? "Sales today" : "Sales"} value={rs(data.today_sales)} hint={`${data.orders} orders`} href="/reports" />
           <StatCard icon={ShoppingBag} label="Net profit" value={rs(data.today_profit)} href="/reports" />
           <StatCard icon={Users} label="Customers" value={String(data.customers)} hint={rs(data.outstanding)} href="/customers" />
-          <StatCard icon={Package} label="Products" value={String(data.products)} hint={`${data.services ?? 0} services`} href="/products" />
+          <StatCard icon={Package} label={retail ? "Inventory" : "Products"} value={String(data.products)} hint={retail ? "Sizes, packs and cartons" : `${data.services ?? 0} services`} href="/products" />
         </StatGrid>
       ) : !loading ? (
         <p className="text-sm text-surface-400">Numbers appear once you have report access.</p>
@@ -180,7 +184,7 @@ export default function DashboardPage() {
           <Panel title={period === "today" ? "Today’s sales" : "Sales overview"} action={<span className="text-sm font-semibold text-royal-800">{rs(data.today_sales)}</span>}>
             <AreaChart points={trend} />
           </Panel>
-          <Panel title="Catalog sold">
+          <Panel title={retail ? "Inventory sold" : "Catalog sold"}>
             <Donut
               center={`${num(data.product_sale_percent).toFixed(0)}%`}
               caption="Sold"
@@ -236,9 +240,9 @@ export default function DashboardPage() {
           <div className="card p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="font-display text-xl">Products sold</h2>
+                <h2 className="font-display text-xl">{retail ? "Inventory sold" : "Products sold"}</h2>
                 <p className="mt-1 text-xs text-surface-400">
-                  {data.products_sold ?? 0} of {data.products} catalog products sold
+                  {data.products_sold ?? 0} of {data.products} {retail ? "inventory items" : "catalog products"} sold
                   {period === "today" ? " today" : " in this period"}
                 </p>
               </div>
@@ -285,9 +289,9 @@ export default function DashboardPage() {
       <section className="mt-8">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="font-display text-xl">Live catalog</h2>
+            <h2 className="font-display text-xl">{retail ? "Live inventory" : "Live catalog"}</h2>
             <p className="mt-1 text-sm text-surface-400">
-              Products moving right now. {counts?.total || 0} with a recent change. Services stay on the Services page.
+              {retail ? "Items moving right now." : "Products moving right now."} {counts?.total || 0} with a recent change. Services stay on the Services page.
             </p>
           </div>
           <div className="flex flex-wrap rounded-xl border border-surface-200 bg-white p-1">
@@ -300,7 +304,7 @@ export default function DashboardPage() {
                   filter === item.id ? "bg-surface-900 text-white" : "text-surface-400 hover:text-surface-900"
                 }`}
               >
-                {item.label}
+                {retail && item.id === "all" ? "All inventory" : item.label}
                 {item.id !== "all" && counts ? ` ${counts[item.id]}` : ""}
               </button>
             ))}
@@ -367,11 +371,11 @@ export default function DashboardPage() {
                   <Row label="Stock" value={`${fmtQty(selected.qty)} in stock`} />
                 </dl>
                 <Link href={`/products/${selected.id}`} className="mt-4 inline-block text-sm font-medium text-brand-600 underline">
-                  Open product
+                  {retail ? "Open in inventory" : "Open product"}
                 </Link>
               </div>
             ) : (
-              <p className="text-sm text-surface-400">Select a product to see its fields.</p>
+              <p className="text-sm text-surface-400">{retail ? "Select an item to see its fields." : "Select a product to see its fields."}</p>
             )}
             <div className="mt-5 border-t border-surface-100 pt-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-surface-400">Latest movement</p>
@@ -480,6 +484,24 @@ const PIZZA_LINKS = [
   { href: "/settings/invoice", label: "Invoice slip" },
   { href: "/settings/cashiers", label: "Cashiers" },
 ];
+
+function RetailShortcuts() {
+  const links = [
+    { href: "/products", title: "Inventory", detail: "Name, size, Economy or Jumbo, pack and carton prices." },
+    { href: "/pos", title: "POS", detail: "Sell a piece, a pack, or a full carton." },
+    { href: "/stock", title: "Stock", detail: "See what came in and what left the shelf." },
+  ];
+  return (
+    <div className="grid gap-3 md:grid-cols-3">
+      {links.map((item) => (
+        <Link key={item.href} href={item.href} className="card p-4 hover:border-brand-400">
+          <p className="font-display text-lg text-surface-900">{item.title}</p>
+          <p className="mt-1 text-sm text-surface-400">{item.detail}</p>
+        </Link>
+      ))}
+    </div>
+  );
+}
 
 function PizzaBoard({ data, period }: { data: OwnerOverview | null; period: string }) {
   const sales = data?.category_sales || [];

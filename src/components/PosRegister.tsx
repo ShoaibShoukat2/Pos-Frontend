@@ -37,7 +37,7 @@ import { useHardware } from "@/lib/hardware";
 import { money, num, rs } from "@/lib/money";
 import { loadSnapshot, markSynced, pendingCount, queueSale, removePending, saveSnapshot, syncPending } from "@/lib/offline";
 import { useDebounced } from "@/lib/query";
-import { quoteCart, type CartLine } from "@/lib/quote";
+import { quoteCart, type CartLine, type SaleUnit } from "@/lib/quote";
 import type {
   CashierOverview,
   OwnerOverview,
@@ -128,9 +128,33 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
     return () => window.clearTimeout(tick);
   }, [pendingPrintId, slip]);
 
-  function matchItem(code: string, rows: PosCatalogItem[] | null | undefined) {
+  function matchSale(code: string, rows: PosCatalogItem[] | null | undefined) {
     const key = code.trim().toLowerCase();
-    return rows?.find((row) => row.barcode.toLowerCase() === key || row.sku.toLowerCase() === key) || null;
+    if (!key || !rows) return null;
+    for (const row of rows) {
+      if ((row.carton_barcode || "").toLowerCase() === key) return { item: row, unit: "carton" as SaleUnit };
+      if ((row.pack_barcode || "").toLowerCase() === key) return { item: row, unit: "pack" as SaleUnit };
+      if ((row.barcode || "").toLowerCase() === key || row.sku.toLowerCase() === key) return { item: row, unit: "piece" as SaleUnit };
+    }
+    return null;
+  }
+
+  function lineKey(id: string, unit: SaleUnit = "piece") {
+    return `${id}:${unit}`;
+  }
+
+  function reservedQty(itemId: string, exceptKey?: string) {
+    return cart.reduce((sum, row) => {
+      if (row.item.id !== itemId) return sum;
+      if (exceptKey && lineKey(row.item.id, row.saleUnit || "piece") === exceptKey) return sum;
+      return sum + row.qty;
+    }, 0);
+  }
+
+  function roomFor(item: PosCatalogItem, exceptKey?: string) {
+    const max = maxSellable(item);
+    if (max === null) return null;
+    return Math.max(0, max - reservedQty(item.id, exceptKey));
   }
 
   const refreshQueue = useCallback(() => {
@@ -244,7 +268,11 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         row.sku.toLowerCase().includes(q) ||
         row.barcode.toLowerCase().includes(q) ||
         row.variant.toLowerCase().includes(q) ||
-        row.category.toLowerCase().includes(q)
+        row.category.toLowerCase().includes(q) ||
+        (row.size || "").toLowerCase().includes(q) ||
+        (row.garment_type || "").toLowerCase().includes(q) ||
+        (row.pack_barcode || "").toLowerCase().includes(q) ||
+        (row.carton_barcode || "").toLowerCase().includes(q)
       );
     });
   }, [snapshot, query, remoteItems, category, kindFilter]);
@@ -274,57 +302,39 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   const change = quote ? money(paid - quote.total) : 0;
   const officeHref = user ? homeFor(user) : "/dashboard";
 
-  function addItem(item: PosCatalogItem) {
+  function addBundle(item: PosCatalogItem, unit: SaleUnit = "piece") {
     setSelectedId(item.id);
-    const max = maxSellable(item);
-    const current = cart.find((row) => row.item.id === item.id)?.qty || 0;
-    if (max === 0) {
-      setError(`${item.product} is out of stock`);
+    const step = bundleSize(item, unit);
+    const key = lineKey(item.id, unit);
+    const current = cart.find((row) => lineKey(row.item.id, row.saleUnit || "piece") === key)?.qty || 0;
+    const room = roomFor(item, key);
+    if (room !== null && current + step > room + 0.0001) {
+      setError(room <= 0 && current <= 0 ? `${item.product} is out of stock` : `Only ${fmtQty(room)} in stock for ${item.product}`);
       return;
     }
-    if (max !== null && current >= max) {
-      setError(`Only ${fmtQty(max)} in stock for ${item.product}`);
-      setDraftQty(Math.max(1, current));
-      return;
-    }
-    const qty = clampQty(item, current + 1);
-    setDraftQty(Math.max(1, qty));
+    const qty = current + step;
+    setDraftQty(qty);
     setCart((prev) => {
-      const found = prev.find((row) => row.item.id === item.id);
-      if (found) return prev.map((row) => (row.item.id === item.id ? { ...row, qty } : row));
-      return [...prev, { item, qty }];
+      const found = prev.find((row) => lineKey(row.item.id, row.saleUnit || "piece") === key);
+      if (found) return prev.map((row) => (lineKey(row.item.id, row.saleUnit || "piece") === key ? { ...row, qty, saleUnit: unit } : row));
+      return [...prev, { item, qty, saleUnit: unit }];
     });
     setMessage("");
     setError("");
   }
 
-  function setItemQty(item: PosCatalogItem, qty: number) {
-    setSelectedId(item.id);
-    const max = maxSellable(item);
-    if (max === 0 && qty > 0) {
-      setError(`${item.product} is out of stock`);
-      return;
-    }
-    const next = clampQty(item, qty);
-    setDraftQty(Math.max(1, next));
-    setCart((prev) => {
-      if (next <= 0) return prev.filter((row) => row.item.id !== item.id);
-      const found = prev.find((row) => row.item.id === item.id);
-      if (found) return prev.map((row) => (row.item.id === item.id ? { ...row, qty: next } : row));
-      return [...prev, { item, qty: next }];
-    });
-    setMessage("");
-    setError("");
+  function addItem(item: PosCatalogItem) {
+    addBundle(item, "piece");
   }
 
   async function applyCode(code: string) {
     const raw = code.trim();
     if (!raw) return;
-    const local = matchItem(raw, snapshot?.catalog) || matchItem(raw, remoteItems);
+    const local = matchSale(raw, snapshot?.catalog) || matchSale(raw, remoteItems);
     if (local) {
-      addItem(local);
+      addBundle(local.item, local.unit);
       setQuery("");
-      setMessage(`${local.product} added`);
+      setMessage(`${local.item.product} added`);
       searchRef.current?.focus();
       return;
     }
@@ -334,11 +344,11 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           `/api/pos/catalog/?search=${encodeURIComponent(raw)}&page_size=5`,
         ),
       );
-      const item = matchItem(raw, found);
+      const item = matchSale(raw, found);
       if (item) {
-        addItem(item);
+        addBundle(item.item, item.unit);
         setQuery("");
-        setMessage(`${item.product} added`);
+        setMessage(`${item.item.product} added`);
         searchRef.current?.focus();
         return;
       }
@@ -348,9 +358,16 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           `/api/pos/catalog/?search=${encodeURIComponent(variant.sku)}&page_size=5`,
         ),
       );
-      const fromLookup = bySku.find((row) => row.id === variant.id) || matchItem(variant.sku, bySku);
+      const fromLookup = bySku.find((row) => row.id === variant.id) || matchSale(variant.sku, bySku)?.item;
       if (fromLookup) {
-        addItem(fromLookup);
+        const key = raw.toLowerCase();
+        const unit: SaleUnit =
+          (fromLookup.carton_barcode || "").toLowerCase() === key
+            ? "carton"
+            : (fromLookup.pack_barcode || "").toLowerCase() === key
+              ? "pack"
+              : "piece";
+        addBundle(fromLookup, unit);
         setQuery("");
         setMessage(`${fromLookup.product} added`);
         searchRef.current?.focus();
@@ -363,20 +380,36 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
     searchRef.current?.focus();
   }
 
-  function setQty(id: string, qty: number) {
-    const line = cart.find((row) => row.item.id === id);
+  function setQty(id: string, qty: number, unit: SaleUnit = "piece") {
+    const key = lineKey(id, unit);
+    const line = cart.find((row) => lineKey(row.item.id, row.saleUnit || "piece") === key);
     if (!line) return;
-    const next = clampQty(line.item, qty);
-    if (id === selectedId) setDraftQty(Math.max(1, next));
+    const step = bundleSize(line.item, unit);
+    let next = step > 1 ? Math.round(qty / step) * step : qty;
+    const room = roomFor(line.item, key);
+    if (room !== null) next = Math.min(next, Math.floor((room + 0.0001) / step) * step);
+    next = Math.max(0, next);
+    if (id === selectedId) setDraftQty(Math.max(step, next));
     if (next <= 0) {
-      setCart((prev) => prev.filter((row) => row.item.id !== id));
+      setCart((prev) => prev.filter((row) => lineKey(row.item.id, row.saleUnit || "piece") !== key));
       return;
     }
-    setCart((prev) => prev.map((row) => (row.item.id === id ? { ...row, qty: next } : row)));
+    setCart((prev) => prev.map((row) => (lineKey(row.item.id, row.saleUnit || "piece") === key ? { ...row, qty: next } : row)));
   }
 
-  function removeLine(id: string) {
-    setCart((prev) => prev.filter((row) => row.item.id !== id));
+  function removeLine(id: string, unit: SaleUnit = "piece") {
+    const key = lineKey(id, unit);
+    setCart((prev) => prev.filter((row) => lineKey(row.item.id, row.saleUnit || "piece") !== key));
+  }
+
+  function catalogAfterSale(catalog: PosCatalogItem[]) {
+    const sold = new Map<string, number>();
+    for (const row of cart) sold.set(row.item.id, (sold.get(row.item.id) || 0) + row.qty);
+    return catalog.map((item) => {
+      const qty = sold.get(item.id);
+      if (!qty) return item;
+      return { ...item, qty: String(Math.max(0, Number(item.qty) - qty)) };
+    });
   }
 
   async function openConnect() {
@@ -437,7 +470,11 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       manual_discount_kind: manualKind,
       manual_discount_value: manualValue || "0",
       sold_at: new Date().toISOString(),
-      lines: cart.map((row) => ({ variant: row.item.id, quantity: String(row.qty) })),
+      lines: cart.map((row) => ({
+        variant: row.item.id,
+        quantity: String(row.qty),
+        sale_unit: row.saleUnit || "piece",
+      })),
       payments: applied > 0 ? [{ method: payMethod, amount: applied.toFixed(2) }] : [],
     };
     await queueSale(payload);
@@ -447,11 +484,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         body: JSON.stringify(payload),
       });
       await markSynced(payload.client_uuid);
-      const nextCatalog = snapshot.catalog.map((item) => {
-        const line = cart.find((row) => row.item.id === item.id);
-        if (!line) return item;
-        return { ...item, qty: String(Math.max(0, Number(item.qty) - line.qty)) };
-      });
+      const nextCatalog = catalogAfterSale(snapshot.catalog);
       const nextSnap = { ...snapshot, catalog: nextCatalog };
       setSnapshot(nextSnap);
       await saveSnapshot(shopKey, nextSnap);
@@ -469,11 +502,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       refreshDash();
     } catch (err) {
       if (err instanceof NetworkError) {
-        const nextCatalog = snapshot.catalog.map((item) => {
-          const line = cart.find((row) => row.item.id === item.id);
-          if (!line) return item;
-          return { ...item, qty: String(Math.max(0, Number(item.qty) - line.qty)) };
-        });
+        const nextCatalog = catalogAfterSale(snapshot.catalog);
         const nextSnap = { ...snapshot, catalog: nextCatalog };
         setSnapshot(nextSnap);
         await saveSnapshot(shopKey, nextSnap);
@@ -563,7 +592,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         return {
           id: row.item.id,
           product_name: row.item.product,
-          variant_name: row.item.variant,
+          variant_name: saleCaptionName(row),
           sku: row.item.sku,
           quantity: String(row.qty),
           unit_price: String(priced?.list ?? row.item.selling_price),
@@ -786,10 +815,15 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           <div className="min-h-0 flex-1 overflow-y-auto pb-2 pr-1">
             <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
               {items.slice(0, 80).map((item) => {
-                const inCart = cart.find((row) => row.item.id === item.id);
+                const lines = cart.filter((row) => row.item.id === item.id);
+                const inCart = lines.length > 0;
+                const inQty = lines.reduce((sum, row) => sum + row.qty, 0);
+                const pieceLine = lines.find((row) => (row.saleUnit || "piece") === "piece");
+                const modes = saleModes(item);
                 const max    = maxSellable(item);
                 const out    = max === 0;
                 const stock  = stockTone(item);
+                const retailMeta = [item.size, garmentLabel(item.garment_type)].filter(Boolean).join(" · ");
                 return (
                   <article
                     key={item.id}
@@ -813,15 +847,15 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                             : "bg-surface-100 text-surface-600"
                         }`}
                       >
-                        {inCart ? inCart.qty : (item.product || "?")[0].toUpperCase()}
+                        {inCart ? fmtQty(inQty) : (item.product || "?")[0].toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-surface-900 leading-snug">
                           {item.product}
                         </p>
                         <p className="mt-0.5 truncate text-xs text-surface-400">
-                          {item.sku}
-                          {item.variant && item.variant !== item.product ? ` · ${item.variant}` : ""}
+                          {retailMeta || item.sku}
+                          {!retailMeta && item.variant && item.variant !== item.product ? ` · ${item.variant}` : ""}
                         </p>
                         <div className="mt-1.5 flex items-center justify-between gap-1">
                           <span className="font-display text-base text-surface-900">
@@ -833,7 +867,12 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                         </div>
                         {Number(item.pack_quantity) > 0 && Number(item.pack_price) > 0 ? (
                           <p className="mt-1 text-[10px] text-brand-600">
-                            Box of {item.pack_quantity}: {rs(item.pack_price)}
+                            Pack of {fmtQty(item.pack_quantity)}: {rs(item.pack_price)}
+                          </p>
+                        ) : null}
+                        {Number(item.carton_quantity) > 0 && Number(item.carton_price) > 0 ? (
+                          <p className="mt-0.5 text-[10px] text-brand-600">
+                            Carton of {fmtQty(item.carton_quantity)}: {rs(item.carton_price)}
                           </p>
                         ) : null}
                       </div>
@@ -843,52 +882,35 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                     <div className={`border-t px-2.5 py-2 ${inCart ? "border-brand-200 bg-brand-50/80" : "border-surface-100 bg-surface-50"}`}>
                       {out ? (
                         <p className="text-center text-xs font-medium text-red-600">Out of stock</p>
-                      ) : inCart ? (
+                      ) : modes.length > 1 ? (
+                        <div className="flex gap-1.5">
+                          {modes.map((mode) => (
+                            <button
+                              key={mode.id}
+                              type="button"
+                              className={`flex h-9 flex-1 items-center justify-center gap-1 rounded-lg text-xs font-medium text-white transition-colors ${
+                                mode.id === "piece" ? "bg-surface-900 hover:bg-surface-700" : "bg-brand-600 hover:bg-brand-700"
+                              }`}
+                              onClick={() => addBundle(item, mode.id)}
+                            >
+                              <Plus size={12} /> {mode.label}
+                            </button>
+                          ))}
+                        </div>
+                      ) : inCart && pieceLine ? (
                         <div className="flex items-center gap-2">
                           <QtyControl
-                            value={inCart.qty}
+                            value={pieceLine.qty}
                             min={0}
                             max={max ?? undefined}
-                            onChange={(qty) => setQty(item.id, qty)}
+                            onChange={(qty) => setQty(item.id, qty, "piece")}
                           />
                           <button
                             type="button"
                             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-red-500 hover:bg-red-50"
-                            onClick={() => removeLine(item.id)}
+                            onClick={() => removeLine(item.id, "piece")}
                           >
                             <Trash2 size={14} />
-                          </button>
-                        </div>
-                      ) : Number(item.pack_quantity) > 0 && Number(item.pack_price) > 0 ? (
-                        /* Pack pricing available — two buttons */
-                        <div className="flex gap-1.5">
-                          <button
-                            type="button"
-                            className="flex h-9 flex-1 items-center justify-center gap-1 rounded-lg bg-surface-900 text-xs font-medium text-white hover:bg-surface-700 transition-colors"
-                            onClick={() => addItem(item)}
-                          >
-                            <Plus size={12} /> Unit
-                          </button>
-                          <button
-                            type="button"
-                            className="flex h-9 flex-1 items-center justify-center gap-1 rounded-lg bg-brand-600 text-xs font-medium text-white hover:bg-brand-700 transition-colors"
-                            onClick={() => {
-                              /* Add pack_quantity units at pack_price each */
-                              const packQty = Number(item.pack_quantity);
-                              const packUnit = Number(item.pack_price) / packQty;
-                              setCart((prev) => {
-                                const found = prev.find((r) => r.item.id === item.id);
-                                if (found) {
-                                  return prev.map((r) =>
-                                    r.item.id === item.id ? { ...r, qty: r.qty + packQty } : r
-                                  );
-                                }
-                                return [...prev, { item: { ...item, selling_price: packUnit.toFixed(2) }, qty: packQty }];
-                              });
-                              setSelectedId(item.id);
-                            }}
-                          >
-                            Box ×{item.pack_quantity}
                           </button>
                         </div>
                       ) : (

@@ -35,6 +35,11 @@ export function isPharmacy(user: User | null | undefined) {
   return type === "pharmacy";
 }
 
+export function isGeneralRetail(user: User | null | undefined) {
+  const type = (user?.business_type || "").toLowerCase().replace(/\s+/g, "_");
+  return type === "general" || type === "general_retail";
+}
+
 export function homeFor(user: User) {
   if (user.is_platform_admin) return "/platform";
   if (isCashier(user)) return "/cashier";

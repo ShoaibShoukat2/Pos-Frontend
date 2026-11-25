@@ -7,7 +7,8 @@ import { FormEvent, useEffect, useState } from "react";
 import { ListState, Pager, SearchField } from "@/components/DataTable";
 import { Button, Field, Input, Modal, PageHeader, Select, Toggle } from "@/components/ui";
 import { ApiError, api, apiCached, fieldErrors, invalidateApiCache } from "@/lib/api";
-import { isCashier, useAuth } from "@/lib/auth";
+import { RetailInventory } from "@/components/retail/RetailInventory";
+import { isCashier, isGeneralRetail, useAuth } from "@/lib/auth";
 import { usePagedList } from "@/lib/query";
 import type { Brand, Category, Product, Unit } from "@/lib/types";
 
@@ -34,6 +35,12 @@ const emptyVariant = (): VariantRow => ({
 });
 
 export default function ProductsPage() {
+  const { user } = useAuth();
+  if (isGeneralRetail(user)) return <RetailInventory />;
+  return <CatalogProducts />;
+}
+
+function CatalogProducts() {
   const { user, can } = useAuth();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("products");

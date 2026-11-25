@@ -1,7 +1,23 @@
-import { money } from "./money";
+import { money, num } from "./money";
 import type { PosCatalogItem, PosCustomer, PosSnapshot, Promotion } from "./types";
 
-export type CartLine = { item: PosCatalogItem; qty: number };
+export type SaleUnit = "piece" | "pack" | "carton";
+export type CartLine = { item: PosCatalogItem; qty: number; saleUnit?: SaleUnit };
+
+function listPrice(line: CartLine): number {
+  const unit = line.saleUnit || "piece";
+  if (unit === "pack") {
+    const size = num(line.item.pack_quantity);
+    const price = num(line.item.pack_price);
+    if (size > 0 && price > 0) return money(price / size);
+  }
+  if (unit === "carton") {
+    const size = num(line.item.carton_quantity);
+    const price = num(line.item.carton_price);
+    if (size > 0 && price > 0) return money(price / size);
+  }
+  return money(parseFloat(line.item.selling_price));
+}
 
 function matchesPromo(promo: Promotion, item: PosCatalogItem): boolean {
   if (promo.variant) return promo.variant === item.id;
@@ -37,7 +53,7 @@ export function quoteCart(
   const activePromos = (snapshot.promotions || []).filter((p) => isPromoActive(p, now));
 
   const priced = lines.map((line) => {
-    const list = money(parseFloat(line.item.selling_price));
+    const list = listPrice(line);
     let unit = list;
     let promoName = "";
     let free = 0;
