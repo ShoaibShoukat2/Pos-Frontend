@@ -83,6 +83,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     .map((item) => (
       isPharmacy(user) && item.href === "/products" ? { ...item, href: "/pharmacy" } : item
     ))
+    .filter((item) => item.href !== "/services" || (!isPharmacy(user) && !isGeneralRetail(user)))
     .filter((item) => !isCashier(user) || CASHIER_LINKS.has(item.href));
 
   const bottomItems = [

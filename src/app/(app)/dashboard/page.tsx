@@ -8,7 +8,7 @@ import { AreaChart, DashHeader, Donut, Panel, StatCard, StatGrid } from "@/compo
 import { PharmacyDesk } from "@/components/pharmacy/PharmacyDesk";
 import { Badge } from "@/components/ui";
 import { api } from "@/lib/api";
-import { isCarShowroom, isGeneralRetail, useAuth } from "@/lib/auth";
+import { isCarShowroom, isGeneralRetail, isPharmacy, useAuth } from "@/lib/auth";
 import { num, rs } from "@/lib/money";
 import type { LiveProduct, OwnerOverview } from "@/lib/types";
 
@@ -100,6 +100,7 @@ export default function DashboardPage() {
   const counts = data?.live_counts;
 
   const retail = isGeneralRetail(user);
+  const pharmacy = isPharmacy(user);
   const firstName = user?.first_name || user?.full_name?.split(" ")[0] || "";
   const trend = (data?.daily || []).slice(-8).map((row) => ({ label: shortDate(row.date), value: num(row.total) }));
 
@@ -173,7 +174,7 @@ export default function DashboardPage() {
           <StatCard icon={Wallet} tone="hero" label={period === "today" ? "Sales today" : "Sales"} value={rs(data.today_sales)} hint={`${data.orders} orders`} href="/reports" />
           <StatCard icon={ShoppingBag} label="Net profit" value={rs(data.today_profit)} href="/reports" />
           <StatCard icon={Users} label="Customers" value={String(data.customers)} hint={rs(data.outstanding)} href="/customers" />
-          <StatCard icon={Package} label={retail ? "Inventory" : "Products"} value={String(data.products)} hint={retail ? "Sizes, packs and cartons" : `${data.services ?? 0} services`} href="/products" />
+          <StatCard icon={Package} label={retail || pharmacy ? "Inventory" : "Products"} value={String(data.products)} hint={retail ? "Sizes, packs and cartons" : pharmacy ? "Medicines on the shelf" : `${data.services ?? 0} services`} href={pharmacy ? "/pharmacy" : "/products"} />
         </StatGrid>
       ) : !loading ? (
         <p className="text-sm text-surface-400">Numbers appear once you have report access.</p>
@@ -289,9 +290,10 @@ export default function DashboardPage() {
       <section className="mt-8">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="font-display text-xl">{retail ? "Live inventory" : "Live catalog"}</h2>
+            <h2 className="font-display text-xl">{retail || pharmacy ? "Live inventory" : "Live catalog"}</h2>
             <p className="mt-1 text-sm text-surface-400">
-              {retail ? "Items moving right now." : "Products moving right now."} {counts?.total || 0} with a recent change. Services stay on the Services page.
+              {retail ? "Items moving right now." : pharmacy ? "Medicines moving right now." : "Products moving right now."} {counts?.total || 0} with a recent change.
+              {retail || pharmacy ? "" : " Services stay on the Services page."}
             </p>
           </div>
           <div className="flex flex-wrap rounded-xl border border-surface-200 bg-white p-1">
