@@ -35,7 +35,8 @@ const emptyVariant = (): VariantRow => ({
 });
 
 export default function ProductsPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading && !user) return <p className="text-sm text-surface-400">Loading inventory…</p>;
   if (isGeneralRetail(user)) return <RetailInventory />;
   return <CatalogProducts />;
 }

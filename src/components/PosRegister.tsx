@@ -1016,15 +1016,18 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                   </div>
                 ) : (
                   <ul className="space-y-2">
-                    {priced.map((row) => (
+                    {priced.map((row) => {
+                      const unit = row.saleUnit || "piece";
+                      const step = bundleSize(row.item, unit);
+                      return (
                       <li
-                        key={row.item.id}
+                        key={lineKey(row.item.id, unit)}
                         className="flex items-start gap-2.5 rounded-xl border border-surface-100 bg-surface-50/60 p-3"
                       >
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium text-surface-900">{row.item.product}</p>
                           <p className="text-xs text-surface-400">
-                            {rs(row.unit)} each
+                            {ticketCaption(row)}
                             {row.unit < row.list ? <span className="ml-1 line-through text-surface-300">{rs(row.list)}</span> : null}
                             {row.promoName ? <span className="ml-1 text-brand-600">{row.promoName}</span> : null}
                             {row.free ? <span className="ml-1 text-emerald-600">+{row.free} free</span> : null}
@@ -1035,22 +1038,27 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                           <div className="flex items-center gap-1">
                             <QtyControl
                               size="sm"
-                              value={row.qty}
+                              value={step > 1 ? row.qty / step : row.qty}
                               min={0}
-                              max={maxSellable(row.item) ?? undefined}
-                              onChange={(qty) => setQty(row.item.id, qty)}
+                              max={(() => {
+                                const room = roomFor(row.item, lineKey(row.item.id, unit));
+                                if (room === null) return undefined;
+                                return step > 1 ? Math.floor((room + 0.0001) / step) : room;
+                              })()}
+                              onChange={(qty) => setQty(row.item.id, step > 1 ? qty * step : qty, unit)}
                             />
                             <button
                               type="button"
                               className="flex h-8 w-8 items-center justify-center rounded-lg text-surface-300 hover:bg-red-50 hover:text-red-500"
-                              onClick={() => removeLine(row.item.id)}
+                              onClick={() => removeLine(row.item.id, unit)}
                             >
                               <Trash2 size={13} />
                             </button>
                           </div>
                         </div>
                       </li>
-                    ))}
+                      );
+                    })}
                   </ul>
                 )}
               </div>
@@ -1390,6 +1398,45 @@ function StatPill({
   );
 }
 
+function bundleSize(item: PosCatalogItem, unit: SaleUnit) {
+  if (unit === "pack") return Math.max(1, Number(item.pack_quantity) || 1);
+  if (unit === "carton") return Math.max(1, Number(item.carton_quantity) || 1);
+  return 1;
+}
+
+function saleModes(item: PosCatalogItem): { id: SaleUnit; label: string }[] {
+  const modes: { id: SaleUnit; label: string }[] = [{ id: "piece", label: "Piece" }];
+  if (Number(item.pack_quantity) > 0 && Number(item.pack_price) > 0) {
+    modes.push({ id: "pack", label: `Pack ×${fmtQty(item.pack_quantity)}` });
+  }
+  if (Number(item.carton_quantity) > 0 && Number(item.carton_price) > 0) {
+    modes.push({ id: "carton", label: `Ctn ×${fmtQty(item.carton_quantity)}` });
+  }
+  return modes;
+}
+
+function garmentLabel(value?: string) {
+  if (value === "jumbo") return "Jumbo";
+  if (value === "economy") return "Economy";
+  return "";
+}
+
+function ticketCaption(row: CartLine & { unit: number }) {
+  const unit = row.saleUnit || "piece";
+  const meta = [row.item.size, garmentLabel(row.item.garment_type)].filter(Boolean);
+  if (!meta.length && row.item.variant && row.item.variant !== row.item.product) meta.push(row.item.variant);
+  if (unit === "pack") meta.push(`Pack of ${fmtQty(row.item.pack_quantity)} · ${rs(row.item.pack_price)}`);
+  else if (unit === "carton") meta.push(`Carton of ${fmtQty(row.item.carton_quantity)} · ${rs(row.item.carton_price)}`);
+  else meta.push(`${rs(row.unit)} each`);
+  return meta.join(" · ");
+}
+
+function saleCaptionName(row: CartLine) {
+  const base = row.item.variant && row.item.variant !== row.item.product ? row.item.variant : "";
+  const tag = row.saleUnit === "pack" ? "Pack" : row.saleUnit === "carton" ? "Carton" : "";
+  return [base, tag].filter(Boolean).join(" · ");
+}
+
 function maxSellable(item: PosCatalogItem) {
   if (isService(item) || !item.track_stock) return null;
   return Math.max(0, num(item.qty));
@@ -1407,12 +1454,14 @@ function QtyControl({
   onChange,
   min = 0,
   max,
+  step = 1,
   size = "md",
 }: {
   value: number;
   onChange: (qty: number) => void;
   min?: number;
   max?: number;
+  step?: number;
   size?: "sm" | "md";
 }) {
   const btn = size === "sm" ? "h-8 w-8" : "h-10 w-10";
@@ -1426,7 +1475,7 @@ function QtyControl({
         type="button"
         className={`grid ${btn} shrink-0 place-items-center text-surface-700 hover:bg-surface-100 disabled:opacity-35`}
         disabled={value <= min}
-        onClick={() => onChange(value - 1)}
+        onClick={() => onChange(value - step)}
         aria-label="Decrease quantity"
       >
         <Minus size={14} />
@@ -1446,8 +1495,8 @@ function QtyControl({
       <button
         type="button"
         className={`grid ${btn} shrink-0 place-items-center text-surface-700 hover:bg-surface-100 disabled:opacity-35`}
-        disabled={max !== undefined && value >= max}
-        onClick={() => onChange(value + 1)}
+        disabled={max !== undefined && value + step > max + 0.0001}
+        onClick={() => onChange(value + step)}
         aria-label="Increase quantity"
       >
         <Plus size={14} />
@@ -1463,7 +1512,7 @@ function serviceMeta(item: PosCatalogItem) {
   return bits.join(" · ") || "No stock";
 }
 
-function fmtQty(value: string | number) {
+function fmtQty(value: string | number | null | undefined) {
   const n = num(value);
   return n.toLocaleString("en-PK", { maximumFractionDigits: n % 1 === 0 ? 0 : 3 });
 }

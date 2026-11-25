@@ -141,6 +141,16 @@ export default function ProductDetailPage() {
             <Stat label="Cost" value={`Rs ${product.cost_price}`} />
             <Stat label="On hand" value={String(product.total_stock ?? 0)} />
             <Stat label="Min stock" value={String(product.min_stock)} />
+            {product.size ? <Stat label="Size" value={product.size} /> : null}
+            {product.garment_type ? (
+              <Stat label="Type" value={product.garment_type === "jumbo" ? "Jumbo" : "Economy"} />
+            ) : null}
+            {Number(product.pack_quantity) > 0 ? (
+              <Stat label="Per pack" value={`${Number(product.pack_quantity)} pcs · Rs ${product.pack_price}`} />
+            ) : null}
+            {Number(product.carton_quantity) > 0 ? (
+              <Stat label="Per carton" value={`${Number(product.carton_quantity)} pcs · Rs ${product.carton_price}`} />
+            ) : null}
           </>
         )}
       </div>

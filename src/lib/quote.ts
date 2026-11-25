@@ -4,19 +4,13 @@ import type { PosCatalogItem, PosCustomer, PosSnapshot, Promotion } from "./type
 export type SaleUnit = "piece" | "pack" | "carton";
 export type CartLine = { item: PosCatalogItem; qty: number; saleUnit?: SaleUnit };
 
-function listPrice(line: CartLine): number {
+function bundleDeal(line: CartLine): { size: number; price: number } | null {
   const unit = line.saleUnit || "piece";
-  if (unit === "pack") {
-    const size = num(line.item.pack_quantity);
-    const price = num(line.item.pack_price);
-    if (size > 0 && price > 0) return money(price / size);
-  }
-  if (unit === "carton") {
-    const size = num(line.item.carton_quantity);
-    const price = num(line.item.carton_price);
-    if (size > 0 && price > 0) return money(price / size);
-  }
-  return money(parseFloat(line.item.selling_price));
+  if (unit === "piece") return null;
+  const size = unit === "pack" ? num(line.item.pack_quantity) : num(line.item.carton_quantity);
+  const price = unit === "pack" ? num(line.item.pack_price) : num(line.item.carton_price);
+  if (!(size > 0) || !(price > 0) || line.qty <= 0 || line.qty % size !== 0) return null;
+  return { size, price };
 }
 
 function matchesPromo(promo: Promotion, item: PosCatalogItem): boolean {
@@ -53,7 +47,9 @@ export function quoteCart(
   const activePromos = (snapshot.promotions || []).filter((p) => isPromoActive(p, now));
 
   const priced = lines.map((line) => {
-    const list = listPrice(line);
+    const deal = bundleDeal(line);
+    const exact = deal ? money((line.qty / deal.size) * deal.price) : null;
+    const list = exact !== null ? money(exact / line.qty) : money(parseFloat(line.item.selling_price));
     let unit = list;
     let promoName = "";
     let free = 0;
@@ -83,7 +79,10 @@ export function quoteCart(
     }
 
     const paidQty = line.qty - free;
-    const lineTotal = money(paidQty * unit);
+    const lineTotal =
+      exact !== null && line.qty > 0 && list > 0
+        ? money((unit === list ? exact : money(exact * (unit / list))) * (paidQty / line.qty))
+        : money(paidQty * unit);
     return { ...line, list, unit, free, lineTotal, promoName };
   });
 

@@ -370,8 +370,8 @@ export default function DashboardPage() {
                   <Row label="Cost" value={rs(selected.cost_price)} />
                   <Row label="Stock" value={`${fmtQty(selected.qty)} in stock`} />
                 </dl>
-                <Link href={`/products/${selected.id}`} className="mt-4 inline-block text-sm font-medium text-brand-600 underline">
-                  {retail ? "Open in inventory" : "Open product"}
+                <Link href={retail ? "/products" : `/products/${selected.id}`} className="mt-4 inline-block text-sm font-medium text-brand-600 underline">
+                  {retail ? "Open inventory" : "Open product"}
                 </Link>
               </div>
             ) : (
