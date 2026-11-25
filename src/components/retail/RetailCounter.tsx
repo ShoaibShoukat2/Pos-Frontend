@@ -1,39 +1,23 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Banknote,
   Check,
-  Coffee,
-  Cookie,
   CreditCard,
-  Home,
   LayoutGrid,
-  MoreHorizontal,
   Pause,
   QrCode,
   Search,
-  ShoppingBag,
-  Sparkles,
+  Tag,
   Trash2,
   UserRound,
 } from "lucide-react";
 
+import { apiCached } from "@/lib/api";
 import { rs } from "@/lib/money";
 import type { CartLine, SaleUnit } from "@/lib/quote";
-import type { PosCatalogItem, PosCustomer } from "@/lib/types";
-
-const PRESETS = ["Groceries", "Beverages", "Snacks", "Household", "Personal Care"] as const;
-
-const CHIPS: { id: string; label: string; icon: typeof LayoutGrid }[] = [
-  { id: "", label: "All items", icon: LayoutGrid },
-  { id: "Groceries", label: "Groceries", icon: ShoppingBag },
-  { id: "Beverages", label: "Beverages", icon: Coffee },
-  { id: "Snacks", label: "Snacks", icon: Cookie },
-  { id: "Household", label: "Household", icon: Home },
-  { id: "Personal Care", label: "Personal Care", icon: Sparkles },
-  { id: "Others", label: "Others", icon: MoreHorizontal },
-];
+import type { Category, PosCatalogItem, PosCustomer } from "@/lib/types";
 
 const TILES = ["bg-amber-50 text-amber-700", "bg-sky-50 text-sky-700", "bg-rose-50 text-rose-700", "bg-emerald-50 text-emerald-700", "bg-violet-50 text-violet-700", "bg-orange-50 text-orange-700"];
 
@@ -130,19 +114,30 @@ export function RetailCounter({
   const [held, setHeld] = useState<HeldSale[]>([]);
   const [holdsOpen, setHoldsOpen] = useState(false);
   const [openingCash, setOpeningCash] = useState("0");
+  const [shelves, setShelves] = useState<Category[] | null>(null);
 
-  const extras = useMemo(() => {
-    const names = new Set<string>();
-    for (const item of items) {
-      const name = item.category?.trim();
-      if (!name) continue;
-      if (PRESETS.some((preset) => sameShelf(name, preset))) continue;
-      names.add(name);
-    }
-    return Array.from(names).sort();
-  }, [items]);
+  useEffect(() => {
+    let cancelled = false;
+    apiCached<Category[]>("/api/categories/")
+      .then((rows) => {
+        if (cancelled) return;
+        setShelves(productShelves(Array.isArray(rows) ? rows : []));
+      })
+      .catch(() => {
+        if (!cancelled) setShelves(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  const visible = items.filter((item) => matchesChip(item, chip));
+  const categories = useMemo(() => shelves ?? shelvesFromCatalog(items), [shelves, items]);
+
+  useEffect(() => {
+    if (chip && !categories.some((row) => row.id === chip)) setChip("");
+  }, [chip, categories]);
+
+  const visible = items.filter((item) => matchesCategory(item, chip, categories));
 
   function pickPay(method: string) {
     setPayMethod(method);
@@ -209,35 +204,32 @@ export function RetailCounter({
         </div>
 
         <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-          {CHIPS.map((row) => {
-            const Icon = row.icon;
+          <button
+            type="button"
+            onClick={() => setChip("")}
+            className={`flex min-w-[5.4rem] shrink-0 flex-col items-center gap-1 rounded-2xl px-3 py-2.5 text-xs font-medium shadow-sm ${
+              chip === "" ? "bg-brand-600 text-white" : "bg-white text-slate-600 hover:text-brand-700"
+            }`}
+          >
+            <LayoutGrid size={18} />
+            All items
+          </button>
+          {categories.map((row) => {
             const active = chip === row.id;
             return (
               <button
-                key={row.label}
+                key={row.id}
                 type="button"
                 onClick={() => setChip(row.id)}
                 className={`flex min-w-[5.4rem] shrink-0 flex-col items-center gap-1 rounded-2xl px-3 py-2.5 text-xs font-medium shadow-sm ${
                   active ? "bg-brand-600 text-white" : "bg-white text-slate-600 hover:text-brand-700"
                 }`}
               >
-                <Icon size={18} />
-                {row.label}
+                <Tag size={18} />
+                {row.name}
               </button>
             );
           })}
-          {extras.map((name) => (
-            <button
-              key={name}
-              type="button"
-              onClick={() => setChip(name)}
-              className={`shrink-0 rounded-2xl px-4 py-2 text-xs font-medium shadow-sm ${
-                chip === name ? "bg-brand-600 text-white" : "bg-white text-slate-600"
-              }`}
-            >
-              {name}
-            </button>
-          ))}
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
@@ -284,7 +276,7 @@ export function RetailCounter({
             })}
           </div>
           {visible.length === 0 ? (
-            <p className="py-16 text-center text-sm text-slate-400">No items in this shelf.</p>
+            <p className="py-16 text-center text-sm text-slate-400">No items in this category.</p>
           ) : null}
         </div>
       </section>
@@ -516,21 +508,29 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-function sameShelf(category: string, preset: string) {
-  const left = category.toLowerCase();
-  const right = preset.toLowerCase();
-  return left === right || left.includes(right) || right.includes(left);
+function productShelves(rows: Category[]) {
+  return rows
+    .filter((row) => row.is_active !== false && (row.kind || "product") === "product" && row.name.trim())
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function matchesChip(item: PosCatalogItem, chip: string) {
-  if (!chip) return true;
-  const category = item.category?.trim() || "";
-  if (chip === "Others") {
-    if (!category) return true;
-    return !PRESETS.some((preset) => sameShelf(category, preset));
+function shelvesFromCatalog(items: PosCatalogItem[]): Category[] {
+  const seen = new Map<string, Category>();
+  for (const item of items) {
+    const name = item.category?.trim();
+    if (!name) continue;
+    const id = item.category_id || name;
+    if (!seen.has(id)) seen.set(id, { id, name, is_active: true, kind: "product" });
   }
-  if ((PRESETS as readonly string[]).includes(chip)) return sameShelf(category, chip);
-  return category.toLowerCase() === chip.toLowerCase();
+  return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function matchesCategory(item: PosCatalogItem, chip: string, categories: Category[]) {
+  if (!chip) return true;
+  const shelf = categories.find((row) => row.id === chip);
+  if (!shelf) return true;
+  if (item.category_id) return item.category_id === shelf.id;
+  return (item.category || "").trim().toLowerCase() === shelf.name.trim().toLowerCase();
 }
 
 function typeName(value?: string) {

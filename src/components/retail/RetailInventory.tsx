@@ -94,6 +94,7 @@ export function RetailInventory() {
   const [form, setForm] = useState<FormState>(emptyForm());
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [categoryName, setCategoryName] = useState("");
 
   const list = usePagedList<Product>("/api/products/", {
     extraParams: {
@@ -115,10 +116,42 @@ export function RetailInventory() {
       .catch(() => setSummary(null));
   }, [list.rows]);
 
+  function loadCategories() {
+    invalidateApiCache("/api/categories");
+    api<Category[]>("/api/categories/")
+      .then((rows) => setCategories(rows.filter((row) => !row.kind || row.kind === "product")))
+      .catch(() => setCategories([]));
+  }
+
   function refresh() {
     invalidateApiCache("/api/products");
     list.reload();
     api<Summary>("/api/inventory/summary/").then(setSummary).catch(() => {});
+  }
+
+  async function addCategory(event: FormEvent) {
+    event.preventDefault();
+    const name = categoryName.trim();
+    if (!name) return;
+    setError("");
+    try {
+      await api("/api/categories/", { method: "POST", body: JSON.stringify({ name, kind: "product" }) });
+      setCategoryName("");
+      loadCategories();
+    } catch (err) {
+      const fields = err instanceof ApiError ? fieldErrors(err.body) : {};
+      setError(fields.name || fields.detail || "Could not add this category.");
+    }
+  }
+
+  async function removeCategory(row: Category) {
+    if (!confirm(`Delete category ${row.name}?`)) return;
+    try {
+      await api(`/api/categories/${row.id}/`, { method: "DELETE" });
+      loadCategories();
+    } catch {
+      setError("This category is still used by an item, so it cannot be deleted.");
+    }
   }
 
   function openCreate() {
@@ -257,6 +290,25 @@ export function RetailInventory() {
       />
 
       {error && !open ? <div className="mb-4"><Alert>{error}</Alert></div> : null}
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        {categories.map((row) => (
+          <span key={row.id} className="inline-flex items-center gap-1 rounded-full border border-surface-200 bg-white px-3 py-1.5 text-sm text-surface-700">
+            {row.name}
+            {manage ? (
+              <button type="button" className="text-surface-400 hover:text-red-700" onClick={() => removeCategory(row)} aria-label={`Delete ${row.name}`}>
+                ×
+              </button>
+            ) : null}
+          </span>
+        ))}
+        {manage ? (
+          <form onSubmit={addCategory} className="flex min-w-[16rem] flex-1 gap-2">
+            <Input value={categoryName} onChange={(e) => setCategoryName(e.target.value)} placeholder="New category" />
+            <Button type="submit">Add category</Button>
+          </form>
+        ) : null}
+      </div>
 
       {summary ? (
         <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -423,14 +475,12 @@ export function RetailInventory() {
               <Input inputMode="decimal" value={form.min_stock} onChange={(e) => setForm({ ...form, min_stock: e.target.value })} />
             </Field>
           </div>
-          {categories.length ? (
-            <Field label="Category">
-              <Select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-                <option value="">None</option>
-                {categories.map((row) => <option key={row.id} value={row.id}>{row.name}</option>)}
-              </Select>
-            </Field>
-          ) : null}
+          <Field label="Category">
+            <Select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+              <option value="">None</option>
+              {categories.map((row) => <option key={row.id} value={row.id}>{row.name}</option>)}
+            </Select>
+          </Field>
           {form.pack_quantity && form.pack_price ? (
             <p className="text-xs text-brand-700">
               Piece {rs(form.selling_price || 0)} · Pack of {pcs(form.pack_quantity)} {rs(form.pack_price)}
