@@ -456,19 +456,52 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
     return () => window.clearInterval(tick);
   }, [connectOpen, scanToken, snapshot]);
 
+  async function openDrawer(openingCash: string) {
+    if (!snapshot?.branch?.id) {
+      setError("The shop branch is not loaded yet.");
+      return;
+    }
+    setPending(true);
+    setError("");
+    try {
+      await api("/api/cash-sessions/open/", {
+        method: "POST",
+        body: JSON.stringify({
+          branch: snapshot.branch.id,
+          opening_cash: openingCash || "0",
+        }),
+      });
+      await load();
+      setMessage("Cash drawer is open. Cash sales can be saved.");
+    } catch (err) {
+      setError(saleErrorText(err) || "Could not open the cash drawer.");
+    } finally {
+      setPending(false);
+    }
+  }
+
   async function checkout() {
-    if (!snapshot || !quote || cart.length === 0) return;
+    if (!snapshot || !quote || cart.length === 0) {
+      setError(snapshot ? "Add an item before completing the sale." : "The catalog is still loading.");
+      return;
+    }
+    const onAccount = payMethod === "credit";
+    if (onAccount && !customerId) {
+      setError("Pick a customer with a credit limit before selling on credit.");
+      return;
+    }
+    const method = payMethod === "card" || payMethod === "bank" || payMethod === "wallet" ? payMethod : "cash";
     setPending(true);
     setError("");
     setMessage("");
-    const tendered = money(payAmount);
     const dueTotal = money(quote.total);
+    const tendered = onAccount ? 0 : money(payAmount || dueTotal);
     const applied = money(Math.min(Math.max(0, tendered), dueTotal));
     const payload: PosSalePayload = {
       client_uuid: crypto.randomUUID(),
       branch: snapshot.branch?.id,
       customer: customerId || null,
-      manual_discount_kind: manualKind,
+      manual_discount_kind: manualKind === "percent" || manualKind === "fixed" ? manualKind : "",
       manual_discount_value: manualValue || "0",
       sold_at: new Date().toISOString(),
       lines: cart.map((row) => ({
@@ -476,7 +509,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         quantity: String(row.qty),
         sale_unit: row.saleUnit || "piece",
       })),
-      payments: applied > 0 ? [{ method: payMethod, amount: applied.toFixed(2) }] : [],
+      payments: applied > 0 ? [{ method, amount: applied.toFixed(2) }] : [],
     };
     await queueSale(payload);
     try {
@@ -500,7 +533,9 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       setTicketOpen(false);
       setManualKind("");
       setManualValue("");
+      setPayMethod("cash");
       refreshDash();
+      load();
     } catch (err) {
       if (err instanceof NetworkError) {
         const nextCatalog = catalogAfterSale(snapshot.catalog);
@@ -520,10 +555,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
         setManualValue("");
       } else {
         await removePending(payload.client_uuid);
-        const body = err instanceof ApiError ? (err.body as { detail?: string; branch?: string[] }) : null;
-        const detail =
-          body && typeof body === "object" ? body.detail || Object.values(body).flat().join(" ") : null;
-        setError(detail || (err instanceof Error ? err.message : "Could not complete sale."));
+        setError(saleErrorText(err));
       }
     } finally {
       setPending(false);
@@ -694,6 +726,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
           message={message}
           shiftOpen={Boolean(shift)}
           onCamera={() => setCameraOpen(true)}
+          onOpenShift={openDrawer}
         />
         <Modal open={cameraOpen} title="Scan product" onClose={() => setCameraOpen(false)}>
           <CameraScan
@@ -1429,6 +1462,21 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
       <div className="flex min-h-0 flex-1 flex-col p-2 sm:p-4">{register}</div>
     </div>
   );
+}
+
+function saleErrorText(err: unknown) {
+  if (err instanceof ApiError && err.body && typeof err.body === "object") {
+    const body = err.body as Record<string, unknown>;
+    const detail = body.detail ?? body.lines ?? body.customer ?? body.payments ?? body.branch;
+    if (typeof detail === "string" && detail.trim()) return detail;
+    if (Array.isArray(detail)) return detail.map(String).join(" ");
+    const bits = Object.values(body)
+      .flatMap((value) => (Array.isArray(value) ? value : [value]))
+      .map((value) => (typeof value === "string" ? value : ""))
+      .filter(Boolean);
+    if (bits.length) return bits.join(" ");
+  }
+  return err instanceof Error ? err.message : "Could not complete the sale.";
 }
 
 function isService(item: PosCatalogItem) {

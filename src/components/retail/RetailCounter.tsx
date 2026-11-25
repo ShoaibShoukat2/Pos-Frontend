@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Banknote,
   Check,
@@ -87,6 +87,7 @@ type Props = {
   message: string;
   shiftOpen: boolean;
   onCamera: () => void;
+  onOpenShift: (openingCash: string) => void;
 };
 
 export function RetailCounter({
@@ -123,16 +124,12 @@ export function RetailCounter({
   message,
   shiftOpen,
   onCamera,
+  onOpenShift,
 }: Props) {
   const [chip, setChip] = useState("");
   const [held, setHeld] = useState<HeldSale[]>([]);
   const [holdsOpen, setHoldsOpen] = useState(false);
-  const tenderTouched = useRef(false);
-
-  useEffect(() => {
-    if (payMethod === "credit") return;
-    if (!tenderTouched.current) setPayAmount(total > 0 ? total.toFixed(2) : "");
-  }, [total, payMethod, setPayAmount]);
+  const [openingCash, setOpeningCash] = useState("0");
 
   const extras = useMemo(() => {
     const names = new Set<string>();
@@ -149,9 +146,8 @@ export function RetailCounter({
 
   function pickPay(method: string) {
     setPayMethod(method);
-    tenderTouched.current = false;
     if (method === "credit") setPayAmount("0");
-    else setPayAmount(total > 0 ? total.toFixed(2) : "");
+    else if (total > 0) setPayAmount(total.toFixed(2));
   }
 
   function holdSale() {
@@ -469,7 +465,26 @@ export function RetailCounter({
           </div>
 
           {payMethod === "cash" && !shiftOpen ? (
-            <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800">Open the cash drawer before taking cash, or use Card.</p>
+            <div className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              <p>Cash is saved on the open drawer. Card, UPI and credit do not need it.</p>
+              <div className="mt-2 flex gap-2">
+                <input
+                  value={openingCash}
+                  onChange={(event) => setOpeningCash(event.target.value)}
+                  inputMode="decimal"
+                  className="h-8 w-24 rounded-lg border border-amber-200 bg-white px-2 text-slate-800"
+                  aria-label="Opening cash"
+                />
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => onOpenShift(openingCash)}
+                  className="rounded-lg bg-amber-700 px-2.5 text-xs font-semibold text-white disabled:opacity-60"
+                >
+                  Open drawer
+                </button>
+              </div>
+            </div>
           ) : null}
           {payMethod === "credit" && !customerId ? (
             <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-800">Pick a customer before selling on credit.</p>
