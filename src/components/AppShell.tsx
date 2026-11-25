@@ -132,13 +132,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const counter = pathname === "/pos";
   const accentStyle = {
     "--nav-active-bg": "var(--brand-accent, #2a1458)",
   } as React.CSSProperties;
 
   return (
     <div
-      className="min-h-dvh lg:grid lg:h-dvh lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] lg:overflow-hidden"
+      className={`${counter ? "h-dvh overflow-hidden" : "min-h-dvh"} lg:grid lg:h-dvh lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] lg:overflow-hidden`}
       style={accentStyle}
     >
       {/* ── Sidebar ── */}
@@ -222,8 +223,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* ── Main content ── */}
-      <div className="flex min-h-0 min-w-0 flex-col lg:overflow-hidden">
-        <header className="safe-top sticky top-0 z-20 flex shrink-0 items-center gap-3 border-b border-surface-200 bg-white/90 px-3 py-2.5 backdrop-blur sm:px-6 sm:py-3">
+      <div className={`flex min-h-0 min-w-0 flex-col lg:overflow-hidden ${counter ? "h-full flex-1" : ""}`}>
+        <header className={`safe-top sticky top-0 z-20 flex shrink-0 items-center gap-3 border-b border-surface-200 bg-white/90 px-3 py-2.5 backdrop-blur sm:px-6 sm:py-3 ${counter ? "lg:hidden" : ""}`}>
           <MenuButton onClick={() => setMenuOpen(true)} />
           <div className="min-w-0 flex-1 flex items-center gap-3">
             {/* Mobile logo */}
@@ -246,11 +247,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <p className="hidden min-w-0 truncate text-sm text-surface-400 md:block">
               {pathname === "/dashboard"
                 ? "Business overview — sales, people and live activity"
-                : "Sales, cash and reports"}
+                : pathname === "/pos"
+                  ? "Point of sale"
+                  : "Sales, cash and reports"}
             </p>
           </div>
         </header>
-        <main className={`page-pad min-h-0 min-w-0 flex-1 overflow-y-auto px-3 sm:px-6 ${MAIN}`}>
+        <main className={counter
+          ? "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#f4f2fa] p-3 pb-20 sm:p-4 lg:pb-4"
+          : `page-pad min-h-0 min-w-0 flex-1 overflow-y-auto px-3 sm:px-6 ${MAIN}`}>
           {children}
         </main>
       </div>

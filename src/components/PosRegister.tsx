@@ -32,7 +32,8 @@ import { INVOICE_DESIGNS, ReceiptSlip, type InvoiceDesign } from "@/components/R
 import { SaleReturnPanel } from "@/components/SaleReturnPanel";
 import { Badge, Button, Field, Input, Modal, Select } from "@/components/ui";
 import { ApiError, NetworkError, api, asList } from "@/lib/api";
-import { homeFor, isCashier, useAuth } from "@/lib/auth";
+import { RetailCounter } from "@/components/retail/RetailCounter";
+import { homeFor, isCashier, isGeneralRetail, useAuth } from "@/lib/auth";
 import { useHardware } from "@/lib/hardware";
 import { money, num, rs } from "@/lib/money";
 import { loadSnapshot, markSynced, pendingCount, queueSale, removePending, saveSnapshot, syncPending } from "@/lib/offline";
@@ -650,6 +651,62 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
   // ── Mobile tab state ───────────────────────────────────────────────────────
   // "products" | "ticket" | "pay"  — only used on mobile
   const [mobileTab, setMobileTab] = useState<"products" | "ticket" | "pay">("products");
+
+  if (isGeneralRetail(user)) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <RetailCounter
+          items={items.filter((row) => (row.item_kind || "product") !== "service")}
+          query={query}
+          setQuery={setQuery}
+          onEnter={() => applyCode(query)}
+          searchRef={searchRef}
+          cart={cart}
+          priced={priced}
+          subtotal={quote?.subtotal || 0}
+          discount={quote?.discountTotal || 0}
+          total={quote?.total || 0}
+          addBundle={addBundle}
+          setQty={setQty}
+          removeLine={removeLine}
+          clearCart={() => setCart([])}
+          restoreCart={(lines, nextCustomer, kind, value) => {
+            setCart(lines);
+            setCustomerId(nextCustomer);
+            setManualKind(kind);
+            setManualValue(value);
+          }}
+          customers={snapshot?.customers || []}
+          customerId={customerId}
+          setCustomerId={setCustomerId}
+          manualKind={manualKind}
+          setManualKind={setManualKind}
+          manualValue={manualValue}
+          setManualValue={setManualValue}
+          canDiscount={can("sale.discount")}
+          payMethod={payMethod}
+          setPayMethod={setPayMethod}
+          payAmount={payAmount}
+          setPayAmount={setPayAmount}
+          onCheckout={() => { checkout().catch(() => setError("Could not complete the sale.")); }}
+          pending={pending}
+          error={error}
+          message={message}
+          shiftOpen={Boolean(shift)}
+          onCamera={() => setCameraOpen(true)}
+        />
+        <Modal open={cameraOpen} title="Scan product" onClose={() => setCameraOpen(false)}>
+          <CameraScan
+            onCode={(code) => { applyCode(code); setCameraOpen(false); }}
+            onClose={() => setCameraOpen(false)}
+          />
+        </Modal>
+        <Modal open={returnOpen} title="Customer return" onClose={() => setReturnOpen(false)}>
+          {returnOpen ? <SaleReturnPanel initialQuery={returnQuery} onDone={onReturned} /> : null}
+        </Modal>
+      </div>
+    );
+  }
 
   const register = (
     <div className={`relative flex min-h-0 flex-1 flex-col ${mode === "owner" ? "h-full" : ""}`}>
