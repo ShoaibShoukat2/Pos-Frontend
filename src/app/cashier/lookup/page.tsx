@@ -38,7 +38,7 @@ export default function CashierLookupPage() {
       <PageHeader
         eyebrow="Counter"
         title="Find to sell"
-        description="Look up selling price, SKU and stock for the ticket. Services show duration instead of stock. You cannot add or edit catalog items."
+        description="Look up selling price, item code and stock for the ticket. Services show duration instead of stock. You cannot add or edit catalog items."
         action={
           <Link href="/pos" className="btn btn-copper text-center">
             Open POS
@@ -48,7 +48,7 @@ export default function CashierLookupPage() {
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search name, SKU or barcode"
+        placeholder="Search name, item code or barcode"
         className="field mb-5"
         autoFocus
       />
@@ -76,7 +76,7 @@ export default function CashierLookupPage() {
               <p className="mt-1 font-medium">{item.product}</p>
               <p className="text-xs text-ink-700/55">
                 {item.variant && item.variant !== item.product ? `${item.variant} · ` : ""}
-                {item.sku || "No SKU"}
+                {item.sku || "No item code"}
               </p>
               <div className="mt-3 flex items-end justify-between gap-2">
                 <p className="font-display text-xl">{rs(item.selling_price)}</p>

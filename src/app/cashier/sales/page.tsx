@@ -60,7 +60,7 @@ export default function CashierSalesPage() {
       />
       {loading ? <TableSkeleton rows={4} cols={3} /> : null}
       {!loading && rows.length === 0 ? (
-        <p className="card px-5 py-10 text-sm text-ink-700/70">No tickets yet. Sell from POS — scan or type the SKU.</p>
+        <p className="card px-5 py-10 text-sm text-ink-700/70">No tickets yet. Sell from POS — scan the barcode or type the item code.</p>
       ) : null}
       <ul className="space-y-3">
         {rows.map((sale) => (

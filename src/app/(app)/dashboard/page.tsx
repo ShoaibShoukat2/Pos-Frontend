@@ -346,7 +346,7 @@ export default function DashboardPage() {
                         <span className="truncate font-medium text-surface-900">{item.name}</span>
                       </span>
                       <span className="mt-1 block truncate text-xs text-surface-400">
-                        {[item.category, item.sku].filter(Boolean).join(" · ") || "No SKU"}
+                        {[item.category, item.sku].filter(Boolean).join(" · ") || "No item code"}
                         <span className="md:hidden"> · {timeAgo(item.at)}</span>
                       </span>
                     </span>
@@ -373,7 +373,7 @@ export default function DashboardPage() {
                 <h3 className="mt-3 font-display text-2xl leading-tight text-surface-900">{selected.name}</h3>
                 <p className="mt-1 text-sm text-surface-400">{selected.detail}</p>
                 <dl className="mt-4 space-y-2 border-t border-surface-100 pt-3 text-sm">
-                  <Row label="SKU" value={selected.sku || "—"} />
+                  <Row label="Item code" value={selected.sku || "—"} />
                   <Row label="Barcode" value={selected.barcode || "—"} />
                   <Row label="Category" value={selected.category || "—"} />
                   <Row label="Sell" value={rs(selected.selling_price)} />
@@ -465,7 +465,7 @@ export default function DashboardPage() {
               </ul>
             )}
             <p className="mt-4 text-xs text-surface-400">
-              Catalog: {data.products} products · {data.variants} SKUs · {data.suppliers} suppliers
+              Catalog: {data.products} products · {data.variants} item codes · {data.suppliers} suppliers
             </p>
           </div>
         </div>

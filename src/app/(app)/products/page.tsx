@@ -246,7 +246,7 @@ function CatalogProducts() {
       {tab === "products" ? (
         <>
           <div className="mb-4">
-            <SearchField value={products.search} onChange={products.setSearch} placeholder="Search name, SKU or barcode" />
+            <SearchField value={products.search} onChange={products.setSearch} placeholder="Search name, item code or barcode" />
           </div>
           <ListState
             loading={products.loading}
@@ -264,7 +264,7 @@ function CatalogProducts() {
                 <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
                   <tr>
                     <th className="px-4 py-3">Product</th>
-                    <th className="px-4 py-3">SKU</th>
+                    <th className="px-4 py-3">Item code</th>
                     <th className="px-4 py-3">Barcode</th>
                     <th className="px-4 py-3">Category</th>
                     <th className="px-4 py-3">Brand</th>
@@ -342,8 +342,8 @@ function CatalogProducts() {
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           </Field>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="SKU" error={errors.sku}>
-              <Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} required />
+            <Field label="Item code" error={errors.sku}>
+              <Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="Short code, like VEST-M" required />
             </Field>
             <Field label="Barcode">
               <Input value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} />
@@ -442,7 +442,7 @@ function CatalogProducts() {
                 <div key={index} className="grid gap-2 rounded-xl border border-surface-200 p-3 sm:grid-cols-3">
                   <Input placeholder="Size" value={row.size} onChange={(e) => updateVariant(index, { size: e.target.value })} />
                   <Input placeholder="Color" value={row.color} onChange={(e) => updateVariant(index, { color: e.target.value })} />
-                  <Input placeholder="SKU" value={row.sku} onChange={(e) => updateVariant(index, { sku: e.target.value })} />
+                  <Input placeholder="Item code" value={row.sku} onChange={(e) => updateVariant(index, { sku: e.target.value })} />
                   <Input placeholder="Cost" value={row.cost_price} onChange={(e) => updateVariant(index, { cost_price: e.target.value })} />
                   <Input placeholder="Sell" value={row.selling_price} onChange={(e) => updateVariant(index, { selling_price: e.target.value })} />
                   <Input placeholder="Opening qty" value={row.opening} onChange={(e) => updateVariant(index, { opening: e.target.value })} />

@@ -192,7 +192,7 @@ export default function ServicesPage() {
 
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end">
         <div className="flex-1">
-          <SearchField value={services.search} onChange={services.setSearch} placeholder="Search service name or SKU" />
+          <SearchField value={services.search} onChange={services.setSearch} placeholder="Search service name or item code" />
         </div>
         {can("category.manage") || can("product.manage") ? (
           <div className="flex min-w-0 flex-1 gap-2">
@@ -227,7 +227,7 @@ export default function ServicesPage() {
             <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
               <tr>
                 <th className="px-4 py-3">Service</th>
-                <th className="px-4 py-3">SKU</th>
+                <th className="px-4 py-3">Item code</th>
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Cost</th>
                 <th className="px-4 py-3">Selling price</th>
@@ -287,7 +287,7 @@ export default function ServicesPage() {
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           </Field>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="SKU" error={errors.sku}>
+            <Field label="Item code" error={errors.sku}>
               <Input
                 value={form.sku}
                 onChange={(e) => setForm({ ...form, sku: e.target.value })}

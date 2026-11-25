@@ -48,7 +48,7 @@ export function VariantPicker({
       <Input
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder="Search SKU, barcode or name"
+        placeholder="Search item code, barcode or name"
       />
       <select
         className="field"

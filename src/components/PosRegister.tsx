@@ -61,7 +61,7 @@ const TENDER = [500, 1000, 5000];
 const QTY_PRESETS = [1, 2, 5, 10];
 
 const HELP_COPY: Record<string, string> = {
-  type: "Scanner not needed. Type barcode, SKU or product name, then press Enter.",
+  type: "Scanner not needed. Type the barcode, item code or product name, then press Enter.",
   camera: "Point the computer camera at the barcode. You can still type if the camera fails.",
   phone: "Scan the counter QR with your phone. Barcodes from the phone land on this ticket.",
   pay: "If cash will not work, tap Card or Bank, enter what the customer paid, then complete the sale.",
@@ -826,7 +826,7 @@ export function PosRegister({ mode = "standalone" }: { mode?: "standalone" | "ow
                   e.preventDefault();
                   applyCode(query);
                 }}
-                placeholder="Scan barcode, SKU or product name…"
+                placeholder="Scan barcode, or type item code or name…"
                 className="field h-11 !pl-10 text-sm"
                 autoFocus
               />

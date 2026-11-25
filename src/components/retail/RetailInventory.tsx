@@ -341,7 +341,7 @@ export function RetailInventory() {
         ))}
       </div>
       <div className="mb-4">
-        <SearchField value={list.search} onChange={list.setSearch} placeholder="Search product, SKU or barcode" />
+        <SearchField value={list.search} onChange={list.setSearch} placeholder="Search product, item code or barcode" />
       </div>
 
       <ListState loading={list.loading} count={list.count} emptyTitle="No inventory yet" emptyHint="Add a product with its size, type, quantity, pack and carton prices." cols={8}>

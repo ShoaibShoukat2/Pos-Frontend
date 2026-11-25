@@ -159,7 +159,7 @@ export default function ProductDetailPage() {
           <thead className="bg-surface-50 text-xs uppercase tracking-wide text-surface-400">
             <tr>
               <th className="px-4 py-3">Variant</th>
-              <th className="px-4 py-3">SKU</th>
+              <th className="px-4 py-3">Item code</th>
               <th className="px-4 py-3">Barcode</th>
               <th className="px-4 py-3">Sell</th>
               <th className="px-4 py-3">Stock</th>
@@ -201,8 +201,8 @@ export default function ProductDetailPage() {
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           </Field>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="SKU" error={errors.sku}>
-              <Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} required />
+            <Field label="Item code" error={errors.sku}>
+              <Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="Short code, like VEST-M" required />
             </Field>
             <Field label="Barcode">
               <Input value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} />

@@ -31,14 +31,14 @@ const ACTIONS = [
   { href: "/pos", label: "Open POS", hint: "Sell on this counter", icon: Monitor },
   { href: "/cashier/sales", label: "My sales", hint: "Tickets and items you sold", icon: Receipt },
   { href: "/cashier/returns", label: "Returns", hint: "Customer brought an item back", icon: RotateCcw },
-  { href: "/cashier/lookup", label: "Find to sell", hint: "Price and SKU for the ticket", icon: Search },
+  { href: "/cashier/lookup", label: "Find to sell", hint: "Price and item code for the ticket", icon: Search },
   { href: "/cash", label: "Cash drawer", hint: "Open or close shift", icon: Banknote },
 ];
 
 const MANUAL = [
   {
     href: "/pos?help=type",
-    title: "Type SKU, barcode or name",
+    title: "Type item code, barcode or name",
     hint: "Scanner dead? Type in the search box and press Enter. No gun needed.",
     icon: Keyboard,
   },
@@ -57,7 +57,7 @@ const MANUAL = [
   {
     href: "/cashier/lookup",
     title: "Find a product to sell",
-    hint: "See selling price, SKU and stock, then send it to the POS ticket. You cannot add catalog items.",
+    hint: "See selling price, item code and stock, then send it to the POS ticket. You cannot add catalog items.",
     icon: Search,
   },
   {
@@ -284,7 +284,7 @@ export default function CashierDashboardPage() {
                   <span className="min-w-0">
                     <span className="block truncate font-medium">{row.product}</span>
                     <span className="block text-xs text-ink-700/55">
-                      {row.sku || "No SKU"} · {fmtQty(row.qty)} sold · {row.tickets} ticket{row.tickets === 1 ? "" : "s"}
+                      {row.sku || "No item code"} · {fmtQty(row.qty)} sold · {row.tickets} ticket{row.tickets === 1 ? "" : "s"}
                     </span>
                   </span>
                   <span className="shrink-0 font-medium">{rs(row.revenue)}</span>
@@ -382,7 +382,7 @@ export default function CashierDashboardPage() {
             ))}
           </ul>
         ) : (
-          <p className="px-5 py-8 text-sm text-ink-700/70">No sales yet today. Open POS to start — or type the SKU if the scanner is down.</p>
+          <p className="px-5 py-8 text-sm text-ink-700/70">No sales yet today. Open POS to start — or type the item code if the scanner is down.</p>
         )}
       </div>
     </div>

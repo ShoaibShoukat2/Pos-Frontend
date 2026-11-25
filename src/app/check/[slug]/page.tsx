@@ -150,7 +150,7 @@ export default function PriceCheckerPage({ params }: { params: Promise<{ slug: s
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={onKey}
-              placeholder="Scan barcode or type SKU / name…"
+              placeholder="Scan barcode, or type item code or name…"
               className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-10 pr-4 text-base text-slate-900 shadow-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15"
             />
             {query ? (
@@ -201,7 +201,7 @@ export default function PriceCheckerPage({ params }: { params: Promise<{ slug: s
                 ) : null}
                 {result.sku ? (
                   <div className="rounded-xl bg-slate-50 px-3 py-3">
-                    <dt className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">SKU</dt>
+                    <dt className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Item code</dt>
                     <dd className="mt-0.5 font-mono font-medium text-slate-900">{result.sku}</dd>
                   </div>
                 ) : null}

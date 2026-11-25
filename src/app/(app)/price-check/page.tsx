@@ -75,7 +75,7 @@ export default function PriceCheckPage() {
       <PageHeader
         eyebrow="Tools"
         title="Price checker"
-        description="Scan or type a barcode or SKU to see the selling price instantly."
+        description="Scan a barcode, or type the item code or name, to see the selling price instantly."
       />
 
       {/* Search bar */}
@@ -90,7 +90,7 @@ export default function PriceCheckPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKey}
-            placeholder="Scan barcode or type SKU / name…"
+            placeholder="Scan barcode, or type item code or name…"
             className="field h-12 !pl-10 text-base"
           />
           {query ? (
@@ -145,7 +145,7 @@ export default function PriceCheckPage() {
                 ) : null}
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                   <div className="rounded-xl bg-surface-50 px-3 py-3">
-                    <dt className="text-[10px] font-semibold uppercase tracking-widest text-surface-400">SKU</dt>
+                    <dt className="text-[10px] font-semibold uppercase tracking-widest text-surface-400">Item code</dt>
                     <dd className="mt-0.5 font-mono font-medium text-surface-900">{result.sku || "—"}</dd>
                   </div>
                   <div className="rounded-xl bg-surface-50 px-3 py-3">
