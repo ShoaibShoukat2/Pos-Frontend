@@ -37,6 +37,15 @@ export function DashHeader({
   );
 }
 
+export function DashNotice({ children }: { children: React.ReactNode }) {
+  if (!children) return null;
+  return (
+    <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800" role="alert">
+      {children}
+    </div>
+  );
+}
+
 export function StatGrid({ children, cols = "xl:grid-cols-4" }: { children: React.ReactNode; cols?: string }) {
   return <div className={`grid grid-cols-2 gap-3 ${cols}`}>{children}</div>;
 }

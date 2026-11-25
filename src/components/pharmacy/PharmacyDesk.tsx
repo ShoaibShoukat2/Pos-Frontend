@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Pill } from "lucide-react";
 
 import { api } from "@/lib/api";
+import { explainError } from "@/lib/errors";
 
 type Summary = {
   medicines: number;
@@ -15,9 +16,15 @@ type Summary = {
 
 export function PharmacyDesk() {
   const [data, setData] = useState<Summary | null>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    api<Summary>("/api/inventory/summary/").then(setData).catch(() => setData(null));
+    api<Summary>("/api/inventory/summary/")
+      .then((row) => {
+        setData(row);
+        setError("");
+      })
+      .catch((err) => setError(explainError(err, "Pharmacy stock could not be loaded.")));
   }, []);
 
   return (
@@ -35,6 +42,7 @@ export function PharmacyDesk() {
         </div>
         <span className="inline-flex h-10 items-center justify-center rounded-xl bg-royal-900 px-4 text-sm font-semibold text-white">Open inventory</span>
       </div>
+      {error ? <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p> : null}
       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <DeskStat label="Medicines" value={data ? String(data.medicines) : "—"} />
         <DeskStat label="On hand" value={data ? qty(data.on_hand_qty) : "—"} />

@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Car, KeyRound, Pencil, Printer, ScrollText, Share2, Trash2, Wallet, X } from "lucide-react";
 
-import { DashHeader, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
+import { DashHeader, DashNotice, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
 import { CarEditDialog, CarStatusDialog, RentalEditDialog, RentalUpdateDialog } from "@/components/rental/DeskDialogs";
 import { RentalInvoice } from "@/components/rental/RentalInvoice";
 import { TermsDocument, TermsEditor } from "@/components/rental/TermsDocument";
-import { ApiError, api, fieldErrors } from "@/lib/api";
+import { api } from "@/lib/api";
+import { explainError } from "@/lib/errors";
 import { useAuth } from "@/lib/auth";
 import { invoiceFromRental, rentalMessage, whatsAppLink, type RentalInvoiceData } from "@/lib/rental";
 import { blankTerms, type TermsSheetData } from "@/lib/rentalTerms";
@@ -111,7 +112,7 @@ export default function RentalDashboardPage() {
         setData(row);
         setError("");
       })
-      .catch(() => setError("Rental details could not be loaded. Check that this business is signed in on the updated server."));
+      .catch((err) => setError(explainError(err, "Rental details could not be loaded.")));
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -133,8 +134,8 @@ export default function RentalDashboardPage() {
       }
       setAutoPrint(print);
       setInvoice(invoiceFromRental(row, { name: user?.business_name, cashier: user?.full_name }));
-    } catch {
-      setError(print ? "Could not print this invoice." : "Could not open this rental invoice.");
+    } catch (err) {
+      setError(explainError(err, print ? "Could not print this invoice." : "Could not open this rental invoice."));
     } finally {
       setPrintingId("");
     }
@@ -175,8 +176,7 @@ export default function RentalDashboardPage() {
       setToast("Terms updated");
       window.setTimeout(() => setToast(""), 2200);
     } catch (err) {
-      const fields = err instanceof ApiError ? fieldErrors(err.body) : {};
-      setTermsError(fields.clauses || fields.detail || "Could not update the terms.");
+      setTermsError(explainError(err, "Could not update the terms."));
     } finally {
       setTermsSaving(false);
     }
@@ -190,8 +190,7 @@ export default function RentalDashboardPage() {
       window.setTimeout(() => setToast(""), 2200);
       load();
     } catch (err) {
-      const fields = err instanceof ApiError ? fieldErrors(err.body) : {};
-      setError(fields.detail || "Could not delete this rental.");
+      setError(explainError(err, "Could not delete this rental."));
     }
   }
 
@@ -203,8 +202,7 @@ export default function RentalDashboardPage() {
       window.setTimeout(() => setToast(""), 2200);
       load();
     } catch (err) {
-      const fields = err instanceof ApiError ? fieldErrors(err.body) : {};
-      setError(fields.detail || "Could not delete this car.");
+      setError(explainError(err, "Could not delete this car."));
     }
   }
 
@@ -220,8 +218,8 @@ export default function RentalDashboardPage() {
     try {
       await api(`/api/rental/rentals/${id}/complete/`, { method: "POST" });
       load();
-    } catch {
-      setError("Could not close this rental.");
+    } catch (err) {
+      setError(explainError(err, "Could not close this rental."));
     }
   }
 
@@ -257,7 +255,7 @@ export default function RentalDashboardPage() {
         </Link>
       </DashHeader>
 
-      {error ? <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">{error}</p> : null}
+      {error ? <DashNotice>{error}</DashNotice> : null}
 
       {data && (data.due_today > 0 || data.overdue > 0) ? (
         <div className="flex flex-wrap gap-2">

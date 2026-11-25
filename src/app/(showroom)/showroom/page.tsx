@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Car, CheckCircle, Clock, Plus, TrendingUp, Users, Wallet } from "lucide-react";
 
-import { AreaChart, DashHeader, Donut, Panel, Pill, StatCard, StatGrid, ViewAll } from "@/components/dashboard/kit";
+import { AreaChart, DashHeader, DashNotice, Donut, Panel, Pill, StatCard, StatGrid, ViewAll } from "@/components/dashboard/kit";
 import { api } from "@/lib/api";
+import { explainError } from "@/lib/errors";
 import { useAuth } from "@/lib/auth";
 
 function rs(v: string | number) {
@@ -49,11 +50,18 @@ export default function ShowroomDashboard() {
   const { user } = useAuth();
   const [data, setData] = useState<Dashboard | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     api<Dashboard>("/api/showroom/dashboard/")
-      .then(setData)
-      .catch(() => setData(null))
+      .then((row) => {
+        setData(row);
+        setError("");
+      })
+      .catch((err) => {
+        setData(null);
+        setError(explainError(err, "The showroom dashboard could not be loaded."));
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -72,7 +80,11 @@ export default function ShowroomDashboard() {
         </Link>
       </DashHeader>
 
-      {(data?.unsigned_invoices || data?.dues_count) ? (
+      {error ? <DashNotice>{error}</DashNotice> : null}
+      {!data && !error ? <p className="text-sm text-slate-500">{loading ? "Loading showroom numbers…" : "Showroom numbers are not available yet."}</p> : null}
+
+      {data ? <>
+      {(data.unsigned_invoices || data.dues_count) ? (
         <div className="flex flex-wrap gap-2">
           {data?.unsigned_invoices ? (
             <Link href="/showroom/sales" className="rounded-full bg-gold-300/50 px-3 py-1 text-xs font-semibold text-royal-950">
@@ -165,6 +177,7 @@ export default function ShowroomDashboard() {
           )}
         </Panel>
       </div>
+      </> : null}
     </div>
   );
 }

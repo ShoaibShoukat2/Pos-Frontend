@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Package, ShoppingBag, UserPlus, Users, Wallet } from "lucide-react";
 
-import { AreaChart, DashHeader, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
+import { AreaChart, DashHeader, DashNotice, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
 import { PharmacyDesk } from "@/components/pharmacy/PharmacyDesk";
 import { Badge } from "@/components/ui";
 import { api } from "@/lib/api";
+import { explainError } from "@/lib/errors";
 import { isCarShowroom, isGeneralRetail, isPharmacy, useAuth } from "@/lib/auth";
 import { num, rs } from "@/lib/money";
 import type { LiveProduct, OwnerOverview } from "@/lib/types";
@@ -65,6 +66,7 @@ export default function DashboardPage() {
   const [period, setPeriod] = useState<(typeof PERIODS)[number]["id"]>("today");
   const [data, setData] = useState<OwnerOverview | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -74,10 +76,14 @@ export default function DashboardPage() {
       if (!silent) setLoading(true);
       api<OwnerOverview>(`/api/reports/owner/?period=${period}`)
         .then((row) => {
-          if (active) setData(row);
+          if (!active) return;
+          setData(row);
+          setError("");
         })
-        .catch(() => {
-          if (active && !silent) setData(null);
+        .catch((err) => {
+          if (!active) return;
+          setError(explainError(err, silent ? "The latest numbers could not be refreshed." : "The dashboard could not be loaded."));
+          if (!silent) setData(null);
         })
         .finally(() => {
           if (active) setLoading(false);
@@ -153,6 +159,8 @@ export default function DashboardPage() {
         </span>
       </Link>
 
+      {error ? <DashNotice>{error}</DashNotice> : null}
+
       {loading && !data ? <p className="text-sm text-slate-400">Loading workspace numbers…</p> : null}
 
       {data?.alerts.length ? (
@@ -176,7 +184,7 @@ export default function DashboardPage() {
           <StatCard icon={Users} label="Customers" value={String(data.customers)} hint={rs(data.outstanding)} href="/customers" />
           <StatCard icon={Package} label={retail || pharmacy ? "Inventory" : "Products"} value={String(data.products)} hint={retail ? "Sizes, packs and cartons" : pharmacy ? "Medicines on the shelf" : `${data.services ?? 0} services`} href={pharmacy ? "/pharmacy" : "/products"} />
         </StatGrid>
-      ) : !loading ? (
+      ) : !loading && !error ? (
         <p className="text-sm text-surface-400">Numbers appear once you have report access.</p>
       ) : null}
 

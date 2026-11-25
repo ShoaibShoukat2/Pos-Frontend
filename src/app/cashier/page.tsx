@@ -19,8 +19,9 @@ import {
 } from "lucide-react";
 
 import { TableSkeleton } from "@/components/DataTable";
-import { Badge, Button, PageHeader } from "@/components/ui";
+import { Alert, Badge, Button, PageHeader } from "@/components/ui";
 import { api } from "@/lib/api";
+import { explainError } from "@/lib/errors";
 import { useAuth } from "@/lib/auth";
 import { rs } from "@/lib/money";
 import { pendingCount, syncPending } from "@/lib/offline";
@@ -93,15 +94,20 @@ export default function CashierDashboardPage() {
   const [online, setOnline] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncNote, setSyncNote] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
     api<CashierOverview>("/api/auth/cashier/overview/")
       .then((row) => {
-        if (active) setData(row);
+        if (!active) return;
+        setData(row);
+        setError("");
       })
-      .catch(() => {
-        if (active) setData(null);
+      .catch((err) => {
+        if (!active) return;
+        setData(null);
+        setError(explainError(err, "Your cashier desk could not be loaded."));
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -140,8 +146,8 @@ export default function CashierDashboardPage() {
           ? `${result.synced} sale${result.synced === 1 ? "" : "s"} synced${result.failed ? `, ${result.failed} still waiting` : ""}.`
           : "Nothing waiting to sync.",
       );
-    } catch {
-      setSyncNote("Could not sync yet. Keep selling — tickets stay on this counter.");
+    } catch (err) {
+      setSyncNote(explainError(err, "Could not sync yet. Keep selling — tickets stay on this counter."));
     } finally {
       setSyncing(false);
     }
@@ -186,6 +192,8 @@ export default function CashierDashboardPage() {
           </Link>
         }
       />
+
+      {error ? <div className="mb-4"><Alert>{error}</Alert></div> : null}
 
       {loading && !data ? <TableSkeleton rows={2} cols={3} /> : null}
 

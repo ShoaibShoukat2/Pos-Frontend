@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { Building2, ShoppingBag, Users, Wallet } from "lucide-react";
 
-import { AreaChart, DashHeader, Donut, Panel, Pill, StatCard, StatGrid, ViewAll } from "@/components/dashboard/kit";
+import { AreaChart, DashHeader, DashNotice, Donut, Panel, Pill, StatCard, StatGrid, ViewAll } from "@/components/dashboard/kit";
 import { api } from "@/lib/api";
+import { explainError } from "@/lib/errors";
 import { rs } from "@/lib/money";
 import type { PlatformOverview } from "@/lib/types";
 
@@ -24,13 +25,14 @@ export default function PlatformOverviewPage() {
   const [period, setPeriod] = useState<(typeof PERIODS)[number]["id"]>("month");
   const [data, setData] = useState<PlatformOverview | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
     setLoading(true);
     api<PlatformOverview>(`/api/platform/overview/?period=${period}`)
-      .then((row) => { if (active) setData(row); })
-      .catch(() => { if (active) setData(null); })
+      .then((row) => { if (active) { setData(row); setError(""); } })
+      .catch((err) => { if (active) { setData(null); setError(explainError(err, "Platform numbers could not be loaded.")); } })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [period]);
@@ -56,6 +58,8 @@ export default function PlatformOverviewPage() {
           ))}
         </div>
       </DashHeader>
+
+      {error ? <DashNotice>{error}</DashNotice> : null}
 
       {loading && !data ? <p className="text-sm text-slate-400">Loading platform numbers…</p> : null}
 

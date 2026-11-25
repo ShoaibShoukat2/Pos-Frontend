@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { BedDouble, Building2, CircleDollarSign, ScanLine, Users, Wallet } from "lucide-react";
 
 import { CameraScan } from "@/components/CameraScan";
-import { AreaChart, DashHeader, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
+import { AreaChart, DashHeader, DashNotice, Donut, Panel, StatCard, StatGrid } from "@/components/dashboard/kit";
 import { Modal } from "@/components/hostel/bits";
 import { useHostel } from "@/components/hostel/session";
 import { api } from "@/lib/api";
@@ -127,7 +127,7 @@ export default function HostelDashboardPage() {
           <option value="overdue">Overdue</option>
         </select>
       </DashHeader>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+      {error ? <DashNotice>{error}</DashNotice> : null}
       <StatGrid cols="xl:grid-cols-5">
         {session?.role === "owner" ? <StatCard icon={Building2} label="Branches" value={String(stats?.branches ?? "—")} href="/hostel/branches" /> : null}
         <StatCard icon={BedDouble} label="Rooms" value={String(stats?.rooms ?? "—")} href="/hostel/rooms" />

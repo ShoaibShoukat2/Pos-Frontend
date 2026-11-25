@@ -1,4 +1,4 @@
-import { ApiError, fieldErrors } from "./api";
+import { explainError } from "./errors";
 
 export type HostelSession = {
   role: "owner" | "manager" | "employee";
@@ -42,12 +42,7 @@ export function pkr(value: string | number | null | undefined) {
 }
 
 export function errText(error: unknown) {
-  if (error instanceof ApiError) {
-    const fields = fieldErrors(error.body);
-    return fields.detail || fields.non_field_errors || Object.values(fields).find(Boolean) || "Could not save that.";
-  }
-  if (error instanceof Error && error.message) return error.message;
-  return "Could not connect. Check the server and try again.";
+  return explainError(error, "Could not save that.");
 }
 
 export function can(session: HostelSession | null | undefined, code: string) {
