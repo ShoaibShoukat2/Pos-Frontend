@@ -41,6 +41,16 @@ export type PlatformOverview = {
   customers: { total: number };
   sales: { count: number; revenue: string; period_count: number; period_revenue: string };
   sales_trend: { date: string; orders: number; revenue: string }[];
+  expiring_soon?: number;
+  by_type?: { business_type: string; total: number; active: number }[];
+  ending_soon?: {
+    id: string;
+    name: string;
+    business_type: string;
+    city: string;
+    subscription_ends_on: string;
+    days_left: number;
+  }[];
   recent_businesses: {
     id: string;
     name: string;
