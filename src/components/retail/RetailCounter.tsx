@@ -184,8 +184,8 @@ export function RetailCounter({
   ];
 
   return (
-    <div className="grid h-full min-h-0 gap-3 lg:grid-cols-[minmax(0,1fr)_22.5rem]">
-      <section className="flex min-h-0 flex-col">
+    <div className="grid h-full min-h-0 grid-rows-[minmax(0,1fr)_minmax(15rem,46%)] gap-3 lg:grid-cols-[minmax(0,1fr)_22.5rem] lg:grid-rows-1">
+      <section className="flex min-h-0 flex-col overflow-hidden">
         <div className="mb-3 flex gap-2">
           <div className="relative min-w-0 flex-1">
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
